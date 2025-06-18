@@ -1,0 +1,41 @@
+version: '3.8'
+services:
+  backend-service:
+    build:
+      context: ./back/tripsok_back
+      dockerfile: Dockerfile
+    image: local/backend-service:${IMAGE_TAG:-local}
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "18081:8080"
+  nginx-service:
+    build:
+      context: ./infra/nginx
+      dockerfile: Dockerfile
+    image: local/nginx-service:${IMAGE_TAG:-local}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/nginx/cert:/etc/nginx/ssl
+
+  redis-service:
+    build:
+      context: ./infra/redis
+      dockerfile: Dockerfile
+    image: local/redis-service:${IMAGE_TAG:-local}
+    ports:
+      - "6379:6379"
+  database-service:
+    build:
+      context: ./infra/rdbms
+      dockerfile: Dockerfile
+    image: local/database-service:${IMAGE_TAG:-local}
+    environment:
+      MYSQL_ROOT_PASSWORD: tripsokPW
+      MYSQL_DATABASE: tripsokDB
+      MYSQL_USER: tripsok
+      MYSQL_PASSWORD: tripsokUPW
+    ports:
+      - "3307:3306"
