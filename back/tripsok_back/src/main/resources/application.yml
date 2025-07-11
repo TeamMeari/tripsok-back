@@ -2,19 +2,23 @@ server:
   port: 8080
 
 spring:
+  profiles:
+    include:
+      - flyway
   redis:
     host: localhost
     port: 6379
   datasource:
-    url: jdbc:mysql://localhost:3307/tripsokDB
-    username: tripsok
-    password: tripsokUPW
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: oracle.jdbc.OracleDriver
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.OracleDialect
