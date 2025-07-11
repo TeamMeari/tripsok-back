@@ -45,20 +45,9 @@ public class TripSokUser extends BaseModifiableEntity {
 	@Column(nullable = false)
 	private Role role;
 
-	public void changePassword(String encodedPassword) {
-		this.password = encodedPassword;
-	}
-
-	public void changeLanguage(Language language) {
-		this.language = language;
-	}
-
-	public void changeCountryCode(String countryCode) {
-		this.countryCode = countryCode;
-	}
-
 	@Builder
-	public TripSokUser(String name, SocialType socialType,String socialId, String email, String password, Role role, String countryCode, Language language) {
+	public TripSokUser(String name, SocialType socialType, String socialId, String email, String password, Role role,
+		String countryCode, Language language) {
 		this.name = name;
 		this.socialType = socialType;
 		this.socialId = socialId;
@@ -69,16 +58,29 @@ public class TripSokUser extends BaseModifiableEntity {
 		this.language = language;
 	}
 
-	public static TripSokUser signUpUser(String name, SocialType socialType,String socialId, String email, String password, String countryCode, Language language) {
+	public static TripSokUser signUpUser(String name, SocialType socialType, String socialId, String email,
+		String password, String countryCode, Language language) {
 		return TripSokUser.builder()
-				.name(name)
-				.socialType(socialType)
-				.socialId(socialId)
-				.email(email)
-				.password(password)
-				.role(Role.USER)
-				.countryCode(countryCode)
-				.language(language)
-				.build();
+			.name(name)
+			.socialType(socialType)
+			.socialId(socialId)
+			.email(email)
+			.password(password)
+			.role(Role.USER)
+			.countryCode(countryCode)
+			.language(language)
+			.build();
+	}
+
+	public void changePassword(String encodedPassword) {
+		this.password = encodedPassword;
+	}
+
+	public void changeLanguage(Language language) {
+		this.language = language;
+	}
+
+	public void changeCountryCode(String countryCode) {
+		this.countryCode = countryCode;
 	}
 }

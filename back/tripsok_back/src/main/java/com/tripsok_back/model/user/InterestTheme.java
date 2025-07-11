@@ -18,8 +18,8 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(indexes = {
-		@Index(name = "idx_interest_theme_user_id", columnList = "user_id"),
-		@Index(name = "idx_interest_theme_theme_id", columnList = "theme_id")
+	@Index(name = "idx_interest_theme_user_id", columnList = "user_id"),
+	@Index(name = "idx_interest_theme_theme_id", columnList = "theme_id")
 })
 public class InterestTheme extends BaseTimeEntity {
 	@Id
