@@ -2,6 +2,7 @@ package com.tripsok_back.model.user;
 
 import com.tripsok_back.support.BaseTimeEntity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,11 +27,11 @@ public class InterestTheme extends BaseTimeEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	@ManyToOne
-	@JoinColumn(name = "user_id")
+	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+	@JoinColumn(name = "user_id", nullable = false)
 	private TripSokUser user;
 
-	@ManyToOne
-	@JoinColumn(name = "theme_id")
+	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+	@JoinColumn(name = "theme_id", nullable = false)
 	private Theme theme;
 }
