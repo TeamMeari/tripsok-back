@@ -1,6 +1,5 @@
 package com.tripsok_back.support;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import org.springframework.data.annotation.CreatedDate;
