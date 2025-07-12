@@ -18,5 +18,5 @@ import lombok.Setter;
 public abstract class BaseTimeEntity {
 	@CreatedDate
 	@Column(nullable = false, updatable = false)
-	LocalDateTime createdAt;
+	private LocalDateTime createdAt;
 }
