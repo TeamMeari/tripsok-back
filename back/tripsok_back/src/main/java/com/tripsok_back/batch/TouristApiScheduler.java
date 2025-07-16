@@ -1,0 +1,51 @@
+package com.tripsok_back.batch;
+
+import java.util.List;
+
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import com.tripsok_back.dto.TouristItemRequestDto;
+import com.tripsok_back.dto.TouristItemResponseDto;
+
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class TouristApiScheduler {
+
+	private final TouristApiClient touristApiClient;
+
+	@PostConstruct
+	public void init() {
+		runBatchTouristApiRequest();
+	}
+
+	@Scheduled(cron = "0 0 1 * * *") // 매일 새벽 1시
+	public void runBatchTouristApiRequest() {
+		try {
+			log.info("속초 신규 관광정보 배치 요청 시작");
+
+			TouristItemRequestDto dto = TouristItemRequestDto.builder()
+				.numOfRows(100)
+				.pageNo(1)
+				.mobileOS("ETC")
+				.mobileApp("tripsok-batch")
+				.type("json")
+				.arrange("R")
+				.areaCode("32") // 예: 인천
+				.serviceKey(System.getenv(
+					"iIG2RJWk60od11f9UocoKvhVwPW2UV1rSIan7Snh8b1PgUGqWw4tfJWKB%2FHqX9h2ztD%2B0tlM%2F0LsHX2szB4wpA%3D%3D")) // 보안: 환경변수로 API 키 주입
+				.build();
+
+			List<TouristItemResponseDto> responseDtoList = touristApiClient.fetchTouristData(dto);
+			log.info("{}개 응답 성공 (미리보기): {}", responseDtoList.size(), responseDtoList.get(0));
+
+		} catch (Exception e) {
+			log.error("신규 관광정보 처리 실패", e);
+		}
+	}
+}
