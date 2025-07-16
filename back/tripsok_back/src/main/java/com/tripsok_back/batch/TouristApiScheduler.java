@@ -2,6 +2,7 @@ package com.tripsok_back.batch;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class TouristApiScheduler {
 
+	@Value("${TOUR_API_KEY}")
+	private String tourApiKey;
 	private final TouristApiClient touristApiClient;
 
 	@PostConstruct
@@ -24,23 +27,22 @@ public class TouristApiScheduler {
 		runBatchTouristApiRequest();
 	}
 
-	@Scheduled(cron = "0 0 1 * * *") // 매일 새벽 1시
+	@Scheduled(cron = "0 0 1 * * *")
 	public void runBatchTouristApiRequest() {
 		try {
 			log.info("속초 신규 관광정보 배치 요청 시작");
 
 			TouristItemRequestDto dto = TouristItemRequestDto.builder()
-				.numOfRows(100)
+				.numOfRows(2)
 				.pageNo(1)
 				.mobileOS("ETC")
 				.mobileApp("tripsok-batch")
 				.type("json")
 				.arrange("R")
-				.areaCode("32") // 예: 인천
-				.serviceKey(System.getenv(
-					"iIG2RJWk60od11f9UocoKvhVwPW2UV1rSIan7Snh8b1PgUGqWw4tfJWKB%2FHqX9h2ztD%2B0tlM%2F0LsHX2szB4wpA%3D%3D")) // 보안: 환경변수로 API 키 주입
+				.areaCode("32")
+				.serviceKey(tourApiKey)
 				.build();
-
+			log.info("서비스 api키: {}", dto.getServiceKey());
 			List<TouristItemResponseDto> responseDtoList = touristApiClient.fetchTouristData(dto);
 			log.info("{}개 응답 성공 (미리보기): {}", responseDtoList.size(), responseDtoList.get(0));
 
