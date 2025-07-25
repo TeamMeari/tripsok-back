@@ -5,6 +5,7 @@ spring:
   profiles:
     include:
       - flyway
+      - jwt
   redis:
     host: localhost
     port: 6379
