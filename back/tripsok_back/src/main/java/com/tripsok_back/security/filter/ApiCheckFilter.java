@@ -14,7 +14,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 public class ApiCheckFilter extends OncePerRequestFilter {
-	private JwtUtil jwtUtil;
+	private final JwtUtil jwtUtil;
 
 	public ApiCheckFilter(JwtUtil jwtUtil) {
 		this.jwtUtil = jwtUtil;
@@ -26,7 +26,7 @@ public class ApiCheckFilter extends OncePerRequestFilter {
 		filterChain.doFilter(request, response);
 	}
 
-	private boolean checkAuthHeader(HttpServletRequest request) {
+	private boolean checkAuthHeader(HttpServletRequest request) { //TODO 사용하기
 		String authHeader = request.getHeader("Authorization");
 		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
 			log.error("Authorization heade가 없거나 잘못된 형식입니다");

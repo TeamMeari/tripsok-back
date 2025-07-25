@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tripsok_back.dto.user.UserSignUpRequest;
-import com.tripsok_back.dto.user.UserSignUpResponse;
 import com.tripsok_back.service.EmailService;
 import com.tripsok_back.service.UserService;
 
@@ -21,14 +20,14 @@ public class UserController {
 	private final EmailService emailService;
 
 	@PostMapping("/signup")
-	public ResponseEntity<UserSignUpResponse> signUp(@RequestBody UserSignUpRequest request) {
+	public ResponseEntity<Void> signUp(@RequestBody UserSignUpRequest request) {
 		// 이메일 인증 코드 검증
 		boolean isVerified = emailService.verifyEmailCode(request.getEmail(), request.getSocialType());
 		if (!isVerified) {
-			throw new
+			throw new RuntimeException("이메일 인증 실패");
 		}
 		// 회원가입 처리
-		UserSignUpResponse response = userService.signUp(request);
-		return ResponseEntity.ok(response);
+		userService.signUp(request);
+		return ResponseEntity.noContent().build();
 	}
 }
