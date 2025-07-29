@@ -14,29 +14,29 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "ATTRACTION")
-public class Attraction {
+@Table(name = "RESTAURANT_REVIEW")
+public class RestaurantReview {
 	@Id
-	@Column(name = "ATTRACTION_ID", nullable = false)
+	@Column(name = "RESTAURANT_REVIEW_ID", nullable = false)
 	private Long id;
 
 	@NotNull
-	@Column(name = "TOUR_ID", nullable = false)
-	private Long tourId;
+	@Column(name = "RESTAURANT_ID", nullable = false)
+	private Long restaurantId;
 
 	@Size(max = 255)
-	@Column(name = "ATTRACTION_NAME")
-	private String attractionName;
+	@NotNull
+	@Column(name = "USER_ID", nullable = false)
+	private String userId;
 
 	@Size(max = 255)
-	@Column(name = "ATTRACTION_PRICE")
-	private String attractionPrice;
-
-	@Size(max = 255)
-	@Column(name = "ATTRACTION_INFORMATION")
-	private String attractionInformation;
+	@Column(name = "RESTAURANT_REVIEW")
+	private String restaurantReview;
 
 	@Column(name = "CREATED_AT")
 	private Instant createdAt;
+
+	@Column(name = "UPDATED_AT")
+	private Instant updatedAt;
 
 }

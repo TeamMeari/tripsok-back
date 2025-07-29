@@ -6,22 +6,26 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "TOUR")
-public class Tour {
+@Table(name = "RESTAURANT_IMAGE")
+public class RestaurantImage {
 	@Id
-	@Column(name = "TOUR_ID", nullable = false)
+	@Column(name = "RESTAURANT_IMAGE_ID", nullable = false)
 	private Long id;
 
-	@Size(max = 255)
-	@Column(name = "TOUR_TYPE")
-	private String tourType;
+	@NotNull
+	@Column(name = "RESTAURANT_ID", nullable = false)
+	private Long restaurantId;
+
+	@NotNull
+	@Column(name = "MENU_ID", nullable = false)
+	private Long menuId;
 
 	@Column(name = "CREATED_AT")
 	private Instant createdAt;
