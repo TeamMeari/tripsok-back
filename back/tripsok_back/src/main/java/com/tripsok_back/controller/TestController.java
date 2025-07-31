@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tripsok_back.dto.response.GetTestResponse;
+import com.tripsok_back.dto.GetTestResponse;
 import com.tripsok_back.service.TestService;
 
 import lombok.RequiredArgsConstructor;

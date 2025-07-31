@@ -20,7 +20,7 @@ public class TripSokUserDto extends User {
 	private SocialType socialType;
 
 	public TripSokUserDto(String userId, String password, SocialType socialType,
-		Collection<? extends GrantedAuthority> authorities) {
+		Collection<GrantedAuthority> authorities) {
 		super(userId, password, authorities);
 		this.userId = userId;
 		this.socialType = socialType;

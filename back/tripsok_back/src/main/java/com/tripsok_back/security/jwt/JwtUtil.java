@@ -3,20 +3,23 @@ package com.tripsok_back.security.jwt;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import javax.crypto.SecretKey;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import com.tripsok_back.config.JwtProperties;
+import com.tripsok_back.exception.ErrorCode;
+import com.tripsok_back.exception.JwtException;
+import com.tripsok_back.model.user.SocialType;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.log4j.Log4j2;
 
 @Component
@@ -34,31 +37,68 @@ public class JwtUtil {
 		this.key = Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes());
 	}
 
-	public String generateAccessToken(String userId, Collection<? extends GrantedAuthority> authorities) {
-		return Jwts.builder()
-			.issuedAt(new Date())
-			.expiration(
-				Date.from(ZonedDateTime.now().plusMinutes(jwtProperties.getAccessTokenExpirationTime()).toInstant()))
-			.claim("userId", userId)
-			.claim("authorities", authorities.stream().map(GrantedAuthority::getAuthority).toList())
-			.signWith(key)
-			.compact();
-
+	public String generateAccessToken(String userId, Collection<GrantedAuthority> authorities) {
+		Map<String, Object> claims = Map.of(
+			"authorities", authorities.stream().map(GrantedAuthority::getAuthority).toList(),
+			"userId", userId
+		);
+		return generateToken(claims, jwtProperties.getAccessTokenExpirationTime());
 	}
 
-	public String validateAndExtract(String token) {
+	public String generateRefreshToken(String userId) {
+		Map<String, Object> claims = Map.of(
+			"userId", userId
+		);
+		return generateToken(claims, jwtProperties.getRefreshTokenExpirationTime());
+	}
+
+	public String generateEmailVerificationToken(String email) {
+		Map<String, Object> claims = Map.of(
+			"email", email
+		);
+		return generateToken(claims, jwtProperties.getEmailVerificationTokenExpirationTime());
+	}
+
+	public String generateOAuth2Token(String authAccessToken, SocialType socialType) {
+		Map<String, Object> claims = Map.of(
+			"authAccessToken", authAccessToken,
+			"socialType", socialType.name()
+		);
+		return generateToken(claims, jwtProperties.getOauth2AccessTokenExpirationTime());
+	}
+
+	private String generateToken(Map<String, Object> claims, long expirationMinutes) {
+		return Jwts.builder()
+			.issuedAt(new Date())
+			.expiration(Date.from(ZonedDateTime.now().plusMinutes(expirationMinutes).toInstant()))
+			.claims(claims)
+			.signWith(key)
+			.compact();
+	}
+
+	public <T> T validateAndExtract(String token, String claimName, Class<T> targetType) {
 		try {
-			return Jwts.parser().setSigningKey(key).build().parseClaimsJws(token).getBody().get("userId", String.class);
+			T content = Jwts.parser()
+				.setSigningKey(key)
+				.build()
+				.parseClaimsJws(token)
+				.getPayload()
+				.get(claimName, targetType);
+			if (content == null) {
+				throw new JwtException(ErrorCode.INVALID_TOKEN);
+			}
+			return content;
 		} catch (ExpiredJwtException e) {
-			throw new IllegalArgumentException("토큰이 만료되었습니다.");
-		} catch (SignatureException e) {
-			throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-		} catch (MalformedJwtException e) {
-			throw new IllegalArgumentException("잘못된 형식의 토큰입니다.");
-		} catch (UnsupportedJwtException e) {
-			throw new IllegalArgumentException("지원하지 않는 토큰입니다.");
+			throw new JwtException(ErrorCode.TOKEN_EXPIRED);
 		} catch (Exception e) {
-			throw new IllegalArgumentException("토큰 검증 중 오류가 발생했습니다.");
+			throw new JwtException(ErrorCode.INVALID_TOKEN);
 		}
+	}
+
+	public List<GrantedAuthority> getAuthorities(String token) {
+		return validateAndExtract(token, "authorities", List.class)
+			.stream()
+			.map(authority -> new SimpleGrantedAuthority((String)authority))
+			.toList();
 	}
 }

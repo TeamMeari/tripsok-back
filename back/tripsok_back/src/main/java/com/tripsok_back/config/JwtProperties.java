@@ -12,4 +12,6 @@ public class JwtProperties {
 	String secretKey;
 	long accessTokenExpirationTime;
 	long refreshTokenExpirationTime;
+	long emailVerificationTokenExpirationTime;
+	long oauth2AccessTokenExpirationTime;
 }

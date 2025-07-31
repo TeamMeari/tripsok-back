@@ -9,4 +9,10 @@ import com.tripsok_back.model.user.TripSokUser;
 @Repository
 public interface UserRepository extends JpaRepository<TripSokUser, Integer> {
 	TripSokUser findByEmailAndSocialType(String email, SocialType socialType);
+
+	TripSokUser findBySocialIdAndSocialType(String socialId, SocialType socialType);
+
+	TripSokUser findByEmail(String email);
+
+	boolean existsByName(String name);
 }

@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -17,8 +18,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.tripsok_back.model.user.Role;
-import com.tripsok_back.security.filter.ApiCheckFilter;
-import com.tripsok_back.security.filter.LoginFilter;
+import com.tripsok_back.security.filter.JwtCheckFilter;
 import com.tripsok_back.security.handler.CustomAuthenticationEntryPoint;
 import com.tripsok_back.security.jwt.JwtUtil;
 import com.tripsok_back.security.service.TripSokUserDetailsService;
@@ -49,20 +49,18 @@ public class SecurityConfig {
 		http.cors(it -> it.configurationSource(corsConfigurationSource())).csrf(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(auth -> {
-				auth.requestMatchers("/api/v1/users/**").hasAnyRole(Role.USER.name(), Role.ADMIN.name())
-					.requestMatchers("/api/v1/**").permitAll();
+				auth.requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+					.requestMatchers("/api/v1/user/**").hasAuthority(Role.USER.name())
+					.requestMatchers("/api/v1/admin/**").hasAuthority(Role.ADMIN.name());
 			});
-		LoginFilter loginFilter = new LoginFilter("/api/v1/auth/signin", jwtUtil);
-		loginFilter.setAuthenticationManager(authenticationManager);
 		http.addFilterBefore(apiFilter(), UsernamePasswordAuthenticationFilter.class);
-		http.addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter.class);
 		http.exceptionHandling(it -> it.authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
 		return http.build();
 	}
 
 	@Bean
-	public ApiCheckFilter apiFilter() {
-		return new ApiCheckFilter(jwtUtil);
+	public JwtCheckFilter apiFilter() {
+		return new JwtCheckFilter(jwtUtil);
 	}
 
 	@Bean
@@ -77,5 +75,11 @@ public class SecurityConfig {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", corsConfig);
 		return source;
+	}
+
+	@Bean
+	public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws
+		Exception {
+		return authenticationConfiguration.getAuthenticationManager();
 	}
 }
