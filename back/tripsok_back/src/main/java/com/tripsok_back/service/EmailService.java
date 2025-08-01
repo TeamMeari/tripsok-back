@@ -32,6 +32,7 @@ public class EmailService {
 	private final RedisEmailVerificationTokenRepository emailVerificationTokenRepository;
 	private final JwtUtil jwtUtil;
 
+	@Transactional
 	public void sendVerificationEmail(String email) {
 		String code = createCode();
 		String subject = "[TripSok] 회원가입 인증 코드 안내";
@@ -51,6 +52,7 @@ public class EmailService {
 		}
 	}
 
+	@Transactional
 	public EmailVerifyResponse verifyEmailCode(String email, String code) {
 		EmailVerificationToken codeFoundByEmail = emailVerificationTokenRepository.findByEmail(email);
 		if (codeFoundByEmail == null || !codeFoundByEmail.getVerificationCode().equals(code)) {

@@ -129,6 +129,7 @@ public class AuthService {
 		}
 	}
 
+	@Transactional
 	public TokenResponse refresh(String refreshToken) {
 		String userId = jwtUtil.validateAndExtract(refreshToken, "userId", String.class);
 
