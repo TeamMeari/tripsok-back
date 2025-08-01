@@ -79,9 +79,9 @@ public class JwtUtil {
 	public <T> T validateAndExtract(String token, String claimName, Class<T> targetType) {
 		try {
 			T content = Jwts.parser()
-				.setSigningKey(key)
+				.verifyWith(key)
 				.build()
-				.parseClaimsJws(token)
+				.parseSignedClaims(token)
 				.getPayload()
 				.get(claimName, targetType);
 			if (content == null) {

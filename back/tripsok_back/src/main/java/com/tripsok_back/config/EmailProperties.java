@@ -16,5 +16,5 @@ public class EmailProperties {
 	private Boolean auth;
 	private Boolean starttls;
 	private Boolean debug;
-	private int connectiontimeout;
+	private int connectionTimeout;
 }

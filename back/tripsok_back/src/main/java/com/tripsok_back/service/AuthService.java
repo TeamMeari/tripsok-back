@@ -49,7 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class AuthService {
-	private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+	private final BCryptPasswordEncoder passwordEncoder;
 	private final RedisRefreshTokenRepository refreshTokenRepository;
 	private final UserRepository userRepository;
 	private final ThemeRepository themeRepository;
@@ -229,9 +229,10 @@ public class AuthService {
 	private void saveInterestThemes(TripSokUser user, List<Integer> interestThemeIds) {
 		if (interestThemeIds != null && !interestThemeIds.isEmpty()) {
 			List<Theme> interestThemes = themeRepository.findAllById(interestThemeIds);
-			for (Theme theme : interestThemes) {
-				interestThemeRepository.save(new InterestTheme(user, theme));
-			}
+			List<InterestTheme> themesToSave = interestThemes.stream()
+				.map(theme -> new InterestTheme(user, theme))
+				.collect(Collectors.toList());
+			interestThemeRepository.saveAll(themesToSave);
 		}
 	}
 }

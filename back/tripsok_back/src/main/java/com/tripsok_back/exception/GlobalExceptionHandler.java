@@ -23,6 +23,7 @@ public class GlobalExceptionHandler {
 		ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.getErrorMessage());
 		return ResponseEntity.status(errorCode.getHttpStatus()).body(errorResponse);
 	}
+
 	// 지원되지 않는 HTTP 메소드를 사용할 때 발생하는 예외
 	@ExceptionHandler(value = {NoHandlerFoundException.class, HttpRequestMethodNotSupportedException.class})
 	public ResponseEntity<ErrorResponse> handleNoPageFoundException(Exception e) {

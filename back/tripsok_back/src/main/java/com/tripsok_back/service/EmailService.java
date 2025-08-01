@@ -2,6 +2,7 @@ package com.tripsok_back.service;
 
 import static com.tripsok_back.exception.ErrorCode.*;
 
+import java.security.SecureRandom;
 import java.util.Random;
 
 import org.springframework.mail.javamail.JavaMailSender;
@@ -65,7 +66,7 @@ public class EmailService {
 
 	private String createCode() {
 		int codeLength = 6;
-		Random random = new Random();
+		Random random = new SecureRandom();
 		StringBuilder code = new StringBuilder();
 		for (int i = 0; i < codeLength; i++) {
 			code.append(random.nextInt(10));

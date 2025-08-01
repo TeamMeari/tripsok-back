@@ -9,9 +9,9 @@ import lombok.Setter;
 @Getter
 @Setter
 public class JwtProperties {
-	String secretKey;
-	long accessTokenExpirationTime;
-	long refreshTokenExpirationTime;
-	long emailVerificationTokenExpirationTime;
-	long oauth2AccessTokenExpirationTime;
+	private String secretKey;
+	private long accessTokenExpirationTime;
+	private long refreshTokenExpirationTime;
+	private long emailVerificationTokenExpirationTime;
+	private long oauth2AccessTokenExpirationTime;
 }
