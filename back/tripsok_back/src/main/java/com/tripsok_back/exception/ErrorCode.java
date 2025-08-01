@@ -28,6 +28,8 @@ public enum ErrorCode {
 	INVALID_PASSWORD_FORMAT(HttpStatus.BAD_REQUEST, -11010, "비밀번호는 8자 이상이여야합니다"),
 	INVALID_REFRESH_TOKEN(HttpStatus.UNAUTHORIZED, -11011, "유효하지 않은 리프레시 토큰입니다."),
 	INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, -11012, "잘못된 이메일 또는 비밀번호입니다."),
+	INVALID_SOCIAL_TOKEN(HttpStatus.UNAUTHORIZED, -11013, "유효하지 않은 소셜 토큰입니다."),
+	INVALID_SOCIAL_CODE(HttpStatus.BAD_REQUEST, -11014, "유효하지 않은 소셜 코드입니다."),
 
 	// Email-verification API error 12000대
 	EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, -12000, "이메일 전송에 실패했습니다."),

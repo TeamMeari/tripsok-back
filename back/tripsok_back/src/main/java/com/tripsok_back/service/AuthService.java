@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
 import com.tripsok_back.config.OAuth2Properties;
@@ -35,7 +36,6 @@ import com.tripsok_back.model.user.Role;
 import com.tripsok_back.model.user.SocialType;
 import com.tripsok_back.model.user.TripSokUser;
 import com.tripsok_back.repository.InterestThemeRepository;
-import com.tripsok_back.repository.RedisEmailVerificationTokenRepository;
 import com.tripsok_back.repository.RedisRefreshTokenRepository;
 import com.tripsok_back.repository.ThemeRepository;
 import com.tripsok_back.repository.UserRepository;
@@ -50,7 +50,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class AuthService {
 	private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-	private final RedisEmailVerificationTokenRepository tokenRepository;
 	private final RedisRefreshTokenRepository refreshTokenRepository;
 	private final UserRepository userRepository;
 	private final ThemeRepository themeRepository;
@@ -79,8 +78,7 @@ public class AuthService {
 		String socialSignUpToken = request.getSocialSignUpToken();
 		SocialType type;
 		try {
-			type = SocialType.valueOf(
-				jwtUtil.validateAndExtract(socialSignUpToken, "socialType", String.class).toUpperCase());
+			type = SocialType.valueOf(jwtUtil.validateAndExtract(socialSignUpToken, "socialType", String.class).toUpperCase());
 		} catch (IllegalArgumentException e) {
 			throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
 		}
@@ -182,25 +180,35 @@ public class AuthService {
 		params.add("redirect_uri", redirectUri);
 		params.add("grant_type", "authorization_code");
 
-		return restClient.post()
-			.uri(url)
-			.contentType(MediaType.APPLICATION_FORM_URLENCODED)
-			.body(params)
-			.retrieve()
-			.toEntity(GoogleTokenResponse.class)
-			.getBody();
+		try {
+			return restClient.post()
+				.uri(url)
+				.contentType(MediaType.APPLICATION_FORM_URLENCODED)
+				.body(params)
+				.retrieve()
+				.toEntity(GoogleTokenResponse.class)
+				.getBody();
+		} catch (HttpClientErrorException e) {
+			log.error("Failed to retrieve Google token: {}", e.getMessage());
+			throw new AuthException(ErrorCode.INVALID_SOCIAL_CODE);
+		}
 	}
 
-	private GoogleUserInfo getGoogleUserInfo(String idToken) {
-		String url = "https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken;
+	private GoogleUserInfo getGoogleUserInfo(String idToken){
+			String url = "https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken;
 
-		return restClient.get()
-			.uri(url)
-			.accept(MediaType.APPLICATION_JSON)
-			.retrieve()
-			.toEntity(GoogleUserInfo.class)
-			.getBody();
-	}
+			try {
+				return restClient.get()
+					.uri(url)
+					.accept(MediaType.APPLICATION_JSON)
+					.retrieve()
+					.toEntity(GoogleUserInfo.class)
+					.getBody();
+			} catch (HttpClientErrorException e) {
+				log.error("Failed to retrieve Google user info: {}", e.getMessage());
+				throw new AuthException(ErrorCode.INVALID_SOCIAL_TOKEN);
+			}
+		}
 
 	private void validateRegisteredAndSave(TripSokUser user) {
 		TripSokUser existingUser = userRepository.findByEmail(user.getEmail());
