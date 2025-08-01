@@ -50,8 +50,8 @@ public class SecurityConfig {
 			.formLogin(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(auth -> {
 				auth.requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-					.requestMatchers("/api/v1/user/**").hasAuthority(Role.USER.name())
-					.requestMatchers("/api/v1/admin/**").hasAuthority(Role.ADMIN.name());
+					.requestMatchers("/api/v1/user/**").hasAuthority(Role.USER.getAuthority().getFirst())
+					.requestMatchers("/api/v1/admin/**").hasAuthority(Role.ADMIN.getAuthority().get(1));
 			});
 		http.addFilterBefore(apiFilter(), UsernamePasswordAuthenticationFilter.class);
 		http.exceptionHandling(it -> it.authenticationEntryPoint(new CustomAuthenticationEntryPoint()));
