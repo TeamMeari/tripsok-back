@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleArgumentNotValidException(MethodArgumentNotValidException e) {
 		log.error("MethodArgumentNotValidException : {}", e.getMessage());
 		ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
-		ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), String.join(e.getMessage()));
+		ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), e.getMessage());
 		return ResponseEntity.status(errorCode.getHttpStatus()).body(errorResponse);
 	}
 
@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
 	// 필수 파라미터가 누락되었을 때 발생하는 예외
 	@ExceptionHandler(value = {MissingServletRequestParameterException.class})
 	public ResponseEntity<ErrorResponse> handleArgumentNotValidException(MissingServletRequestParameterException e) {
-		log.error("MethodArgumentNotValidException : {}", e.getMessage());
+		log.error("MissingServletRequestParameterException : {}", e.getMessage());
 		ErrorCode errorCode = ErrorCode.MISSING_REQUEST_PARAMETER;
 		ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), e.getMessage());
 		return ResponseEntity.status(errorCode.getHttpStatus()).body(errorResponse);
@@ -70,8 +70,7 @@ public class GlobalExceptionHandler {
 	// 서버, DB 예외
 	@ExceptionHandler(value = {Exception.class})
 	public ResponseEntity<ErrorResponse> handleException(Exception e) {
-		log.error("Exception : {}", e.getMessage());
-		e.printStackTrace();
+		log.error("Exception : ", e);
 		ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
 		ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.getErrorMessage());
 		return ResponseEntity.status(errorCode.getHttpStatus()).body(errorResponse);
