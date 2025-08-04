@@ -14,6 +14,19 @@ java {
     }
 }
 
+def loadEnvToProjectProps() {
+    def envFile = file(".env") // 상위 경로 정확히 맞게 수정
+    if (envFile.exists()) {
+        def props = new Properties()
+        envFile.withInputStream { props.load(it) }
+        props.each { key, value ->
+            project.ext.set(key.toString(), value.toString())
+        }
+    }
+}
+
+loadEnvToProjectProps()
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -47,6 +60,13 @@ dependencies {
     // Swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8'
 
+}
+
+flyway {
+    url = project.findProperty("DB_URL")
+    user = project.findProperty("DB_USERNAME")
+    password = project.findProperty("DB_PASSWORD")
+    locations = ['classpath:db/migration']
 }
 
 tasks.named('test') {
