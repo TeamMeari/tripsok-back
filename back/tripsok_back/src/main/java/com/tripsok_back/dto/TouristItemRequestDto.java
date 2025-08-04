@@ -6,11 +6,12 @@ import lombok.Data;
 @Data
 @Builder
 public class TouristItemRequestDto {
-	private int numOfRows;
-	private int pageNo;
+	private Integer numOfRows;
+	private Integer pageNo;
 	private String mobileOS;
 	private String mobileApp;
 	private String type;
+	private Integer ContentTypeId;
 	private String arrange;
 	private String areaCode;
 	private String serviceKey;
