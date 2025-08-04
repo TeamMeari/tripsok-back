@@ -22,7 +22,8 @@ CREATE TABLE tour (
 );
 
 CREATE TABLE place (
-                         place_id	VARCHAR2(255)	NOT NULL,
+                         place_id	Number	NOT NULL,
+                         content_id NUMBER NOT NULL,
                          place_name	VARCHAR2(255)	NULL,
                          address	VARCHAR2(255)	NULL,
                          contact	VARCHAR2(255)	NULL,
