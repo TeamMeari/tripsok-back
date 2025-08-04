@@ -1,4 +1,4 @@
-package com.tripsok_back.model.place;
+package com.tripsok_back.model.place.restaurant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

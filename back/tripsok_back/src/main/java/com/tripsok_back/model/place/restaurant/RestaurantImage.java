@@ -1,4 +1,4 @@
-package com.tripsok_back.model.place;
+package com.tripsok_back.model.place.restaurant;
 
 import java.time.Instant;
 
@@ -13,19 +13,19 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "TOUR_IMAGE")
-public class TourImage {
+@Table(name = "RESTAURANT_IMAGE")
+public class RestaurantImage {
 	@Id
-	@Column(name = "TOUR_IMAGE_ID", nullable = false)
+	@Column(name = "RESTAURANT_IMAGE_ID", nullable = false)
 	private Long id;
 
 	@NotNull
-	@Column(name = "TOUR_ID", nullable = false)
-	private Long tourId;
+	@Column(name = "RESTAURANT_ID", nullable = false)
+	private Long restaurantId;
 
 	@NotNull
-	@Column(name = "ATTRACTION_ID", nullable = false)
-	private Long attractionId;
+	@Column(name = "MENU_ID", nullable = false)
+	private Long menuId;
 
 	@Column(name = "CREATED_AT")
 	private Instant createdAt;

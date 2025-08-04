@@ -20,7 +20,7 @@ public class Place {
 	@Id
 	@Size(max = 255)
 	@Column(name = "PLACE_ID", nullable = false)
-	private String placeId;
+	private Integer placeId;
 
 	@Size(max = 255)
 	@Column(name = "PLACE_NAME")
@@ -64,5 +64,9 @@ public class Place {
 
 	@Column(name = "CREATED_AT")
 	private Instant createdAt;
+
+	@NotNull
+	@Column(name = "CONTENT_ID", nullable = false)
+	private Long contentId;
 
 }

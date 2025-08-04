@@ -1,4 +1,4 @@
-package com.tripsok_back.model.place;
+package com.tripsok_back.model.place.accomodation;
 
 import java.time.Instant;
 
@@ -14,33 +14,33 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "ACCOMODATION_REVIEW")
-public class AccomodationReview {
+@Table(name = "ROOM")
+public class Room {
 	@Id
-	@Column(name = "ACCOMODATION_REVIEW_ID", nullable = false)
+	@Column(name = "ROOM_ID", nullable = false)
 	private Long id;
 
 	@NotNull
 	@Column(name = "ACCOMODATION_ID", nullable = false)
 	private Long accomodationId;
 
-	@NotNull
-	@Column(name = "ROOM_ID", nullable = false)
-	private Long roomId;
+	@Size(max = 255)
+	@Column(name = "ROOM_NAME")
+	private String roomName;
 
 	@Size(max = 255)
-	@NotNull
-	@Column(name = "USER_ID", nullable = false)
-	private String userId;
+	@Column(name = "SEASON_TYPE")
+	private String seasonType;
 
 	@Size(max = 255)
-	@Column(name = "ACCOMODATION_REVIEW")
-	private String accomodationReview;
+	@Column(name = "ROOM_PRICE")
+	private String roomPrice;
+
+	@Size(max = 255)
+	@Column(name = "ROOM_INFORMATION")
+	private String roomInformation;
 
 	@Column(name = "CREATED_AT")
 	private Instant createdAt;
-
-	@Column(name = "UPDATED_AT")
-	private Instant updatedAt;
 
 }
