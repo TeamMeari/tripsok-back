@@ -25,28 +25,29 @@ public class TouristApiClient {
 	private final WebClient touristApiWebClient;
 	private final ObjectMapper objectMapper;
 
-	public List<TouristItemResponseDto> fetchTouristData(TouristItemRequestDto dto) throws JsonProcessingException {
+	public List<TouristItemResponseDto> fetchTouristData(TouristItemRequestDto dto) throws
+		JsonProcessingException {
 
 		ObjectWriter prettyPrinter = objectMapper.writerWithDefaultPrettyPrinter();
 
 		URI uri = UriComponentsBuilder
 			.fromHttpUrl("https://apis.data.go.kr/B551011/KorService2/areaBasedList2")
-			.queryParam("numOfRows", 100)
-			.queryParam("pageNo", 1)
-			.queryParam("MobileOS", "ETC")
-			.queryParam("MobileApp", "tripsok-batch")
-			.queryParam("_type", "json")
-			.queryParam("arrange", "R")
-			.queryParam("areaCode", 32)
-			.queryParam("serviceKey",
-				dto.getServiceKey()) // 인코딩 안 함
-			.build(true) // 이걸로!
+			.queryParam("numOfRows", dto.getNumOfRows())
+			.queryParam("pageNo", dto.getPageNo())
+			.queryParam("MobileOS", dto.getMobileOS())
+			.queryParam("MobileApp", dto.getMobileApp())
+			.queryParam("_type", dto.getType())
+			.queryParam("arrange", dto.getArrange())
+			.queryParam("areaCode", dto.getAreaCode())
+			.queryParam("contentTypeId", dto.getContentTypeId())
+			.queryParam("serviceKey", dto.getServiceKey())
+			.build(true)
 			.toUri();
 		log.info("관광 API 요청 URI: {}", uri);
 
 		String body = touristApiWebClient.get()
 			.uri(uri)
-			.header("User-Agent", "Mozilla/5.0") // ← 추가
+			.header("User-Agent", "Mozilla/5.0")
 			.retrieve()
 			.bodyToMono(String.class)
 			.block();
