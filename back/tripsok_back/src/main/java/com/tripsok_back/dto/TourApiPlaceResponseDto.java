@@ -6,11 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class TouristItemResponseDto {
+public class TourApiPlaceResponseDto {
 
 	@NotNull
 	@JsonProperty("contentid")
-	private String contentId;
+	private Integer contentId;
 
 	@NotNull
 	@JsonProperty("contenttypeid")

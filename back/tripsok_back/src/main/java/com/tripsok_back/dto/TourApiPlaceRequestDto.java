@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class TouristItemRequestDto {
+public class TourApiPlaceRequestDto {
 	private Integer numOfRows;
 	private Integer pageNo;
 	private String mobileOS;
