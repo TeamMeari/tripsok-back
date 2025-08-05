@@ -17,6 +17,8 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
@@ -33,6 +35,7 @@ import lombok.Setter;
 @Table(name = "PLACE", schema = "TRIPSOK")
 public class Place {
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ID", nullable = false)
 	private Integer id;
 
@@ -107,10 +110,10 @@ public class Place {
 		place.setAddress(
 			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : ""));
 		place.setContact(placeDto.getPhoneNumber());
-		place.setEmail(null); // Dto에 이메일 정보 없음
+		place.setEmail(null);
 		place.setInformation(detailResponseDto.getOverview());
-		place.setView(0); // 조회수는 외부 데이터 없음
-		place.setLike(0); // 좋아요도 외부 데이터 없음
+		place.setView(0);
+		place.setLike(0);
 
 		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
 			place.setMapX(new BigDecimal(placeDto.getLongitude()));
@@ -120,10 +123,9 @@ public class Place {
 		place.setCreatedAt(TimeUtil.StringToInstant(placeDto.getCreatedTime()));
 		place.setUpdatedAt(TimeUtil.StringToInstant(placeDto.getModifiedTime()));
 
-		place.setTour(new Tour()); // 실제 연관관계 객체는 Service단에서 세팅해야 함
-		place.setRestaurant(new Restaurant()); // 프록시 or null 허용
-		place.setAccommodation(new Accommodation()); // 프록시 or null 허용
-
+		place.setTour(null);
+		place.setRestaurant(null);
+		place.setAccommodation(Accommodation.buildAccommodation(placeDto, detailResponseDto));
 		return place;
 	}
 
