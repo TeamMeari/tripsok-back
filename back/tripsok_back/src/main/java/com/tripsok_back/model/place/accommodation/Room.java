@@ -1,10 +1,16 @@
-package com.tripsok_back.model.place.accomodation;
+package com.tripsok_back.model.place.accommodation;
 
 import java.time.Instant;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -14,15 +20,17 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "ROOM")
+@Table(name = "ROOM", schema = "TRIPSOK")
 public class Room {
 	@Id
-	@Column(name = "ROOM_ID", nullable = false)
-	private Long id;
+	@Column(name = "ID", nullable = false)
+	private Integer id;
 
 	@NotNull
-	@Column(name = "ACCOMODATION_ID", nullable = false)
-	private Long accomodationId;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@OnDelete(action = OnDeleteAction.RESTRICT)
+	@JoinColumn(name = "ACCOMMODATION_ID", nullable = false)
+	private Accommodation accommodation;
 
 	@Size(max = 255)
 	@Column(name = "ROOM_NAME")
@@ -40,7 +48,8 @@ public class Room {
 	@Column(name = "ROOM_INFORMATION")
 	private String roomInformation;
 
-	@Column(name = "CREATED_AT")
+	@NotNull
+	@Column(name = "CREATED_AT", nullable = false)
 	private Instant createdAt;
 
 }

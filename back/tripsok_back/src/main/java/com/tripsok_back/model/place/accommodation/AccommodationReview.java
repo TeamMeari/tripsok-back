@@ -1,4 +1,4 @@
-package com.tripsok_back.model.place.restaurant;
+package com.tripsok_back.model.place.accommodation;
 
 import java.time.Instant;
 
@@ -20,17 +20,23 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "RESTAURANT_REVIEW", schema = "TRIPSOK")
-public class RestaurantReview {
+@Table(name = "ACCOMMODATION_REVIEW", schema = "TRIPSOK")
+public class AccommodationReview {
 	@Id
 	@Column(name = "ID", nullable = false)
-	private Integer id;
+	private Long id;
 
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
-	@JoinColumn(name = "RESTAURANT_ID", nullable = false)
-	private Restaurant restaurant;
+	@JoinColumn(name = "ACCOMMODATION_ID", nullable = false)
+	private Accommodation accommodation;
+
+	@NotNull
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@OnDelete(action = OnDeleteAction.RESTRICT)
+	@JoinColumn(name = "ROOM_ID", nullable = false)
+	private Room room;
 
 	@Size(max = 255)
 	@NotNull
@@ -38,8 +44,8 @@ public class RestaurantReview {
 	private String userId;
 
 	@Size(max = 255)
-	@Column(name = "RESTAURANT_REVIEW")
-	private String restaurantReview;
+	@Column(name = "ACCOMMODATION_REVIEW")
+	private String accommodationReview;
 
 	@NotNull
 	@Column(name = "CREATED_AT", nullable = false)

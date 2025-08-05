@@ -1,4 +1,4 @@
-package com.tripsok_back.model.place.restaurant;
+package com.tripsok_back.model.place.accommodation;
 
 import java.time.Instant;
 
@@ -13,15 +13,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "RESTAURANT_REVIEW", schema = "TRIPSOK")
-public class RestaurantReview {
+@Table(name = "ACCOMMODATION_IMAGE", schema = "TRIPSOK")
+public class AccommodationImage {
 	@Id
 	@Column(name = "ID", nullable = false)
 	private Integer id;
@@ -29,24 +28,17 @@ public class RestaurantReview {
 	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
-	@JoinColumn(name = "RESTAURANT_ID", nullable = false)
-	private Restaurant restaurant;
+	@JoinColumn(name = "ACCOMMODATION_ID", nullable = false)
+	private Accommodation accommodation;
 
-	@Size(max = 255)
 	@NotNull
-	@Column(name = "USER_ID", nullable = false)
-	private String userId;
-
-	@Size(max = 255)
-	@Column(name = "RESTAURANT_REVIEW")
-	private String restaurantReview;
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@OnDelete(action = OnDeleteAction.RESTRICT)
+	@JoinColumn(name = "ROOM_ID", nullable = false)
+	private Room room;
 
 	@NotNull
 	@Column(name = "CREATED_AT", nullable = false)
 	private Instant createdAt;
-
-	@NotNull
-	@Column(name = "UPDATED_AT", nullable = false)
-	private Instant updatedAt;
 
 }

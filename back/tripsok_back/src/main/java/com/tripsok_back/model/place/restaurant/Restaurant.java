@@ -11,11 +11,11 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "RESTAURANT")
+@Table(name = "RESTAURANT", schema = "TRIPSOK")
 public class Restaurant {
 	@Id
-	@Column(name = "RESTAURANT_ID", nullable = false)
-	private Long id;
+	@Column(name = "ID", nullable = false)
+	private Integer id;
 
 	@Size(max = 255)
 	@Column(name = "RESTAURANT_TYPE")
