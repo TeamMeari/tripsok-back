@@ -13,7 +13,7 @@ java {
         languageVersion = JavaLanguageVersion.of(21)
     }
 }
-
+/*
 def loadEnvToProjectProps() {
     def envFile = file(".env") // 상위 경로 정확히 맞게 수정
     if (envFile.exists()) {
@@ -26,7 +26,7 @@ def loadEnvToProjectProps() {
 }
 
 loadEnvToProjectProps()
-
+*/
 configurations {
     compileOnly {
         extendsFrom annotationProcessor

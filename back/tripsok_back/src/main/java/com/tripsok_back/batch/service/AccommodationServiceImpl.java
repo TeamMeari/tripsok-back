@@ -60,7 +60,7 @@ public class AccommodationServiceImpl implements PlaceService {
 			.type("json")
 			.arrange("R")
 			.areaCode("32")
-			.ContentTypeId(this.getType().getId())
+			.contentTypeId(this.getType().getId())
 			.serviceKey(apiKeyConfig.getTourApiKey())
 			.build();
 		List<TourApiPlaceResponseDto> responseDtoList = tourApiClient.fetchPlaceData(accommodationRequestDto);
