@@ -16,6 +16,6 @@ public class TourApiPlaceDetailRequestDto {
 	private String mobileOS;
 	private String mobileApp;
 	private String responseType;
-	private String contentId;
+	private Integer contentId;
 	private String serviceKey;
 }

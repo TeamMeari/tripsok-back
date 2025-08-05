@@ -74,7 +74,7 @@ public class AccommodationServiceImpl implements PlaceService {
 			.mobileOS("ETC")
 			.mobileApp("tripsok-batch")
 			.responseType("json")
-			.contentId("R")
+			.contentId(contentId)
 			.serviceKey(apiKeyConfig.getTourApiKey())
 			.build();
 		Optional<TourApiPlaceDetailResponseDto> responseDto = Optional.ofNullable(tourApiClient.fetchPlaceDataDetail(

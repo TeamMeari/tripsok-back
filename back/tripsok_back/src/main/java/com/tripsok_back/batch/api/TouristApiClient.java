@@ -114,7 +114,10 @@ public class TouristApiClient {
 			List<TourApiPlaceDetailResponseDto> result = objectMapper
 				.readerForListOf(TourApiPlaceDetailResponseDto.class)
 				.readValue(itemsNode);
-
+			if (result.isEmpty()) {
+				log.warn("상세 정보 API 응답 결과가 비어있습니다.");
+				return null;
+			}
 			log.info("응답 처리 완료: {}개", result.size());
 			return result.getFirst();
 

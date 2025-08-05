@@ -34,8 +34,8 @@ CREATE TABLE place (
                          tour_id	NUMBER(10)	NULL,
                          restaurant_id	NUMBER(10)	NULL,
                          accommodation_id	NUMBER(10)	NULL,
-                         map_x NUMBER(4,10) NULL,
-                         map_y NUMBER(4,10) NULL,
+                         map_x NUMBER NULL,
+                         map_y NUMBER NULL,
                          created_at	TIMESTAMP	NOT NULL,
                          updated_at	TIMESTAMP	NOT NULL
 );

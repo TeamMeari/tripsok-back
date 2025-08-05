@@ -84,10 +84,10 @@ public class Place {
 	@JoinColumn(name = "ACCOMMODATION_ID", nullable = false)
 	private Accommodation accommodation;
 
-	@Column(name = "MAP_X", precision = 4, scale = 10)
+	@Column(name = "MAP_X", precision = 13, scale = 10)
 	private BigDecimal mapX;
 
-	@Column(name = "MAP_Y", precision = 4, scale = 10)
+	@Column(name = "MAP_Y", precision = 13, scale = 10)
 	private BigDecimal mapY;
 
 	@NotNull

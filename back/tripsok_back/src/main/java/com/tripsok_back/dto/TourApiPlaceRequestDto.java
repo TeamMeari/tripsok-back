@@ -11,7 +11,7 @@ public class TourApiPlaceRequestDto {
 	private String mobileOS;
 	private String mobileApp;
 	private String type;
-	private Integer ContentTypeId;
+	private Integer contentTypeId;
 	private String arrange;
 	private String areaCode;
 	private String serviceKey;
