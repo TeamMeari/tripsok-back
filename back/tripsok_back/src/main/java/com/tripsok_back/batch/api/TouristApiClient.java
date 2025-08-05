@@ -1,4 +1,4 @@
-package com.tripsok_back.batch;
+package com.tripsok_back.batch.api;
 
 import java.net.URI;
 import java.util.List;
@@ -11,8 +11,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.tripsok_back.dto.TouristItemRequestDto;
-import com.tripsok_back.dto.TouristItemResponseDto;
+import com.tripsok_back.dto.TourApiPlaceDetailRequestDto;
+import com.tripsok_back.dto.TourApiPlaceDetailResponseDto;
+import com.tripsok_back.dto.TourApiPlaceRequestDto;
+import com.tripsok_back.dto.TourApiPlaceResponseDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +27,7 @@ public class TouristApiClient {
 	private final WebClient touristApiWebClient;
 	private final ObjectMapper objectMapper;
 
-	public List<TouristItemResponseDto> fetchTouristData(TouristItemRequestDto dto) throws
+	public List<TourApiPlaceResponseDto> fetchPlaceData(TourApiPlaceRequestDto dto) throws
 		JsonProcessingException {
 
 		ObjectWriter prettyPrinter = objectMapper.writerWithDefaultPrettyPrinter();
@@ -62,12 +64,59 @@ public class TouristApiClient {
 				return List.of();
 			}
 
-			List<TouristItemResponseDto> result = objectMapper
-				.readerForListOf(TouristItemResponseDto.class)
+			List<TourApiPlaceResponseDto> result = objectMapper
+				.readerForListOf(TourApiPlaceResponseDto.class)
 				.readValue(itemsNode);
 
 			log.info("응답 처리 완료: {}개", result.size());
 			return result;
+
+		} catch (Exception e) {
+			log.error("JSON 파싱 오류", e);
+			throw new RuntimeException("Tourist API 응답 파싱 오류", e);
+		}
+	}
+
+	public TourApiPlaceDetailResponseDto fetchPlaceDataDetail(TourApiPlaceDetailRequestDto dto) throws
+		JsonProcessingException {
+
+		ObjectWriter prettyPrinter = objectMapper.writerWithDefaultPrettyPrinter();
+
+		URI uri = UriComponentsBuilder
+			.fromHttpUrl("https://apis.data.go.kr/B551011/KorService2/detailCommon2")
+			.queryParam("MobileOS", dto.getMobileOS())
+			.queryParam("MobileApp", dto.getMobileApp())
+			.queryParam("_type", dto.getResponseType())
+			.queryParam("contentId", dto.getContentId())
+			.queryParam("serviceKey", dto.getServiceKey())
+			.build(true)  // true -> 인코딩된 상태로 생성
+			.toUri();
+		log.info("관광 API 상세정보 요청 URI: {}", uri);
+
+		String body = touristApiWebClient.get()
+			.uri(uri)
+			.header("User-Agent", "Mozilla/5.0")
+			.retrieve()
+			.bodyToMono(String.class)
+			.block();
+
+		log.info("관광 API 응답: \n{}", prettyPrinter.writeValueAsString(objectMapper.readValue(body, Object.class)));
+		try {
+			JsonNode root = objectMapper.readTree(body);
+			log.info(root.asText());
+			JsonNode itemsNode = root.path("response").path("body").path("items").path("item");
+
+			if (itemsNode.isMissingNode() || itemsNode.isNull()) {
+				log.warn("'item' 노드가 없음");
+				return null;
+			}
+
+			List<TourApiPlaceDetailResponseDto> result = objectMapper
+				.readerForListOf(TourApiPlaceDetailResponseDto.class)
+				.readValue(itemsNode);
+
+			log.info("응답 처리 완료: {}개", result.size());
+			return result.getFirst();
 
 		} catch (Exception e) {
 			log.error("JSON 파싱 오류", e);
