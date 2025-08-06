@@ -11,14 +11,16 @@ CREATE TABLE tour_image (
                               id	NUMBER(10)	NOT NULL,
                               tour_id	NUMBER(10)	NOT NULL,
                               attraction_id	NUMBER(10)	NOT NULL,
-                              created_at	TIMESTAMP	NOT NULL
+                              created_at	TIMESTAMP	NOT NULL,
+                              updated_at	TIMESTAMP	NOT NULL
 );
 
 
 CREATE TABLE tour (
                         id	NUMBER(10)	NOT NULL,
                         tour_type	VARCHAR2(255)	NULL,
-                        created_at	TIMESTAMP	NOT NULL
+                        created_at	TIMESTAMP	NOT NULL,
+                        updated_at	TIMESTAMP	NOT NULL
 );
 
 CREATE TABLE place (
@@ -46,7 +48,8 @@ CREATE TABLE attraction (
                               attraction_name	VARCHAR2(255)	NULL,
                               attraction_price	VARCHAR2(255)	NULL,
                               attraction_information	VARCHAR2(255)	NULL,
-                              created_at	TIMESTAMP	NOT NULL
+                              created_at	TIMESTAMP	NOT NULL,
+                              updated_at	TIMESTAMP	NOT NULL
 );
 
 CREATE TABLE room (
@@ -56,14 +59,16 @@ CREATE TABLE room (
                         season_type	VARCHAR2(255)	NULL,
                         room_price	VARCHAR2(255)	NULL,
                         room_information	VARCHAR2(255)	NULL,
-                        created_at	TIMESTAMP	NOT NULL
+                        created_at	TIMESTAMP	NOT NULL,
+                        updated_at	TIMESTAMP	NOT NULL
 );
 
 CREATE TABLE restaurant_image (
                                     id	NUMBER(10)	NOT NULL,
                                     restaurant_id	NUMBER(10)	NOT NULL,
                                     menu_id	NUMBER(10)	NOT NULL,
-                                    created_at	TIMESTAMP	NOT NULL
+                                    created_at	TIMESTAMP	NOT NULL,
+                                    updated_at	TIMESTAMP	NOT NULL
 );
 
 
@@ -71,12 +76,15 @@ CREATE TABLE accommodation_image (
                                       id	NUMBER(10)	NOT NULL,
                                       accommodation_id	NUMBER(10)	NOT NULL,
                                       room_id	NUMBER(10)	NOT NULL,
-                                      created_at	TIMESTAMP	NOT NULL
+                                      created_at	TIMESTAMP	NOT NULL,
+                                      updated_at	TIMESTAMP	NOT NULL
 );
 
 CREATE TABLE restaurant (
                               id	NUMBER(10)	NOT NULL,
-                              restaurant_type	VARCHAR2(255)	NULL
+                              restaurant_type	VARCHAR2(255)	NULL,
+                              created_at	TIMESTAMP	NOT NULL,
+                              updated_at	TIMESTAMP	NOT NULL
 );
 
 CREATE TABLE accommodation_review (
@@ -95,14 +103,16 @@ CREATE TABLE menu (
                         menu_name	VARCHAR2(255)	NULL,
                         menu_price	VARCHAR2(255)	NULL,
                         menu_information	VARCHAR2(255)	NULL,
-                        created_at	TIMESTAMP	NOT NULL
+                        created_at	TIMESTAMP	NOT NULL,
+                        updated_at	TIMESTAMP	NOT NULL
 );
 
 
 CREATE TABLE accommodation (
                                 id	NUMBER(10)	NOT NULL,
                                 accommodation_type	VARCHAR2(255)	NULL,
-                                created_at	TIMESTAMP	NOT NULL
+                                created_at	TIMESTAMP	NOT NULL,
+                                updated_at	TIMESTAMP	NOT NULL
 );
 
 CREATE TABLE tour_review (

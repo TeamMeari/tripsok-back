@@ -1,9 +1,9 @@
 package com.tripsok_back.model.place.restaurant;
 
-import java.time.Instant;
-
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+
+import com.tripsok_back.support.BaseModifiableEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -22,9 +23,10 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "RESTAURANT_IMAGE", schema = "TRIPSOK")
-public class RestaurantImage {
+public class RestaurantImage extends BaseModifiableEntity {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@SequenceGenerator(name = "restaurant_image_seq", sequenceName = "RESTAURANT_IMAGE_SEQ", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "restaurant_image_seq")
 	@Column(name = "ID", nullable = false)
 	private Integer id;
 
@@ -39,9 +41,5 @@ public class RestaurantImage {
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "MENU_ID", nullable = false)
 	private Menu menu;
-
-	@NotNull
-	@Column(name = "CREATED_AT", nullable = false)
-	private Instant createdAt;
 
 }

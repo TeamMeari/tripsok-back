@@ -1,9 +1,9 @@
 package com.tripsok_back.model.place.restaurant;
 
-import java.time.Instant;
-
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+
+import com.tripsok_back.support.BaseModifiableEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,6 +13,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -23,9 +24,10 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "RESTAURANT_REVIEW", schema = "TRIPSOK")
-public class RestaurantReview {
+public class RestaurantReview extends BaseModifiableEntity {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@SequenceGenerator(name = "restaurant_review_seq", sequenceName = "RESTAURANT_REVIEW_SEQ", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "restaurant_review_seq")
 	@Column(name = "ID", nullable = false)
 	private Integer id;
 
@@ -43,13 +45,5 @@ public class RestaurantReview {
 	@Size(max = 255)
 	@Column(name = "RESTAURANT_REVIEW")
 	private String restaurantReview;
-
-	@NotNull
-	@Column(name = "CREATED_AT", nullable = false)
-	private Instant createdAt;
-
-	@NotNull
-	@Column(name = "UPDATED_AT", nullable = false)
-	private Instant updatedAt;
 
 }

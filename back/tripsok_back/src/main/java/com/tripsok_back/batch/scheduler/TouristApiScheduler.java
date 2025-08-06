@@ -31,12 +31,10 @@ public class TouristApiScheduler {
 
 	@Scheduled(cron = "0 0 1 * * *")
 	@PostConstruct
-	public void init() throws JsonProcessingException {
+	public void initTourPlaceRequest() throws JsonProcessingException {
 		runBatchAccommodationRequestApi();
-		/*
 		runBatchRestaurantRequestApi();
 		runBatchTourRequestApi();
-		 */
 	}
 
 	public void runBatchAccommodationRequestApi() throws JsonProcessingException {

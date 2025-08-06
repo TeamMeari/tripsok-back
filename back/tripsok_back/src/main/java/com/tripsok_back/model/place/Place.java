@@ -1,7 +1,6 @@
 package com.tripsok_back.model.place;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -11,6 +10,7 @@ import com.tripsok_back.dto.TourApiPlaceResponseDto;
 import com.tripsok_back.model.place.accommodation.Accommodation;
 import com.tripsok_back.model.place.restaurant.Restaurant;
 import com.tripsok_back.model.place.tour.Tour;
+import com.tripsok_back.support.BaseModifiableEntity;
 import com.tripsok_back.util.TimeUtil;
 
 import jakarta.persistence.CascadeType;
@@ -23,6 +23,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -33,9 +34,10 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "PLACE", schema = "TRIPSOK")
-public class Place {
+public class Place extends BaseModifiableEntity {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@SequenceGenerator(name = "place_seq", sequenceName = "PLACE_SEQ", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "place_seq")
 	@Column(name = "ID", nullable = false)
 	private Integer id;
 
@@ -69,22 +71,19 @@ public class Place {
 	@Column(name = "\"like\"")
 	private Integer like;
 
-	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
-	@JoinColumn(name = "TOUR_ID", nullable = false)
+	@JoinColumn(name = "TOUR_ID")
 	private Tour tour;
 
-	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
-	@JoinColumn(name = "RESTAURANT_ID", nullable = false)
+	@JoinColumn(name = "RESTAURANT_ID")
 	private Restaurant restaurant;
 
-	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
-	@JoinColumn(name = "ACCOMMODATION_ID", nullable = false)
+	@JoinColumn(name = "ACCOMMODATION_ID")
 	private Accommodation accommodation;
 
 	@Column(name = "MAP_X", precision = 13, scale = 10)
@@ -92,14 +91,6 @@ public class Place {
 
 	@Column(name = "MAP_Y", precision = 13, scale = 10)
 	private BigDecimal mapY;
-
-	@NotNull
-	@Column(name = "CREATED_AT", nullable = false)
-	private Instant createdAt;
-
-	@NotNull
-	@Column(name = "UPDATED_AT", nullable = false)
-	private Instant updatedAt;
 
 	public static Place buildAccommodation(TourApiPlaceResponseDto placeDto,
 		TourApiPlaceDetailResponseDto detailResponseDto) {
@@ -120,12 +111,66 @@ public class Place {
 			place.setMapY(new BigDecimal(placeDto.getLatitude()));
 		}
 
-		place.setCreatedAt(TimeUtil.StringToInstant(placeDto.getCreatedTime()));
-		place.setUpdatedAt(TimeUtil.StringToInstant(placeDto.getModifiedTime()));
+		place.setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
 
 		place.setTour(null);
 		place.setRestaurant(null);
 		place.setAccommodation(Accommodation.buildAccommodation(placeDto, detailResponseDto));
+		return place;
+	}
+
+	public static Place buildRestaurant(TourApiPlaceResponseDto placeDto,
+		TourApiPlaceDetailResponseDto detailResponseDto) {
+		Place place = new Place();
+
+		place.setContentId(placeDto.getContentId());
+		place.setPlaceName(placeDto.getTitle());
+		place.setAddress(
+			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : ""));
+		place.setContact(placeDto.getPhoneNumber());
+		place.setEmail(null);
+		place.setInformation(detailResponseDto.getOverview());
+		place.setView(0);
+		place.setLike(0);
+
+		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
+			place.setMapX(new BigDecimal(placeDto.getLongitude()));
+			place.setMapY(new BigDecimal(placeDto.getLatitude()));
+		}
+
+		place.setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
+
+		place.setTour(null);
+		place.setRestaurant(Restaurant.buildRestaurant(placeDto, detailResponseDto)); // Restaurant 엔티티에서 build 메서드 필요
+		place.setAccommodation(null);
+
+		return place;
+	}
+
+	public static Place buildTour(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto) {
+		Place place = new Place();
+
+		place.setContentId(placeDto.getContentId());
+		place.setPlaceName(placeDto.getTitle());
+		place.setAddress(
+			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : ""));
+		place.setContact(placeDto.getPhoneNumber());
+		place.setEmail(null);
+		place.setInformation(detailResponseDto.getOverview());
+		place.setView(0);
+		place.setLike(0);
+
+		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
+			place.setMapX(new BigDecimal(placeDto.getLongitude()));
+			place.setMapY(new BigDecimal(placeDto.getLatitude()));
+		}
+
+		place.setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
+
+		place.setTour(Tour.buildTour(placeDto, detailResponseDto)); // Tour 엔티티에서 build 메서드 필요
+		place.setRestaurant(null);
+		place.setAccommodation(null);
+
 		return place;
 	}
 
@@ -141,6 +186,36 @@ public class Place {
 			this.mapY = new BigDecimal(placeDto.getLatitude());
 		}
 
-		this.updatedAt = TimeUtil.StringToInstant(placeDto.getModifiedTime());
+		setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
+	}
+
+	public void updateRestaurant(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto) {
+		this.placeName = placeDto.getTitle();
+		this.address =
+			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : "");
+		this.contact = placeDto.getPhoneNumber();
+		this.information = detailResponseDto.getOverview();
+
+		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
+			this.mapX = new BigDecimal(placeDto.getLongitude());
+			this.mapY = new BigDecimal(placeDto.getLatitude());
+		}
+
+		setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
+	}
+
+	public void updateTour(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto) {
+		this.placeName = placeDto.getTitle();
+		this.address =
+			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : "");
+		this.contact = placeDto.getPhoneNumber();
+		this.information = detailResponseDto.getOverview();
+
+		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
+			this.mapX = new BigDecimal(placeDto.getLongitude());
+			this.mapY = new BigDecimal(placeDto.getLatitude());
+		}
+
+		setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
 	}
 }

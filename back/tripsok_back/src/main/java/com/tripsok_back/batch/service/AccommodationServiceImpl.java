@@ -1,6 +1,6 @@
 package com.tripsok_back.batch.service;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -77,16 +77,15 @@ public class AccommodationServiceImpl implements PlaceService {
 			.contentId(contentId)
 			.serviceKey(apiKeyConfig.getTourApiKey())
 			.build();
-		Optional<TourApiPlaceDetailResponseDto> responseDto = Optional.ofNullable(tourApiClient.fetchPlaceDataDetail(
-			accommodationRequestDto));
 
-		return responseDto;
+		return Optional.ofNullable(tourApiClient.fetchPlaceDataDetail(
+			accommodationRequestDto));
 	}
 
 	public Boolean checkAndUpdatePlace(TourApiPlaceResponseDto placeDto) throws JsonProcessingException {
-		Instant placeUpdatedAt = Instant.from(TimeUtil.StringToInstant(placeDto.getModifiedTime()));
+		LocalDateTime placeUpdatedAt = LocalDateTime.from(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
 		Optional<Place> place = accommodationRepository.findByContentId(placeDto.getContentId());
-		if (!place.isPresent()) {
+		if (place.isEmpty()) {
 			addPlace(placeDto);
 			log.info("숙소: ContentId:{} 신규 항목으로 추가", placeDto.getContentId());
 			return true;
@@ -115,8 +114,8 @@ public class AccommodationServiceImpl implements PlaceService {
 		Optional<TourApiPlaceDetailResponseDto> detailResponseDto = requestPlaceDetail(placeDto.getContentId());
 		detailResponseDto.ifPresent(e -> {
 			log.info("상세정보 응답 성공 (미리보기): {}", detailResponseDto.get());
-			Place accomodationPlace = Place.buildAccommodation(placeDto, detailResponseDto.get());
-			accommodationRepository.save(accomodationPlace);
+			Place accommodationPlace = Place.buildAccommodation(placeDto, detailResponseDto.get());
+			accommodationRepository.save(accommodationPlace);
 		});
 	}
 }
