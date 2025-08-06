@@ -73,7 +73,8 @@ public class AuthService {
 		String socialSignUpToken = request.getSocialSignUpToken();
 		SocialType type;
 		try {
-			type = SocialType.valueOf(jwtUtil.validateAndExtract(socialSignUpToken, "socialType", String.class).toUpperCase());
+			type = SocialType.valueOf(
+				jwtUtil.validateAndExtract(socialSignUpToken, "socialType", String.class).toUpperCase());
 		} catch (IllegalArgumentException e) {
 			throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
 		}
@@ -146,6 +147,7 @@ public class AuthService {
 	public long getRefreshTokenExpirationTime() {
 		return jwtUtil.getRefreshTokenExpirationTime();
 	}
+
 	private TokenResponse getTokenResponse(String userId, Collection<GrantedAuthority> authorities) {
 		String accessToken = jwtUtil.generateAccessToken(userId, authorities);
 		String refreshToken = jwtUtil.generateRefreshToken(userId);
@@ -193,21 +195,21 @@ public class AuthService {
 		}
 	}
 
-	private GoogleUserInfo getGoogleUserInfo(String idToken){
-			String url = "https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken;
+	private GoogleUserInfo getGoogleUserInfo(String idToken) {
+		String url = "https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken;
 
-			try {
-				return restClient.get()
-					.uri(url)
-					.accept(MediaType.APPLICATION_JSON)
-					.retrieve()
-					.toEntity(GoogleUserInfo.class)
-					.getBody();
-			} catch (HttpClientErrorException e) {
-				log.error("Failed to retrieve Google user info: {}", e.getMessage());
-				throw new AuthException(ErrorCode.INVALID_SOCIAL_TOKEN);
-			}
+		try {
+			return restClient.get()
+				.uri(url)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.toEntity(GoogleUserInfo.class)
+				.getBody();
+		} catch (HttpClientErrorException e) {
+			log.error("Failed to retrieve Google user info: {}", e.getMessage());
+			throw new AuthException(ErrorCode.INVALID_SOCIAL_TOKEN);
 		}
+	}
 
 	private void validateRegisteredAndSave(TripSokUser user) {
 		TripSokUser existingUser = userRepository.findByEmail(user.getEmail());
@@ -223,6 +225,5 @@ public class AuthService {
 		}
 		userRepository.save(user);
 	}
-
 
 }

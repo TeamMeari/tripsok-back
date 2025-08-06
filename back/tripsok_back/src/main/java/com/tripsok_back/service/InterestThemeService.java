@@ -21,6 +21,7 @@ public class InterestThemeService {
 
 	private final ThemeRepository themeRepository;
 	private final InterestThemeRepository interestThemeRepository;
+
 	public void saveInterestThemes(TripSokUser user, List<Integer> interestThemeIds) {
 		if (interestThemeIds != null && !interestThemeIds.isEmpty()) {
 			List<Theme> interestThemes = themeRepository.findAllById(interestThemeIds);

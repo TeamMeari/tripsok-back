@@ -29,6 +29,7 @@ public class AuthController {
 
 	private final AuthService authService;
 	private final String COOKIE_HEARER = "Set-Cookie";
+
 	@PostMapping("/signup/email")
 	public ResponseEntity<Void> signUpWithEmail(@RequestBody EmailSignUpRequest request) {
 		authService.signUpEmail(request);
@@ -37,8 +38,10 @@ public class AuthController {
 
 	@PostMapping("/signup/oauth2")
 	public ResponseEntity<LoginResponseDto> signUpWithOAuth2(@RequestBody OauthSignUpRequest request) {
-		TokenResponse tokenResponse= authService.signUpOAuth(request);
-		return ResponseEntity.status(HttpStatus.CREATED).header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString()).body(new LoginResponseDto(tokenResponse.accessToken()));
+		TokenResponse tokenResponse = authService.signUpOAuth(request);
+		return ResponseEntity.status(HttpStatus.CREATED)
+			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
+			.body(new LoginResponseDto(tokenResponse.accessToken()));
 	}
 
 	@PostMapping("/login/oauth2")
@@ -47,19 +50,25 @@ public class AuthController {
 		if (tokenResponse.refreshToken() == null) {
 			return ResponseEntity.status(HttpStatus.SEE_OTHER).body(new LoginResponseDto(tokenResponse.accessToken()));
 		}
-		return ResponseEntity.status(HttpStatus.OK).header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString()).body(new LoginResponseDto(tokenResponse.accessToken()));
+		return ResponseEntity.status(HttpStatus.OK)
+			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
+			.body(new LoginResponseDto(tokenResponse.accessToken()));
 	}
 
 	@PostMapping("/login/email")
 	public ResponseEntity<LoginResponseDto> loginWithEmail(@RequestBody EmailLoginRequest request) {
 		TokenResponse tokenResponse = authService.loginWithEmail(request.getEmail(), request.getPassword());
-		return ResponseEntity.status(HttpStatus.OK).header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString()).body(new LoginResponseDto(tokenResponse.accessToken()));
+		return ResponseEntity.status(HttpStatus.OK)
+			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
+			.body(new LoginResponseDto(tokenResponse.accessToken()));
 	}
 
 	@PostMapping("/refresh")
 	public ResponseEntity<LoginResponseDto> refreshToken(@RequestBody RefreshTokenRequest request) {
 		TokenResponse tokenResponse = authService.refresh(request.getRefreshToken());
-		return ResponseEntity.status(HttpStatus.OK).header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString()).body(new LoginResponseDto(tokenResponse.accessToken()));
+		return ResponseEntity.status(HttpStatus.OK)
+			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
+			.body(new LoginResponseDto(tokenResponse.accessToken()));
 	}
 
 	private HttpCookie getRefreshTokenCookie(String refreshToken) {
