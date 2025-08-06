@@ -11,7 +11,7 @@ import com.tripsok_back.model.place.Place;
 @Repository
 public interface RestaurantRepository extends JpaRepository<Place, Integer> {
 
-	@EntityGraph(attributePaths = {"tour"})
+	@EntityGraph(attributePaths = {"restaurant"})
 	Optional<Place> findByContentId(Integer contentId);
 
 }

@@ -71,17 +71,17 @@ public class Place extends BaseModifiableEntity {
 	@Column(name = "\"like\"")
 	private Integer like;
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "TOUR_ID")
 	private Tour tour;
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "RESTAURANT_ID")
 	private Restaurant restaurant;
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.PERSIST)
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "ACCOMMODATION_ID")
 	private Accommodation accommodation;

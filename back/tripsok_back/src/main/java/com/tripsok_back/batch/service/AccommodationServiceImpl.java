@@ -45,9 +45,7 @@ public class AccommodationServiceImpl implements PlaceService {
 			return;
 		}
 		for (TourApiPlaceResponseDto responseDto : responseDtoList) {
-			if (checkAndUpdatePlace(responseDto)) {
-				//
-			}
+			checkAndUpdatePlace(responseDto);
 		}
 	}
 
@@ -64,7 +62,9 @@ public class AccommodationServiceImpl implements PlaceService {
 			.serviceKey(apiKeyConfig.getTourApiKey())
 			.build();
 		List<TourApiPlaceResponseDto> responseDtoList = tourApiClient.fetchPlaceData(accommodationRequestDto);
-		log.info("{}개 응답 성공 (미리보기): {}", responseDtoList.size(), responseDtoList.getFirst());
+		if (!responseDtoList.isEmpty()) {
+			log.info("{}개 응답 성공 (미리보기): {}", responseDtoList.size(), responseDtoList.getFirst());
+		}
 		return responseDtoList;
 	}
 
