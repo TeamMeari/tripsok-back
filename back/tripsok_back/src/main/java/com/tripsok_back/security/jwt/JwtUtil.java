@@ -101,4 +101,8 @@ public class JwtUtil {
 			.map(authority -> new SimpleGrantedAuthority((String)authority))
 			.toList();
 	}
+
+	public long getRefreshTokenExpirationTime() {
+		return jwtProperties.getRefreshTokenExpirationTime();
+	}
 }

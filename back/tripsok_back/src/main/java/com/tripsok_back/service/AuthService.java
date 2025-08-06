@@ -29,15 +29,11 @@ import com.tripsok_back.dto.auth.response.GoogleTokenResponse;
 import com.tripsok_back.dto.auth.response.TokenResponse;
 import com.tripsok_back.exception.AuthException;
 import com.tripsok_back.exception.ErrorCode;
-import com.tripsok_back.model.Theme.Theme;
 import com.tripsok_back.model.auth.RefreshToken;
-import com.tripsok_back.model.user.InterestTheme;
 import com.tripsok_back.model.user.Role;
 import com.tripsok_back.model.user.SocialType;
 import com.tripsok_back.model.user.TripSokUser;
-import com.tripsok_back.repository.InterestThemeRepository;
 import com.tripsok_back.repository.RedisRefreshTokenRepository;
-import com.tripsok_back.repository.ThemeRepository;
 import com.tripsok_back.repository.UserRepository;
 import com.tripsok_back.security.dto.TripSokUserDto;
 import com.tripsok_back.security.jwt.JwtUtil;
@@ -147,6 +143,9 @@ public class AuthService {
 		return !userRepository.existsByName(nickname);
 	}
 
+	public long getRefreshTokenExpirationTime() {
+		return jwtUtil.getRefreshTokenExpirationTime();
+	}
 	private TokenResponse getTokenResponse(String userId, Collection<GrantedAuthority> authorities) {
 		String accessToken = jwtUtil.generateAccessToken(userId, authorities);
 		String refreshToken = jwtUtil.generateRefreshToken(userId);
