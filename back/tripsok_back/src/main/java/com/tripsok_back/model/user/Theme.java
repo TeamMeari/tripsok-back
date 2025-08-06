@@ -1,4 +1,4 @@
-package com.tripsok_back.model.Theme;
+package com.tripsok_back.model.user;
 
 import com.tripsok_back.support.BaseTimeEntity;
 

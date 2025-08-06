@@ -1,17 +1,15 @@
 package com.tripsok_back.model.user;
 
-import java.util.List;
-
 import lombok.Getter;
 
 @Getter
 public enum Role {
-	USER(List.of("ROLE_USER")),
-	ADMIN(List.of("ROLE_USER", "ROLE_ADMIN"));
+	USER("ROLE_USER"),
+	ADMIN("ROLE_ADMIN");
 
-	private final List<String> authority;
+	private final String value;
 
-	Role(List<String> authority) {
-		this.authority = authority;
+	Role(String value) {
+		this.value = value;
 	}
 }

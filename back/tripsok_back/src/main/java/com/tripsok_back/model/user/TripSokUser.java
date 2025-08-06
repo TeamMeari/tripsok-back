@@ -58,10 +58,10 @@ public class TripSokUser extends BaseModifiableEntity {
 		this.language = language;
 	}
 
-	public static TripSokUser signUpUser(String nickname, SocialType socialType, String socialId, String email,
+	public static TripSokUser signUpUser(String name, SocialType socialType, String socialId, String email,
 		String password, String countryCode, Language language) {
 		return TripSokUser.builder()
-			.name(nickname)
+			.name(name)
 			.socialType(socialType)
 			.socialId(socialId)
 			.email(email)
