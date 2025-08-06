@@ -29,15 +29,11 @@ import com.tripsok_back.dto.auth.response.GoogleTokenResponse;
 import com.tripsok_back.dto.auth.response.TokenResponse;
 import com.tripsok_back.exception.AuthException;
 import com.tripsok_back.exception.ErrorCode;
-import com.tripsok_back.model.Theme.Theme;
 import com.tripsok_back.model.auth.RefreshToken;
-import com.tripsok_back.model.user.InterestTheme;
 import com.tripsok_back.model.user.Role;
 import com.tripsok_back.model.user.SocialType;
 import com.tripsok_back.model.user.TripSokUser;
-import com.tripsok_back.repository.InterestThemeRepository;
 import com.tripsok_back.repository.RedisRefreshTokenRepository;
-import com.tripsok_back.repository.ThemeRepository;
 import com.tripsok_back.repository.UserRepository;
 import com.tripsok_back.security.dto.TripSokUserDto;
 import com.tripsok_back.security.jwt.JwtUtil;
@@ -52,11 +48,10 @@ public class AuthService {
 	private final BCryptPasswordEncoder passwordEncoder;
 	private final RedisRefreshTokenRepository refreshTokenRepository;
 	private final UserRepository userRepository;
-	private final ThemeRepository themeRepository;
-	private final InterestThemeRepository interestThemeRepository;
 	private final OAuth2Properties oAuth2Properties;
 	private final JwtUtil jwtUtil;
 	private final AuthenticationManager authenticationManager;
+	private final InterestThemeService interestThemeService;
 
 	private final RestClient restClient = RestClient.builder().build();
 
@@ -70,7 +65,7 @@ public class AuthService {
 		TripSokUser user = TripSokUser.signUpUser(request.getNickname(), SocialType.EMAIL, null, email,
 			passwordEncoder.encode(password), request.getCountryCode());
 		validateRegisteredAndSave(user);
-		saveInterestThemes(user, request.getInterestThemeIds());
+		interestThemeService.saveInterestThemes(user, request.getInterestThemeIds());
 	}
 
 	@Transactional
@@ -78,7 +73,8 @@ public class AuthService {
 		String socialSignUpToken = request.getSocialSignUpToken();
 		SocialType type;
 		try {
-			type = SocialType.valueOf(jwtUtil.validateAndExtract(socialSignUpToken, "socialType", String.class).toUpperCase());
+			type = SocialType.valueOf(
+				jwtUtil.validateAndExtract(socialSignUpToken, "socialType", String.class).toUpperCase());
 		} catch (IllegalArgumentException e) {
 			throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
 		}
@@ -93,7 +89,7 @@ public class AuthService {
 			default -> throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
 		}
 		validateRegisteredAndSave(user);
-		saveInterestThemes(user, request.getInterestThemeIds());
+		interestThemeService.saveInterestThemes(user, request.getInterestThemeIds());
 
 		return getTokenResponse(user.getId().toString(), getAuthorities(user.getRole()));
 	}
@@ -148,6 +144,10 @@ public class AuthService {
 		return !userRepository.existsByName(nickname);
 	}
 
+	public long getRefreshTokenExpirationTime() {
+		return jwtUtil.getRefreshTokenExpirationTime();
+	}
+
 	private TokenResponse getTokenResponse(String userId, Collection<GrantedAuthority> authorities) {
 		String accessToken = jwtUtil.generateAccessToken(userId, authorities);
 		String refreshToken = jwtUtil.generateRefreshToken(userId);
@@ -195,21 +195,21 @@ public class AuthService {
 		}
 	}
 
-	private GoogleUserInfo getGoogleUserInfo(String idToken){
-			String url = "https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken;
+	private GoogleUserInfo getGoogleUserInfo(String idToken) {
+		String url = "https://oauth2.googleapis.com/tokeninfo?id_token=" + idToken;
 
-			try {
-				return restClient.get()
-					.uri(url)
-					.accept(MediaType.APPLICATION_JSON)
-					.retrieve()
-					.toEntity(GoogleUserInfo.class)
-					.getBody();
-			} catch (HttpClientErrorException e) {
-				log.error("Failed to retrieve Google user info: {}", e.getMessage());
-				throw new AuthException(ErrorCode.INVALID_SOCIAL_TOKEN);
-			}
+		try {
+			return restClient.get()
+				.uri(url)
+				.accept(MediaType.APPLICATION_JSON)
+				.retrieve()
+				.toEntity(GoogleUserInfo.class)
+				.getBody();
+		} catch (HttpClientErrorException e) {
+			log.error("Failed to retrieve Google user info: {}", e.getMessage());
+			throw new AuthException(ErrorCode.INVALID_SOCIAL_TOKEN);
 		}
+	}
 
 	private void validateRegisteredAndSave(TripSokUser user) {
 		TripSokUser existingUser = userRepository.findByEmail(user.getEmail());
@@ -226,13 +226,4 @@ public class AuthService {
 		userRepository.save(user);
 	}
 
-	private void saveInterestThemes(TripSokUser user, List<Integer> interestThemeIds) {
-		if (interestThemeIds != null && !interestThemeIds.isEmpty()) {
-			List<Theme> interestThemes = themeRepository.findAllById(interestThemeIds);
-			List<InterestTheme> themesToSave = interestThemes.stream()
-				.map(theme -> new InterestTheme(user, theme))
-				.collect(Collectors.toList());
-			interestThemeRepository.saveAll(themesToSave);
-		}
-	}
 }
