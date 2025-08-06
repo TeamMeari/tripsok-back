@@ -42,7 +42,7 @@ public class TripSokUser extends BaseModifiableEntity {
 	@Column(nullable = false)
 	private Role role;
 
-	@Column(length = 100)
+	@Column(length = 100, nullable = false)
 	private String contactEmail;
 
 	@Builder
