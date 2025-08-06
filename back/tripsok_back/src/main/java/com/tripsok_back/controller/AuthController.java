@@ -4,6 +4,7 @@ import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +14,6 @@ import com.tripsok_back.dto.auth.request.EmailLoginRequest;
 import com.tripsok_back.dto.auth.request.EmailSignUpRequest;
 import com.tripsok_back.dto.auth.request.OauthLoginRequest;
 import com.tripsok_back.dto.auth.request.OauthSignUpRequest;
-import com.tripsok_back.dto.auth.request.RefreshTokenRequest;
 import com.tripsok_back.dto.auth.response.LoginResponseDto;
 import com.tripsok_back.dto.auth.response.TokenResponse;
 import com.tripsok_back.service.AuthService;
@@ -64,18 +64,19 @@ public class AuthController {
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity<LoginResponseDto> refreshToken(@RequestBody RefreshTokenRequest request) {
-		TokenResponse tokenResponse = authService.refresh(request.getRefreshToken());
+	public ResponseEntity<LoginResponseDto> refreshToken(@CookieValue String refreshToken) {
+		TokenResponse tokenResponse = authService.refresh(refreshToken);
 		return ResponseEntity.status(HttpStatus.OK)
 			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
 			.body(new LoginResponseDto(tokenResponse.accessToken()));
 	}
 
 	private HttpCookie getRefreshTokenCookie(String refreshToken) {
+
 		return ResponseCookie
 			.from("refreshToken", refreshToken)
 			.httpOnly(true) // JavaScript 에서 쿠키에 접근할 수 없도록
-			.maxAge(authService.getRefreshTokenExpirationTime()) // 쿠키의 만료 시간 설정
+			.maxAge(authService.getRefreshTokenExpirationTime() * 60) // 쿠키의 만료 시간 설정
 			.secure(true) // cookie 가 https 에서만 전송되도록
 			.path("/api/auth") // 쿠키가 유효한 경로 설정
 			.build();
