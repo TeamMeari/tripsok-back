@@ -157,7 +157,7 @@ ALTER TABLE restaurant_image ADD CONSTRAINT  PK_RESTAURANT_IMAGE PRIMARY KEY (
 
 
 
-ALTER TABLE accommodation_image ADD CONSTRAINT  PK_accommodation_IMAGE PRIMARY KEY (
+ALTER TABLE accommodation_image ADD CONSTRAINT  PK_ACCOMMODATION_IMAGE PRIMARY KEY (
                                                                                     id
     );
 
@@ -165,7 +165,7 @@ ALTER TABLE restaurant ADD CONSTRAINT  PK_RESTAURANT PRIMARY KEY (
                                                                   id
     );
 
-ALTER TABLE accommodation_review ADD CONSTRAINT  PK_accommodation_REVIEW PRIMARY KEY (
+ALTER TABLE accommodation_review ADD CONSTRAINT  PK_ACCOMMODATION_REVIEW PRIMARY KEY (
                                                                                       id
     );
 
@@ -174,7 +174,7 @@ ALTER TABLE menu ADD CONSTRAINT  PK_MENU PRIMARY KEY (
     );
 
 
-ALTER TABLE accommodation ADD CONSTRAINT  PK_accommodation PRIMARY KEY (
+ALTER TABLE accommodation ADD CONSTRAINT  PK_ACCOMMODATION PRIMARY KEY (
                                                                         id
     );
 
