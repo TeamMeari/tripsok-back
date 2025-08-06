@@ -52,11 +52,10 @@ public class AuthService {
 	private final BCryptPasswordEncoder passwordEncoder;
 	private final RedisRefreshTokenRepository refreshTokenRepository;
 	private final UserRepository userRepository;
-	private final ThemeRepository themeRepository;
-	private final InterestThemeRepository interestThemeRepository;
 	private final OAuth2Properties oAuth2Properties;
 	private final JwtUtil jwtUtil;
 	private final AuthenticationManager authenticationManager;
+	private final InterestThemeService interestThemeService;
 
 	private final RestClient restClient = RestClient.builder().build();
 
@@ -70,7 +69,7 @@ public class AuthService {
 		TripSokUser user = TripSokUser.signUpUser(request.getNickname(), SocialType.EMAIL, null, email,
 			passwordEncoder.encode(password), request.getCountryCode(), null);
 		validateRegisteredAndSave(user);
-		saveInterestThemes(user, request.getInterestThemeIds());
+		interestThemeService.saveInterestThemes(user, request.getInterestThemeIds());
 	}
 
 	@Transactional
@@ -93,7 +92,7 @@ public class AuthService {
 			default -> throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
 		}
 		validateRegisteredAndSave(user);
-		saveInterestThemes(user, request.getInterestThemeIds());
+		interestThemeService.saveInterestThemes(user, request.getInterestThemeIds());
 
 		return getTokenResponse(user.getId().toString(), getAuthorities(user.getRole()));
 	}
@@ -226,13 +225,5 @@ public class AuthService {
 		userRepository.save(user);
 	}
 
-	private void saveInterestThemes(TripSokUser user, List<Integer> interestThemeIds) {
-		if (interestThemeIds != null && !interestThemeIds.isEmpty()) {
-			List<Theme> interestThemes = themeRepository.findAllById(interestThemeIds);
-			List<InterestTheme> themesToSave = interestThemes.stream()
-				.map(theme -> new InterestTheme(user, theme))
-				.collect(Collectors.toList());
-			interestThemeRepository.saveAll(themesToSave);
-		}
-	}
+
 }
