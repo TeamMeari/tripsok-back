@@ -57,9 +57,9 @@ public class TripSokUser extends BaseModifiableEntity {
 		this.contactEmail = contactEmail;
 	}
 
-	public static TripSokUser signUpUser(String name, SocialType socialType, String socialId, String email, String password, String countryCode) {
+	public static TripSokUser signUpUser(String nickname, SocialType socialType, String socialId, String email, String password, String countryCode) {
 		return TripSokUser.builder()
-			.name(name)
+			.name(nickname)
 			.socialType(socialType)
 			.socialId(socialId)
 			.email(email)
