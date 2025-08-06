@@ -1,6 +1,5 @@
 package com.tripsok_back.model.user;
 
-import com.tripsok_back.model.Theme.Theme;
 import com.tripsok_back.support.BaseTimeEntity;
 
 import jakarta.persistence.CascadeType;
@@ -35,9 +34,4 @@ public class InterestTheme extends BaseTimeEntity {
 	@ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
 	@JoinColumn(name = "theme_id", nullable = false)
 	private Theme theme;
-
-	public InterestTheme(TripSokUser user, Theme theme) {
-		this.user = user;
-		this.theme = theme;
-	}
 }
