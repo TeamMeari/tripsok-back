@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.0'
     id 'io.spring.dependency-management' version '1.1.7'
+    id "org.flywaydb.flyway" version '11.10.1'
 }
 
 group = 'com'
@@ -30,8 +31,19 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    runtimeOnly 'com.mysql:mysql-connector-j'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+
+    // Flyway
+    implementation 'org.flywaydb:flyway-core:11.10.1'
+    runtimeOnly 'org.flywaydb:flyway-database-oracle:11.10.1'
+
+    // Database
+    runtimeOnly 'com.oracle.database.jdbc:ojdbc11:23.8.0.25.04'
+
+    // Swagger
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8'
+
 }
 
 tasks.named('test') {
