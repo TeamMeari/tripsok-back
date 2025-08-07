@@ -14,7 +14,7 @@ import com.tripsok_back.dto.auth.request.EmailLoginRequest;
 import com.tripsok_back.dto.auth.request.EmailSignUpRequest;
 import com.tripsok_back.dto.auth.request.OauthLoginRequest;
 import com.tripsok_back.dto.auth.request.OauthSignUpRequest;
-import com.tripsok_back.dto.auth.response.LoginResponseDto;
+import com.tripsok_back.dto.auth.response.LoginResponse;
 import com.tripsok_back.dto.auth.response.TokenResponse;
 import com.tripsok_back.service.AuthService;
 
@@ -37,38 +37,38 @@ public class AuthController {
 	}
 
 	@PostMapping("/signup/oauth2")
-	public ResponseEntity<LoginResponseDto> signUpWithOAuth2(@RequestBody OauthSignUpRequest request) {
+	public ResponseEntity<LoginResponse> signUpWithOAuth2(@RequestBody OauthSignUpRequest request) {
 		TokenResponse tokenResponse = authService.signUpOAuth(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
-			.body(new LoginResponseDto(tokenResponse.accessToken()));
+			.body(new LoginResponse(tokenResponse.accessToken()));
 	}
 
 	@PostMapping("/login/oauth2")
-	public ResponseEntity<LoginResponseDto> loginWithOAuth2(@RequestBody OauthLoginRequest request) {
+	public ResponseEntity<LoginResponse> loginWithOAuth2(@RequestBody OauthLoginRequest request) {
 		TokenResponse tokenResponse = authService.loginWithOauth2(request);
 		if (tokenResponse.refreshToken() == null) {
-			return ResponseEntity.status(HttpStatus.SEE_OTHER).body(new LoginResponseDto(tokenResponse.accessToken()));
+			return ResponseEntity.status(HttpStatus.SEE_OTHER).body(new LoginResponse(tokenResponse.accessToken()));
 		}
 		return ResponseEntity.status(HttpStatus.OK)
 			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
-			.body(new LoginResponseDto(tokenResponse.accessToken()));
+			.body(new LoginResponse(tokenResponse.accessToken()));
 	}
 
 	@PostMapping("/login/email")
-	public ResponseEntity<LoginResponseDto> loginWithEmail(@RequestBody EmailLoginRequest request) {
+	public ResponseEntity<LoginResponse> loginWithEmail(@RequestBody EmailLoginRequest request) {
 		TokenResponse tokenResponse = authService.loginWithEmail(request.getEmail(), request.getPassword());
 		return ResponseEntity.status(HttpStatus.OK)
 			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
-			.body(new LoginResponseDto(tokenResponse.accessToken()));
+			.body(new LoginResponse(tokenResponse.accessToken()));
 	}
 
 	@PostMapping("/refresh")
-	public ResponseEntity<LoginResponseDto> refreshToken(@CookieValue String refreshToken) {
+	public ResponseEntity<LoginResponse> refreshToken(@CookieValue String refreshToken) {
 		TokenResponse tokenResponse = authService.refresh(refreshToken);
 		return ResponseEntity.status(HttpStatus.OK)
 			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
-			.body(new LoginResponseDto(tokenResponse.accessToken()));
+			.body(new LoginResponse(tokenResponse.accessToken()));
 	}
 
 	private HttpCookie getRefreshTokenCookie(String refreshToken) {
