@@ -54,7 +54,8 @@ public class JwtUtil {
 
 	public String generateEmailVerificationToken(String email) {
 		Map<String, Object> claims = Map.of(
-			"email", email
+			"email", email,
+			"tokenType", TokenType.EMAIL_VERIFICATION.name()
 		);
 		return generateToken(claims, jwtProperties.getEmailVerificationTokenExpirationTime());
 	}
@@ -62,7 +63,8 @@ public class JwtUtil {
 	public String generateOAuth2Token(String authAccessToken, SocialType socialType) {
 		Map<String, Object> claims = Map.of(
 			"authAccessToken", authAccessToken,
-			"socialType", socialType.name()
+			"socialType", socialType.name(),
+			"tokenType", TokenType.SOCIAL_SIGNUP.name()
 		);
 		return generateToken(claims, jwtProperties.getOauth2AccessTokenExpirationTime());
 	}
@@ -76,7 +78,7 @@ public class JwtUtil {
 			.compact();
 	}
 
-	public <T> T validateAndExtract(String token, String claimName, Class<T> targetType, TokenType tokenType) {
+	public <T> T validateAndExtract(String token, String claimName, Class<T> targetType) {
 		try {
 			T content = Jwts.parser()
 				.verifyWith(key)
@@ -85,32 +87,31 @@ public class JwtUtil {
 				.getPayload()
 				.get(claimName, targetType);
 			if (content == null) {
-				throw new JwtException(ErrorCode.INVALID_TOKEN);
+				throw new Exception();
 			}
 			return content;
 		} catch (ExpiredJwtException e) {
+			TokenType tokenType;
+			try{
+				tokenType = TokenType.valueOf(e.getClaims().get("tokenType", String.class));
+			}catch (Exception ex) {
+				tokenType = TokenType.UNKNOWN;
+			}
 			switch (tokenType) {
 				case EMAIL_VERIFICATION:
 					throw new JwtException(ErrorCode.EXPIRED_EMAIL_VERIFICATION_TOKEN);
-				case SOCIAL_SINGUP:
+				case SOCIAL_SIGNUP:
 					throw new JwtException(ErrorCode.EXPIRED_SOCIAL_SIGNUP_TOKEN);
 				default:
 					throw new JwtException(ErrorCode.TOKEN_EXPIRED);
 			}
 		} catch (Exception e) {
-			switch (tokenType) {
-				case EMAIL_VERIFICATION:
-					throw new JwtException(ErrorCode.INVALID_EMAIL_VERIFICATION_TOKEN);
-				case SOCIAL_SINGUP:
-					throw new JwtException(ErrorCode.INVALID_SOCIAL_SIGNUP_TOKEN);
-				default:
 					throw new JwtException(ErrorCode.INVALID_TOKEN);
-			}
 		}
 	}
 
 	public List<GrantedAuthority> getAuthorities(String token) {
-		return validateAndExtract(token, "authorities", List.class, null)
+		return validateAndExtract(token, "authorities", List.class)
 			.stream()
 			.map(authority -> new SimpleGrantedAuthority((String)authority))
 			.toList();

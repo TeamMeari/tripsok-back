@@ -37,7 +37,6 @@ import com.tripsok_back.repository.RedisRefreshTokenRepository;
 import com.tripsok_back.repository.UserRepository;
 import com.tripsok_back.security.dto.TripSokUserDto;
 import com.tripsok_back.security.jwt.JwtUtil;
-import com.tripsok_back.security.jwt.TokenType;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +57,7 @@ public class AuthService {
 
 	@Transactional
 	public void signUpEmail(EmailSignUpRequest request) {
-		String email = jwtUtil.validateAndExtract(request.getEmailVerifyToken(), "email", String.class, TokenType.EMAIL_VERIFICATION);
+		String email = jwtUtil.validateAndExtract(request.getEmailVerifyToken(), "email", String.class);
 		String password = request.getPassword();
 		TripSokUser user = TripSokUser.signUpUser(request.getNickname(), SocialType.EMAIL, null, email,
 			passwordEncoder.encode(password), request.getCountryCode());
@@ -69,8 +68,8 @@ public class AuthService {
 	@Transactional
 	public TokenResponse signUpOAuth(OauthSignUpRequest request) {
 		String socialSignUpToken = request.getSocialSignUpToken();
-		String type = jwtUtil.validateAndExtract(socialSignUpToken, "socialType", String.class, TokenType.SOCIAL_SINGUP).toUpperCase();
-		String socialAccessToken = jwtUtil.validateAndExtract(socialSignUpToken, "authAccessToken", String.class, TokenType.SOCIAL_SINGUP);
+		String type = jwtUtil.validateAndExtract(socialSignUpToken, "socialType", String.class).toUpperCase();
+		String socialAccessToken = jwtUtil.validateAndExtract(socialSignUpToken, "authAccessToken", String.class);
 		TripSokUser user;
 		try {
 			SocialType tokenType = SocialType.valueOf(type);
@@ -126,7 +125,7 @@ public class AuthService {
 
 	@Transactional
 	public TokenResponse refresh(String refreshToken) {
-		String userId = jwtUtil.validateAndExtract(refreshToken, "userId", String.class, TokenType.REFRESH);
+		String userId = jwtUtil.validateAndExtract(refreshToken, "userId", String.class);
 
 		String storedToken = refreshTokenRepository.findByUserId(userId).getToken();
 		if (!refreshToken.equals(storedToken)) {
