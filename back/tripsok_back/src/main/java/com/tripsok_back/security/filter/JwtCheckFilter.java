@@ -31,7 +31,7 @@ public class JwtCheckFilter extends OncePerRequestFilter {
 			return;
 		}
 		String token = authHeader.substring(7);
-		String userId = jwtUtil.validateAndExtract(token, "userId", String.class);
+		String userId = jwtUtil.validateAndExtract(token, "userId", String.class,null);
 		SecurityContextHolder.getContext()
 			.setAuthentication(new UsernamePasswordAuthenticationToken(userId, token, jwtUtil.getAuthorities(token)));
 		filterChain.doFilter(request, response);

@@ -76,7 +76,7 @@ public class JwtUtil {
 			.compact();
 	}
 
-	public <T> T validateAndExtract(String token, String claimName, Class<T> targetType) {
+	public <T> T validateAndExtract(String token, String claimName, Class<T> targetType, TokenType tokenType) {
 		try {
 			T content = Jwts.parser()
 				.verifyWith(key)
@@ -89,14 +89,28 @@ public class JwtUtil {
 			}
 			return content;
 		} catch (ExpiredJwtException e) {
-			throw new JwtException(ErrorCode.TOKEN_EXPIRED);
+			switch (tokenType) {
+				case EMAIL_VERIFICATION:
+					throw new JwtException(ErrorCode.EXPIRED_EMAIL_VERIFICATION_TOKEN);
+				case SOCIAL_SINGUP:
+					throw new JwtException(ErrorCode.EXPIRED_SOCIAL_SIGNUP_TOKEN);
+				default:
+					throw new JwtException(ErrorCode.TOKEN_EXPIRED);
+			}
 		} catch (Exception e) {
-			throw new JwtException(ErrorCode.INVALID_TOKEN);
+			switch (tokenType) {
+				case EMAIL_VERIFICATION:
+					throw new JwtException(ErrorCode.INVALID_EMAIL_VERIFICATION_TOKEN);
+				case SOCIAL_SINGUP:
+					throw new JwtException(ErrorCode.INVALID_SOCIAL_SIGNUP_TOKEN);
+				default:
+					throw new JwtException(ErrorCode.INVALID_TOKEN);
+			}
 		}
 	}
 
 	public List<GrantedAuthority> getAuthorities(String token) {
-		return validateAndExtract(token, "authorities", List.class)
+		return validateAndExtract(token, "authorities", List.class, null)
 			.stream()
 			.map(authority -> new SimpleGrantedAuthority((String)authority))
 			.toList();

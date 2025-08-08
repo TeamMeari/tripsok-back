@@ -37,6 +37,7 @@ import com.tripsok_back.repository.RedisRefreshTokenRepository;
 import com.tripsok_back.repository.UserRepository;
 import com.tripsok_back.security.dto.TripSokUserDto;
 import com.tripsok_back.security.jwt.JwtUtil;
+import com.tripsok_back.security.jwt.TokenType;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -57,11 +58,8 @@ public class AuthService {
 
 	@Transactional
 	public void signUpEmail(EmailSignUpRequest request) {
-		String email = jwtUtil.validateAndExtract(request.getEmailVerifyToken(), "email", String.class);
+		String email = jwtUtil.validateAndExtract(request.getEmailVerifyToken(), "email", String.class, TokenType.EMAIL_VERIFICATION);
 		String password = request.getPassword();
-		if (password == null || !validatePassword(password)) {
-			throw new AuthException(ErrorCode.INVALID_PASSWORD_FORMAT);
-		}
 		TripSokUser user = TripSokUser.signUpUser(request.getNickname(), SocialType.EMAIL, null, email,
 			passwordEncoder.encode(password), request.getCountryCode());
 		validateRegisteredAndSave(user);
@@ -71,23 +69,24 @@ public class AuthService {
 	@Transactional
 	public TokenResponse signUpOAuth(OauthSignUpRequest request) {
 		String socialSignUpToken = request.getSocialSignUpToken();
-		SocialType type;
+		String type = jwtUtil.validateAndExtract(socialSignUpToken, "socialType", String.class, TokenType.SOCIAL_SINGUP).toUpperCase();
+		String socialAccessToken = jwtUtil.validateAndExtract(socialSignUpToken, "authAccessToken", String.class, TokenType.SOCIAL_SINGUP);
+		TripSokUser user;
 		try {
-			type = SocialType.valueOf(
-				jwtUtil.validateAndExtract(socialSignUpToken, "socialType", String.class).toUpperCase());
-		} catch (IllegalArgumentException e) {
+			SocialType tokenType = SocialType.valueOf(type);
+			switch (tokenType) {
+				case GOOGLE -> {
+					GoogleUserInfo oauthGoogleUserInfo = getGoogleUserInfo(socialAccessToken);
+					user = TripSokUser.signUpUser(request.getNickname(), GOOGLE, oauthGoogleUserInfo.getSub(),
+						oauthGoogleUserInfo.getEmail(), null, request.getCountryCode());
+				}
+				default -> throw new Exception();
+			}
+		} catch (Exception e) {
+			log.error("Unsupported social type: {}", type);
 			throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
 		}
-		String socialAccessToken = jwtUtil.validateAndExtract(socialSignUpToken, "authAccessToken", String.class);
-		TripSokUser user;
-		switch (type) {
-			case GOOGLE -> {
-				GoogleUserInfo oauthGoogleUserInfo = getGoogleUserInfo(socialAccessToken);
-				user = TripSokUser.signUpUser(request.getNickname(), GOOGLE, oauthGoogleUserInfo.getSub(),
-					oauthGoogleUserInfo.getEmail(), null, request.getCountryCode());
-			}
-			default -> throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
-		}
+
 		validateRegisteredAndSave(user);
 		interestThemeService.saveInterestThemes(user, request.getInterestThemeIds());
 
@@ -127,7 +126,7 @@ public class AuthService {
 
 	@Transactional
 	public TokenResponse refresh(String refreshToken) {
-		String userId = jwtUtil.validateAndExtract(refreshToken, "userId", String.class);
+		String userId = jwtUtil.validateAndExtract(refreshToken, "userId", String.class, TokenType.REFRESH);
 
 		String storedToken = refreshTokenRepository.findByUserId(userId).getToken();
 		if (!refreshToken.equals(storedToken)) {
@@ -140,7 +139,7 @@ public class AuthService {
 		return getTokenResponse(user.getId().toString(), getAuthorities(user.getRole()));
 	}
 
-	public boolean validateNickname(String nickname) {
+	public boolean nicknameDuplicateCheck(String nickname) {
 		return !userRepository.existsByName(nickname);
 	}
 
@@ -163,10 +162,6 @@ public class AuthService {
 		return role.getAuthority().stream()
 			.map(SimpleGrantedAuthority::new)
 			.collect(Collectors.toList());
-	}
-
-	private boolean validatePassword(String password) { //TODO: 비밀번호 유효성 검사 필요한가?
-		return password.length() >= 8;
 	}
 
 	private GoogleTokenResponse getGoogleToken(String code) {
@@ -207,7 +202,7 @@ public class AuthService {
 				.getBody();
 		} catch (HttpClientErrorException e) {
 			log.error("Failed to retrieve Google user info: {}", e.getMessage());
-			throw new AuthException(ErrorCode.INVALID_SOCIAL_TOKEN);
+			throw new AuthException(ErrorCode.INVALID_SOCIAL_SIGNUP_TOKEN);
 		}
 	}
 
@@ -220,7 +215,7 @@ public class AuthService {
 				throw new AuthException(ErrorCode.REGISTERED_ANOTHER_SOCIAL);
 			}
 		}
-		if (!validateNickname(user.getName())) {
+		if (!nicknameDuplicateCheck(user.getName())) {
 			throw new AuthException(ErrorCode.CONFLICT_NICKNAME);
 		}
 		userRepository.save(user);
