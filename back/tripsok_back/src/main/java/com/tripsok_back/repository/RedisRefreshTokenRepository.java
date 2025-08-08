@@ -7,5 +7,5 @@ import com.tripsok_back.model.auth.RefreshToken;
 
 @Repository
 public interface RedisRefreshTokenRepository extends CrudRepository<RefreshToken, Integer> {
-	RefreshToken findByUserId(String userId);
+	RefreshToken findByUserId(Integer userId);
 }

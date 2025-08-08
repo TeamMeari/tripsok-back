@@ -37,7 +37,7 @@ public class JwtUtil {
 		this.key = Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes());
 	}
 
-	public String generateAccessToken(String userId, Collection<GrantedAuthority> authorities) {
+	public String generateAccessToken(Integer userId, Collection<GrantedAuthority> authorities) {
 		Map<String, Object> claims = Map.of(
 			"authorities", authorities.stream().map(GrantedAuthority::getAuthority).toList(),
 			"userId", userId
@@ -45,7 +45,7 @@ public class JwtUtil {
 		return generateToken(claims, jwtProperties.getAccessTokenExpirationTime());
 	}
 
-	public String generateRefreshToken(String userId) {
+	public String generateRefreshToken(Integer userId) {
 		Map<String, Object> claims = Map.of(
 			"userId", userId
 		);

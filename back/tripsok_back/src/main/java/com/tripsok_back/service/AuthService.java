@@ -95,7 +95,7 @@ public class AuthService {
 		validateRegisteredAndSave(user);
 		interestThemeService.saveInterestThemes(user, request.getInterestThemeIds());
 
-		return getTokenResponse(user.getId().toString(), getAuthorities(user.getRole()));
+		return getTokenResponse(user.getId(), getAuthorities(user.getRole()));
 	}
 
 	@Transactional
@@ -112,7 +112,7 @@ public class AuthService {
 			}
 			default -> throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
 		}
-		return getTokenResponse(user.getId().toString(), getAuthorities(user.getRole()));
+		return getTokenResponse(user.getId(), getAuthorities(user.getRole()));
 	}
 
 	@Transactional
@@ -122,7 +122,7 @@ public class AuthService {
 				new UsernamePasswordAuthenticationToken(email, password));
 			TripSokUserDto userDetails = (TripSokUserDto)authentication.getPrincipal();
 
-			return getTokenResponse(userDetails.getUserId(), userDetails.getAuthorities());
+			return getTokenResponse(Integer.parseInt(userDetails.getUserId()), userDetails.getAuthorities());
 		} catch (Exception e) {
 			log.error("Login failed for email: {}", email, e);
 			throw new AuthException(ErrorCode.INVALID_CREDENTIALS);
@@ -131,17 +131,17 @@ public class AuthService {
 
 	@Transactional
 	public TokenResponse refresh(String refreshToken) {
-		String userId = jwtUtil.validateAndExtract(refreshToken, "userId", String.class);
+		Integer userId = jwtUtil.validateAndExtract(refreshToken, "userId", Integer.class);
 
 		String storedToken = refreshTokenRepository.findByUserId(userId).getToken();
 		if (!refreshToken.equals(storedToken)) {
 			throw new AuthException(ErrorCode.INVALID_REFRESH_TOKEN);
 		}
 
-		TripSokUser user = userRepository.findById(Integer.parseInt(userId))
+		TripSokUser user = userRepository.findById(userId)
 			.orElseThrow(() -> new AuthException(ErrorCode.USER_NOT_FOUND));
 
-		return getTokenResponse(user.getId().toString(), getAuthorities(user.getRole()));
+		return getTokenResponse(user.getId(), getAuthorities(user.getRole()));
 	}
 
 	public boolean validateNickname(String nickname) {
@@ -152,17 +152,19 @@ public class AuthService {
 		return jwtUtil.getRefreshTokenExpirationTime();
 	}
 
-	public void logout(String refreshToken, String accessToken) {
-		String userId = jwtUtil.validateAndExtract(refreshToken, "userId", String.class);
+	public void logout(String accessToken) {
+		Integer userId = jwtUtil.validateAndExtract(accessToken, "userId", Integer.class);
 		RefreshToken existingRefreshToken = refreshTokenRepository.findByUserId(userId);
 		if (existingRefreshToken != null) {
 			refreshTokenRepository.delete(existingRefreshToken); // 리프레시 토큰 삭제
+			log.info("리프레시 토큰 삭제: {}", userId);
 		}
 		try {
 			Date expiration = jwtUtil.getTokenExpirationTime(accessToken);
 			long ttl = (expiration.getTime() - System.currentTimeMillis()) / 1000; // 초로 변환
 			if (ttl > 0) {
 				blackListAccessTokenRepository.save(new BlackListAccessToken(accessToken, ttl));
+				log.info("액세스 토큰 블랙리스트 추가: {}, TTL: {}초", userId, ttl);
 			}
 		} catch (Exception e) {
 			log.error("액세스 토큰 블랙리스트 추가 실패: {}", e.getMessage());
@@ -170,7 +172,7 @@ public class AuthService {
 
 	}
 
-	private TokenResponse getTokenResponse(String userId, Collection<GrantedAuthority> authorities) {
+	private TokenResponse getTokenResponse(Integer userId, Collection<GrantedAuthority> authorities) {
 		String accessToken = jwtUtil.generateAccessToken(userId, authorities);
 		String refreshToken = jwtUtil.generateRefreshToken(userId);
 		RefreshToken existingRefreshToken = refreshTokenRepository.findByUserId(userId);

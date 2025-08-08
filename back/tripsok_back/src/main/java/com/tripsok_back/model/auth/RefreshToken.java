@@ -19,12 +19,12 @@ public class RefreshToken {
 	private Integer id;
 
 	@Indexed
-	private String userId;
+	private Integer userId;
 	private String token;
 	@TimeToLive
 	private Long expirationTime;
 
-	public RefreshToken(String userId, String token, Long expirationTime) {
+	public RefreshToken(Integer userId, String token, Long expirationTime) {
 		this.userId = userId;
 		this.token = token;
 		this.expirationTime = expirationTime;

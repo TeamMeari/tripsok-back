@@ -36,10 +36,9 @@ public class JwtCheckFilter extends OncePerRequestFilter {
 		}
 		String token = authHeader.substring(7);
 		if (blackListAccessTokenRepository.existsByToken(token)) {
-			log.warn("해당 토큰은 블랙리스트에 있습니다: {}", token);
 			throw new AuthException(ErrorCode.INVALID_TOKEN, "해당 토큰은 블랙리스트에 있습니다.");
 		}
-		Integer userId = Integer.parseInt(jwtUtil.validateAndExtract(token, "userId", String.class));
+		Integer userId = jwtUtil.validateAndExtract(token, "userId", Integer.class);
 		SecurityContextHolder.getContext()
 			.setAuthentication(new UsernamePasswordAuthenticationToken(userId, token, jwtUtil.getAuthorities(token)));
 		filterChain.doFilter(request, response);
