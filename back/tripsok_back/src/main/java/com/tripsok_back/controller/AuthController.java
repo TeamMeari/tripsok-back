@@ -20,6 +20,8 @@ import com.tripsok_back.dto.auth.request.ResetPasswordRequest;
 import com.tripsok_back.dto.auth.response.LoginResponse;
 import com.tripsok_back.dto.auth.response.NicknameDuplicateCheckResponse;
 import com.tripsok_back.dto.auth.response.TokenResponse;
+import com.tripsok_back.exception.AuthException;
+import com.tripsok_back.exception.ErrorCode;
 import com.tripsok_back.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -86,7 +88,10 @@ public class AuthController {
 
 	@PostMapping("/logout")
 	public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authHeader) {
-		String accessToken = authHeader.replace("Bearer ", "");
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			throw new AuthException(ErrorCode.INVALID_TOKEN);
+		}
+		String accessToken = authHeader.substring(7);
 		authService.logout(accessToken);
 		return ResponseEntity.status(HttpStatus.NO_CONTENT)
 			.header(COOKIE_HEARER, getExpiredCookie().toString())
@@ -94,7 +99,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/reset/password")
-	public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
+	public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
 		authService.resetPassword(request.getEmailVerifyToken(), request.getPassword());
 		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 	}
