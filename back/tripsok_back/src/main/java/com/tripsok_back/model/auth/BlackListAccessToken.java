@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 @RedisHash(value = "blackListAccessToken")
 public class BlackListAccessToken {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	@Indexed
 	private String token;
