@@ -76,10 +76,6 @@ public class TripSokUser extends BaseModifiableEntity {
 		this.password = encodedPassword;
 	}
 
-	public void changeCountryCode(String countryCode) {
-		this.countryCode = countryCode;
-	}
-
 	public void changeContactEmail(String contactEmail) {
 		this.contactEmail = contactEmail;
 	}
