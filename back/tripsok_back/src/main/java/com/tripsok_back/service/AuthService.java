@@ -91,7 +91,7 @@ public class AuthService {
 		validateRegisteredAndSave(user);
 		interestThemeService.saveInterestThemes(user, request.getInterestThemeIds());
 
-		return getTokenResponse(user.getId().toString(), getAuthorities(user.getRole()));
+		return getTokenResponse(user.getId(), getAuthorities(user.getRole()));
 	}
 
 	@Transactional
@@ -108,7 +108,7 @@ public class AuthService {
 			}
 			default -> throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
 		}
-		return getTokenResponse(user.getId().toString(), getAuthorities(user.getRole()));
+		return getTokenResponse(user.getId(), getAuthorities(user.getRole()));
 	}
 
 	@Transactional
@@ -118,7 +118,7 @@ public class AuthService {
 				new UsernamePasswordAuthenticationToken(email, password));
 			TripSokUserDto userDetails = (TripSokUserDto)authentication.getPrincipal();
 
-			return getTokenResponse(userDetails.getUserId(), userDetails.getAuthorities());
+			return getTokenResponse(Integer.parseInt(userDetails.getUserId()), userDetails.getAuthorities());
 		} catch (Exception e) {
 			log.error("Login failed for email: {}", email, e);
 			throw new AuthException(ErrorCode.INVALID_CREDENTIALS);
@@ -127,17 +127,17 @@ public class AuthService {
 
 	@Transactional
 	public TokenResponse refresh(String refreshToken) {
-		String userId = jwtUtil.validateAndExtract(refreshToken, "userId", String.class);
+		Integer userId = jwtUtil.validateAndExtract(refreshToken, "userId", Integer.class);
 
 		String storedToken = refreshTokenRepository.findByUserId(userId).getToken();
 		if (!refreshToken.equals(storedToken)) {
 			throw new AuthException(ErrorCode.INVALID_REFRESH_TOKEN);
 		}
 
-		TripSokUser user = userRepository.findById(Integer.parseInt(userId))
+		TripSokUser user = userRepository.findById(userId)
 			.orElseThrow(() -> new AuthException(ErrorCode.USER_NOT_FOUND));
 
-		return getTokenResponse(user.getId().toString(), getAuthorities(user.getRole()));
+		return getTokenResponse(user.getId(), getAuthorities(user.getRole()));
 	}
 
 	public boolean validateNickname(String nickname) {
@@ -148,14 +148,14 @@ public class AuthService {
 		return jwtUtil.getRefreshTokenExpirationTime();
 	}
 
-	private TokenResponse getTokenResponse(String userId, Collection<GrantedAuthority> authorities) {
+	private TokenResponse getTokenResponse(Integer userId, Collection<GrantedAuthority> authorities) {
 		String accessToken = jwtUtil.generateAccessToken(userId, authorities);
 		String refreshToken = jwtUtil.generateRefreshToken(userId);
 		RefreshToken existingRefreshToken = refreshTokenRepository.findByUserId(userId);
 		if (existingRefreshToken != null) {
 			refreshTokenRepository.delete(existingRefreshToken);
 		}
-		refreshTokenRepository.save(new RefreshToken(userId, refreshToken));
+		refreshTokenRepository.save(new RefreshToken(userId, refreshToken, jwtUtil.getRefreshTokenExpirationTime()));
 		return new TokenResponse(accessToken, refreshToken);
 	}
 

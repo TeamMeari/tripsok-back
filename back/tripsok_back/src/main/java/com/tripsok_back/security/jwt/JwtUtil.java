@@ -37,7 +37,7 @@ public class JwtUtil {
 		this.key = Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes());
 	}
 
-	public String generateAccessToken(String userId, Collection<GrantedAuthority> authorities) {
+	public String generateAccessToken(Integer userId, Collection<GrantedAuthority> authorities) {
 		Map<String, Object> claims = Map.of(
 			"authorities", authorities.stream().map(GrantedAuthority::getAuthority).toList(),
 			"userId", userId
@@ -45,7 +45,7 @@ public class JwtUtil {
 		return generateToken(claims, jwtProperties.getAccessTokenExpirationTime());
 	}
 
-	public String generateRefreshToken(String userId) {
+	public String generateRefreshToken(Integer userId) {
 		Map<String, Object> claims = Map.of(
 			"userId", userId
 		);
@@ -70,7 +70,7 @@ public class JwtUtil {
 	private String generateToken(Map<String, Object> claims, long expirationMinutes) {
 		return Jwts.builder()
 			.issuedAt(new Date())
-			.expiration(Date.from(ZonedDateTime.now().plusMinutes(expirationMinutes).toInstant()))
+			.expiration(Date.from(ZonedDateTime.now().plusSeconds(expirationMinutes).toInstant()))
 			.claims(claims)
 			.signWith(key)
 			.compact();
@@ -104,5 +104,9 @@ public class JwtUtil {
 
 	public long getRefreshTokenExpirationTime() {
 		return jwtProperties.getRefreshTokenExpirationTime();
+	}
+
+	public long getEmailVerificationTokenExpirationTime() {
+		return jwtProperties.getEmailVerificationTokenExpirationTime();
 	}
 }

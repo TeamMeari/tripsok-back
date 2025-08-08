@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.tripsok_back.security.jwt.JwtUtil;
@@ -12,15 +13,14 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
+@RequiredArgsConstructor
 @Log4j2
+@Component
 public class JwtCheckFilter extends OncePerRequestFilter {
 	private final JwtUtil jwtUtil;
-
-	public JwtCheckFilter(JwtUtil jwtUtil) {
-		this.jwtUtil = jwtUtil;
-	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -31,7 +31,7 @@ public class JwtCheckFilter extends OncePerRequestFilter {
 			return;
 		}
 		String token = authHeader.substring(7);
-		String userId = jwtUtil.validateAndExtract(token, "userId", String.class);
+		Integer userId = jwtUtil.validateAndExtract(token, "userId", Integer.class);
 		SecurityContextHolder.getContext()
 			.setAuthentication(new UsernamePasswordAuthenticationToken(userId, token, jwtUtil.getAuthorities(token)));
 		filterChain.doFilter(request, response);

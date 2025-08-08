@@ -43,7 +43,8 @@ public class EmailService {
 				emailVerificationTokenRepository.delete(codeFoundByEmail);
 			}
 			MimeMessage message = createEmailMessage(email, subject, code);
-			emailVerificationTokenRepository.save(new EmailVerificationToken(email, code));
+			emailVerificationTokenRepository.save(
+				new EmailVerificationToken(email, code, jwtUtil.getEmailVerificationTokenExpirationTime()));
 			mailSender.send(message);
 			// TODO: 비동기 처리 고려
 			log.info("이메일 전송 완료: {}, 인증코드: {}", email, code);
