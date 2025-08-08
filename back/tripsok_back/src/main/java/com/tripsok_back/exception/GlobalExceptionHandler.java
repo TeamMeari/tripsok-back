@@ -36,9 +36,10 @@ public class GlobalExceptionHandler {
 	// @Validated 어노테이션을 사용하여 검증을 수행할 때 발생하는 예외
 	@ExceptionHandler(value = {MethodArgumentNotValidException.class})
 	public ResponseEntity<ErrorResponse> handleArgumentNotValidException(MethodArgumentNotValidException e) {
-		log.error("MethodArgumentNotValidException : {}", e.getMessage());
+		String errorMessage = e.getBindingResult().getAllErrors().getFirst().getDefaultMessage();
+		log.error("MethodArgumentNotValidException : {}",errorMessage);
 		ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
-		ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), e.getMessage());
+		ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorMessage);
 		return ResponseEntity.status(errorCode.getHttpStatus()).body(errorResponse);
 	}
 

@@ -54,7 +54,8 @@ public class JwtUtil {
 
 	public String generateEmailVerificationToken(String email) {
 		Map<String, Object> claims = Map.of(
-			"email", email
+			"email", email,
+			"tokenType", TokenType.EMAIL_VERIFICATION.name()
 		);
 		return generateToken(claims, jwtProperties.getEmailVerificationTokenExpirationTime());
 	}
@@ -62,7 +63,8 @@ public class JwtUtil {
 	public String generateOAuth2Token(String authAccessToken, SocialType socialType) {
 		Map<String, Object> claims = Map.of(
 			"authAccessToken", authAccessToken,
-			"socialType", socialType.name()
+			"socialType", socialType.name(),
+			"tokenType", TokenType.SOCIAL_SIGNUP.name()
 		);
 		return generateToken(claims, jwtProperties.getOauth2AccessTokenExpirationTime());
 	}
@@ -85,13 +87,26 @@ public class JwtUtil {
 				.getPayload()
 				.get(claimName, targetType);
 			if (content == null) {
-				throw new JwtException(ErrorCode.INVALID_TOKEN);
+				throw new Exception();
 			}
 			return content;
 		} catch (ExpiredJwtException e) {
-			throw new JwtException(ErrorCode.TOKEN_EXPIRED);
+			TokenType tokenType;
+			try{
+				tokenType = TokenType.valueOf(e.getClaims().get("tokenType", String.class));
+			}catch (Exception ex) {
+				tokenType = TokenType.UNKNOWN;
+			}
+			switch (tokenType) {
+				case EMAIL_VERIFICATION:
+					throw new JwtException(ErrorCode.EXPIRED_EMAIL_VERIFICATION_TOKEN);
+				case SOCIAL_SIGNUP:
+					throw new JwtException(ErrorCode.EXPIRED_SOCIAL_SIGNUP_TOKEN);
+				default:
+					throw new JwtException(ErrorCode.TOKEN_EXPIRED);
+			}
 		} catch (Exception e) {
-			throw new JwtException(ErrorCode.INVALID_TOKEN);
+					throw new JwtException(ErrorCode.INVALID_TOKEN);
 		}
 	}
 
