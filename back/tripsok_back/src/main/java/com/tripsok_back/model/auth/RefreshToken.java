@@ -1,6 +1,7 @@
 package com.tripsok_back.model.auth;
 
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.TimeToLive;
 import org.springframework.data.redis.core.index.Indexed;
 
 import jakarta.persistence.GeneratedValue;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@RedisHash(value = "refreshToken", timeToLive = 604800) // 기본 TTL을 604800초(7일)로 설정
+@RedisHash(value = "refreshToken")
 public class RefreshToken {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,9 +21,12 @@ public class RefreshToken {
 	@Indexed
 	private String userId;
 	private String token;
+	@TimeToLive
+	private Long expirationTime;
 
-	public RefreshToken(String userId, String token) {
+	public RefreshToken(String userId, String token, Long expirationTime) {
 		this.userId = userId;
 		this.token = token;
+		this.expirationTime = expirationTime;
 	}
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tripsok_back.dto.auth.request.EmailLoginRequest;
 import com.tripsok_back.dto.auth.request.EmailSignUpRequest;
+import com.tripsok_back.dto.auth.request.LogoutRequest;
 import com.tripsok_back.dto.auth.request.OauthLoginRequest;
 import com.tripsok_back.dto.auth.request.OauthSignUpRequest;
 import com.tripsok_back.dto.auth.response.LoginResponse;
@@ -71,6 +72,15 @@ public class AuthController {
 			.body(new LoginResponse(tokenResponse.accessToken()));
 	}
 
+	@PostMapping("/logout")
+	public ResponseEntity<Void> logout(
+		@RequestBody LogoutRequest request, @CookieValue String refreshToken) {
+		authService.logout(refreshToken, request.getAccessToken());
+		return ResponseEntity.status(HttpStatus.NO_CONTENT)
+			.header(COOKIE_HEARER, getExpiredCookie().toString())
+			.build();
+	}
+
 	private HttpCookie getRefreshTokenCookie(String refreshToken) {
 
 		return ResponseCookie
@@ -82,7 +92,6 @@ public class AuthController {
 			.build();
 	}
 
-	//TODO: 쿠키 만료 처리
 	private HttpCookie getExpiredCookie() {
 		return ResponseCookie
 			.from("refreshToken", "")

@@ -70,7 +70,7 @@ public class JwtUtil {
 	private String generateToken(Map<String, Object> claims, long expirationMinutes) {
 		return Jwts.builder()
 			.issuedAt(new Date())
-			.expiration(Date.from(ZonedDateTime.now().plusMinutes(expirationMinutes).toInstant()))
+			.expiration(Date.from(ZonedDateTime.now().plusSeconds(expirationMinutes).toInstant()))
 			.claims(claims)
 			.signWith(key)
 			.compact();
@@ -104,5 +104,18 @@ public class JwtUtil {
 
 	public long getRefreshTokenExpirationTime() {
 		return jwtProperties.getRefreshTokenExpirationTime();
+	}
+
+	public long getEmailVerificationTokenExpirationTime() {
+		return jwtProperties.getEmailVerificationTokenExpirationTime();
+	}
+
+	public Date getTokenExpirationTime(String token) {
+			return Jwts.parser()
+				.verifyWith(key)
+				.build()
+				.parseSignedClaims(token)
+				.getPayload()
+				.getExpiration();
 	}
 }

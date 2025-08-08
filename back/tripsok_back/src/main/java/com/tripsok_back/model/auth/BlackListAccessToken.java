@@ -12,21 +12,18 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@RedisHash(value = "emailVerification")
-public class EmailVerificationToken {
+@RedisHash(value = "blackListAccessToken")
+public class BlackListAccessToken {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-
 	@Indexed
-	private String email;
-	private String verificationCode;
+	private String token;
 	@TimeToLive
 	private Long expirationTime;
 
-	public EmailVerificationToken(String email, String verificationCode, Long expirationTime) {
-		this.email = email;
-		this.verificationCode = verificationCode;
+	public BlackListAccessToken(String token, Long expirationTime) {
+		this.token = token;
 		this.expirationTime = expirationTime;
 	}
 }

@@ -3,6 +3,7 @@ package com.tripsok_back.service;
 import static com.tripsok_back.model.user.SocialType.*;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,10 +30,12 @@ import com.tripsok_back.dto.auth.response.GoogleTokenResponse;
 import com.tripsok_back.dto.auth.response.TokenResponse;
 import com.tripsok_back.exception.AuthException;
 import com.tripsok_back.exception.ErrorCode;
+import com.tripsok_back.model.auth.BlackListAccessToken;
 import com.tripsok_back.model.auth.RefreshToken;
 import com.tripsok_back.model.user.Role;
 import com.tripsok_back.model.user.SocialType;
 import com.tripsok_back.model.user.TripSokUser;
+import com.tripsok_back.repository.RedisBlackListAccessTokenRepository;
 import com.tripsok_back.repository.RedisRefreshTokenRepository;
 import com.tripsok_back.repository.UserRepository;
 import com.tripsok_back.security.dto.TripSokUserDto;
@@ -47,6 +50,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthService {
 	private final BCryptPasswordEncoder passwordEncoder;
 	private final RedisRefreshTokenRepository refreshTokenRepository;
+	private final RedisBlackListAccessTokenRepository blackListAccessTokenRepository;
 	private final UserRepository userRepository;
 	private final OAuth2Properties oAuth2Properties;
 	private final JwtUtil jwtUtil;
@@ -148,6 +152,23 @@ public class AuthService {
 		return jwtUtil.getRefreshTokenExpirationTime();
 	}
 
+	public void logout(String refreshToken, String accessToken) {
+		String userId = jwtUtil.validateAndExtract(refreshToken, "userId", String.class);
+		RefreshToken existingRefreshToken = refreshTokenRepository.findByUserId(userId);
+		if (existingRefreshToken != null) {
+			refreshTokenRepository.delete(existingRefreshToken); // 리프레시 토큰 삭제
+		}
+		try {
+			Date expiration = jwtUtil.getTokenExpirationTime(accessToken);
+			long ttl = (expiration.getTime() - System.currentTimeMillis()) / 1000; // 초로 변환
+			if (ttl > 0) {
+				blackListAccessTokenRepository.save(new BlackListAccessToken(accessToken, ttl));
+			}
+		} catch (Exception e) {
+			log.error("액세스 토큰 블랙리스트 추가 실패: {}", e.getMessage());
+		}
+
+	}
 	private TokenResponse getTokenResponse(String userId, Collection<GrantedAuthority> authorities) {
 		String accessToken = jwtUtil.generateAccessToken(userId, authorities);
 		String refreshToken = jwtUtil.generateRefreshToken(userId);
@@ -155,7 +176,7 @@ public class AuthService {
 		if (existingRefreshToken != null) {
 			refreshTokenRepository.delete(existingRefreshToken);
 		}
-		refreshTokenRepository.save(new RefreshToken(userId, refreshToken));
+		refreshTokenRepository.save(new RefreshToken(userId, refreshToken, jwtUtil.getRefreshTokenExpirationTime()));
 		return new TokenResponse(accessToken, refreshToken);
 	}
 

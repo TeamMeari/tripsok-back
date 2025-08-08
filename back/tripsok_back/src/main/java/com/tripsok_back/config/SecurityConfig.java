@@ -18,21 +18,21 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.tripsok_back.model.user.Role;
+import com.tripsok_back.repository.RedisBlackListAccessTokenRepository;
 import com.tripsok_back.security.filter.JwtCheckFilter;
 import com.tripsok_back.security.handler.CustomAuthenticationEntryPoint;
 import com.tripsok_back.security.jwt.JwtUtil;
 import com.tripsok_back.security.service.TripSokUserDetailsService;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Configuration // 스프링 컨테이너에 등록되는 설정 클래스임을 나타냄
 @EnableWebSecurity // Spring Security를 활성화하는 어노테이션
 public class SecurityConfig {
 	private final TripSokUserDetailsService userDetailsService;
 	private final JwtUtil jwtUtil;
-
-	public SecurityConfig(TripSokUserDetailsService userDetailsService, JwtUtil jwtUtil) {
-		this.userDetailsService = userDetailsService;
-		this.jwtUtil = jwtUtil;
-	}
+	private final RedisBlackListAccessTokenRepository blackListAccessTokenRepository;
 
 	@Bean
 	public BCryptPasswordEncoder passwordEncoder() {
@@ -60,7 +60,7 @@ public class SecurityConfig {
 
 	@Bean
 	public JwtCheckFilter apiFilter() {
-		return new JwtCheckFilter(jwtUtil);
+		return new JwtCheckFilter(jwtUtil, blackListAccessTokenRepository);
 	}
 
 	@Bean
