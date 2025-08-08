@@ -19,6 +19,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.tripsok_back.model.user.Role;
 import com.tripsok_back.security.filter.JwtCheckFilter;
+import com.tripsok_back.security.handler.CustomAccessDeniedHandler;
 import com.tripsok_back.security.handler.CustomAuthenticationEntryPoint;
 import com.tripsok_back.security.service.TripSokUserDetailsService;
 
@@ -30,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 	private final TripSokUserDetailsService userDetailsService;
 	private final JwtCheckFilter jwtFilter;
+	private final CustomAccessDeniedHandler customAccessDeniedHandler;
 	private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
 	@Bean
@@ -50,7 +52,8 @@ public class SecurityConfig {
 					.hasAuthority(Role.ADMIN.getAuthority().getFirst());
 			});
 		http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-		http.exceptionHandling(it -> it.authenticationEntryPoint(customAuthenticationEntryPoint));
+		http.exceptionHandling(it -> it.accessDeniedHandler(customAccessDeniedHandler)
+			.authenticationEntryPoint(customAuthenticationEntryPoint));
 		return http.build();
 	}
 
