@@ -44,9 +44,12 @@ public class SecurityConfig {
 		http.cors(it -> it.configurationSource(corsConfigurationSource())).csrf(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(auth -> {
-				auth.requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-					.requestMatchers("/api/v1/user/**").hasAuthority(Role.USER.getAuthority().getFirst())
-					.requestMatchers("/api/v1/admin/**").hasAuthority(Role.ADMIN.getAuthority().get(1));
+				auth.requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**")
+					.permitAll()
+					.requestMatchers("/api/v1/user/**")
+					.hasAnyAuthority(Role.USER.getAuthority().getFirst(), Role.ADMIN.getAuthority().getFirst())
+					.requestMatchers("/api/v1/admin/**")
+					.hasAuthority(Role.ADMIN.getAuthority().getFirst());
 			});
 		http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 		http.exceptionHandling(it -> it.accessDeniedHandler(customAccessDeniedHandler)
@@ -69,10 +72,9 @@ public class SecurityConfig {
 	}
 
 	@Bean
-	public DaoAuthenticationProvider authenticationProvider(TripSokUserDetailsService userDetailsService,
-		BCryptPasswordEncoder passwordEncoder) {
+	public DaoAuthenticationProvider authenticationProvider() {
 		DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
-		authProvider.setPasswordEncoder(passwordEncoder);
+		authProvider.setPasswordEncoder(passwordEncoder());
 		return authProvider;
 	}
 

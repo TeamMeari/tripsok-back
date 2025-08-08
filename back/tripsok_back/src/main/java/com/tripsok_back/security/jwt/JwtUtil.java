@@ -111,11 +111,11 @@ public class JwtUtil {
 	}
 
 	public Date getTokenExpirationTime(String token) {
-			return Jwts.parser()
-				.verifyWith(key)
-				.build()
-				.parseSignedClaims(token)
-				.getPayload()
-				.getExpiration();
+		return Jwts.parser()
+			.verifyWith(key)
+			.build()
+			.parseSignedClaims(token)
+			.getPayload()
+			.getExpiration();
 	}
 }

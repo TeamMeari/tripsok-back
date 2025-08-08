@@ -169,6 +169,7 @@ public class AuthService {
 		}
 
 	}
+
 	private TokenResponse getTokenResponse(String userId, Collection<GrantedAuthority> authorities) {
 		String accessToken = jwtUtil.generateAccessToken(userId, authorities);
 		String refreshToken = jwtUtil.generateRefreshToken(userId);
