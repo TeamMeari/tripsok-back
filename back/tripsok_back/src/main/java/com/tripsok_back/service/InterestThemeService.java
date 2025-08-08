@@ -41,7 +41,7 @@ public class InterestThemeService {
 			.filter(it -> !interestThemeIds.contains(it)).toList();
 
 		if (!themesToDeleteIds.isEmpty()) {
-			interestThemeRepository.deleteAllByThemeIdIn(themesToDeleteIds);
+			interestThemeRepository.deleteAllByUserAndThemeIdIn(user, themesToDeleteIds);
 		}
 
 		List<Integer> themeIdsToAddIds = interestThemeIds.stream()

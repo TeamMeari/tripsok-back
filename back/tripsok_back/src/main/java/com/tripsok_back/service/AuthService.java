@@ -117,7 +117,7 @@ public class AuthService {
 
 			return getTokenResponse(Integer.parseInt(userDetails.getUserId()), userDetails.getAuthorities());
 		} catch (Exception e) {
-			throw new AuthException(ErrorCode.INVALID_CREDENTIALS);
+			throw new AuthException(ErrorCode.INVALID_CREDENTIALS, e.getMessage());
 		}
 	}
 

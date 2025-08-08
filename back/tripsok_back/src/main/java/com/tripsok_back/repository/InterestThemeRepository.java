@@ -9,5 +9,6 @@ import com.tripsok_back.model.user.TripSokUser;
 
 public interface InterestThemeRepository extends JpaRepository<InterestTheme, Integer> {
 	List<InterestTheme> findByUser(TripSokUser user);
-	void deleteAllByThemeIdIn(List<Integer> themeIds);
+
+	void deleteAllByUserAndThemeIdIn(TripSokUser user, List<Integer> themeIds);
 }

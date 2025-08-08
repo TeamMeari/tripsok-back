@@ -24,7 +24,7 @@ public class UserService {
 
 	@Transactional(readOnly = true)
 	public UserInfoResponse getUserInfo(Integer userId) {
-		 TripSokUser user = userRepository.findById(userId).orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+		TripSokUser user = findUserById(userId);
 		 List< InterestThemeResponse> interestThemes = interestThemeService.getInterestThemes(user);
 		return new UserInfoResponse(user.getName(), user.getEmail(), user.getContactEmail(), user.getCountryCode(), user.getSocialType(),interestThemes);
 	}
@@ -32,13 +32,18 @@ public class UserService {
 	@Transactional
 	public void changeContactEmail(Integer userId, String emailVerificationToken) {
 		String contactEmail = jwtUtil.validateAndExtract(emailVerificationToken, "email", String.class);
-		TripSokUser user = userRepository.findById(userId).orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+		TripSokUser user = findUserById(userId);
 		user.changeContactEmail(contactEmail);
 	}
 
 	@Transactional
 	public void changeInterestThemes(Integer userId, List<Integer> interestThemeIds) {
-		TripSokUser user = userRepository.findById(userId).orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+		TripSokUser user = findUserById(userId);
 		interestThemeService.updateInterestThemes(user, interestThemeIds);
+	}
+
+	private TripSokUser findUserById(Integer userId) {
+		return userRepository.findById(userId)
+			.orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
 	}
 }

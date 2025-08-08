@@ -35,7 +35,8 @@ public class UserController {
 	}
 
 	@PostMapping("/interest-themes")
-	public ResponseEntity<Void> changeInterestThemes(@AuthenticationPrincipal Integer userId, @RequestBody ChangeInterestThemeRequest request){
+	public ResponseEntity<Void> changeInterestThemes(@AuthenticationPrincipal Integer userId,
+		@Valid @RequestBody ChangeInterestThemeRequest request) {
 		userService.changeInterestThemes(userId, request.getInterestThemeIds());
 		return ResponseEntity.noContent().build();
 	}
