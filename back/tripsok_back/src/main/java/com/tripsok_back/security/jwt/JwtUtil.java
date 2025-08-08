@@ -92,9 +92,9 @@ public class JwtUtil {
 			return content;
 		} catch (ExpiredJwtException e) {
 			TokenType tokenType;
-			try{
+			try {
 				tokenType = TokenType.valueOf(e.getClaims().get("tokenType", String.class));
-			}catch (Exception ex) {
+			} catch (Exception ex) {
 				tokenType = TokenType.UNKNOWN;
 			}
 			switch (tokenType) {
@@ -106,7 +106,7 @@ public class JwtUtil {
 					throw new JwtException(ErrorCode.TOKEN_EXPIRED);
 			}
 		} catch (Exception e) {
-					throw new JwtException(ErrorCode.INVALID_TOKEN);
+			throw new JwtException(ErrorCode.INVALID_TOKEN);
 		}
 	}
 

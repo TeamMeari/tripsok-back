@@ -16,11 +16,11 @@ import com.tripsok_back.dto.auth.request.NicknameDuplicateCheckRequest;
 import com.tripsok_back.dto.auth.request.OauthLoginRequest;
 import com.tripsok_back.dto.auth.request.OauthSignUpRequest;
 import com.tripsok_back.dto.auth.response.LoginResponse;
-import com.tripsok_back.dto.auth.response.TokenResponse;
 import com.tripsok_back.dto.auth.response.NicknameDuplicateCheckResponse;
+import com.tripsok_back.dto.auth.response.TokenResponse;
 import com.tripsok_back.service.AuthService;
-import jakarta.validation.Valid;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -76,8 +76,10 @@ public class AuthController {
 
 	// 닉네임 중복 확인
 	@PostMapping("/validate/nickname")
-	public ResponseEntity<NicknameDuplicateCheckResponse> nicknameDuplicateCheck(@Valid @RequestBody NicknameDuplicateCheckRequest request) {
-		return ResponseEntity.status(HttpStatus.OK).body(new NicknameDuplicateCheckResponse(authService.nicknameDuplicateCheck(request.getNickname())));
+	public ResponseEntity<NicknameDuplicateCheckResponse> nicknameDuplicateCheck(
+		@Valid @RequestBody NicknameDuplicateCheckRequest request) {
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(new NicknameDuplicateCheckResponse(authService.nicknameDuplicateCheck(request.getNickname())));
 	}
 
 	private HttpCookie getRefreshTokenCookie(String refreshToken) {

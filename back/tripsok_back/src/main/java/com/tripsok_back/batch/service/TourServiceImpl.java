@@ -78,7 +78,7 @@ public class TourServiceImpl implements PlaceService {
 	}
 
 	public Boolean checkAndUpdatePlace(TourApiPlaceResponseDto placeDto) throws JsonProcessingException {
-		LocalDateTime placeUpdatedAt = LocalDateTime.from(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
+		LocalDateTime placeUpdatedAt = TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime());
 		Optional<Place> place = tourRepository.findByContentId(placeDto.getContentId());
 		if (place.isEmpty()) {
 			addPlace(placeDto);

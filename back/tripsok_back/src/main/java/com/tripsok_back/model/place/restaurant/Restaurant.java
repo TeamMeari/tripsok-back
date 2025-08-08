@@ -36,7 +36,7 @@ public class Restaurant extends BaseModifiableEntity {
 
 		restaurant.setRestaurantType(
 			detailResponseDto.getLargeClassificationSystem1());
-		
+
 		return restaurant;
 	}
 
