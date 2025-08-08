@@ -32,19 +32,15 @@ public class SwaggerConfig {
 	}
 
 	private Components createSecurityComponents() {
-		Components components = new Components();
-		SecurityScheme securityScheme = new SecurityScheme()
-			.type(SecurityScheme.Type.HTTP)
-			.scheme("bearer")
-			.in(SecurityScheme.In.HEADER)
-			.name(AUTHORIZATION);
-		components.addSecuritySchemes(AUTHORIZATION, securityScheme);
-		return components;
+		return new Components()
+			.addSecuritySchemes(AUTHORIZATION, new SecurityScheme()
+				.type(SecurityScheme.Type.HTTP)
+				.scheme("bearer")
+				.in(SecurityScheme.In.HEADER)
+				.name(AUTHORIZATION));
 	}
 
 	private SecurityRequirement createSecurityRequirement() {
-		SecurityRequirement securityRequirement = new SecurityRequirement();
-		securityRequirement.addList(AUTHORIZATION);
-		return securityRequirement;
+		return new SecurityRequirement().addList(AUTHORIZATION);
 	}
 }
