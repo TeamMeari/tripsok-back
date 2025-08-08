@@ -36,7 +36,7 @@ public class AuthController {
 	private final String COOKIE_HEARER = "Set-Cookie";
 
 	@PostMapping("/signup/email")
-	public ResponseEntity<Void> signUpWithEmail(@RequestBody EmailSignUpRequest request) {
+	public ResponseEntity<Void> signUpWithEmail(@Valid @RequestBody EmailSignUpRequest request) {
 		authService.signUpEmail(request);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
