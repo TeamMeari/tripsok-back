@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 @RedisHash(value = "emailVerification")
 public class EmailVerificationToken {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
 	@Indexed

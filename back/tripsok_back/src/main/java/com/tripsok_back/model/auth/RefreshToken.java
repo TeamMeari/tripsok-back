@@ -15,7 +15,6 @@ import lombok.NoArgsConstructor;
 @RedisHash(value = "refreshToken")
 public class RefreshToken {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
 	@Indexed
