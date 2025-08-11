@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  config:
+    import: optional:classpath:.env
   profiles:
     include:
       - flyway
@@ -35,3 +37,6 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.OracleDialect
+logging:
+  level:
+    org.springframework.web.reactive.function.client.ExchangeFunctions: TRACE

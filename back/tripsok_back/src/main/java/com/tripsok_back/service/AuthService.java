@@ -63,7 +63,7 @@ public class AuthService {
 			throw new AuthException(ErrorCode.INVALID_PASSWORD_FORMAT);
 		}
 		TripSokUser user = TripSokUser.signUpUser(request.getNickname(), SocialType.EMAIL, null, email,
-			passwordEncoder.encode(password), request.getCountryCode(), null);
+			passwordEncoder.encode(password), request.getCountryCode());
 		validateRegisteredAndSave(user);
 		interestThemeService.saveInterestThemes(user, request.getInterestThemeIds());
 	}
@@ -84,7 +84,7 @@ public class AuthService {
 			case GOOGLE -> {
 				GoogleUserInfo oauthGoogleUserInfo = getGoogleUserInfo(socialAccessToken);
 				user = TripSokUser.signUpUser(request.getNickname(), GOOGLE, oauthGoogleUserInfo.getSub(),
-					oauthGoogleUserInfo.getEmail(), null, request.getCountryCode(), null);
+					oauthGoogleUserInfo.getEmail(), null, request.getCountryCode());
 			}
 			default -> throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
 		}
