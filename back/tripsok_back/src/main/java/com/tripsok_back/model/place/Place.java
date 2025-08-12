@@ -5,8 +5,8 @@ import java.math.BigDecimal;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import com.tripsok_back.dto.TourApiPlaceDetailResponseDto;
-import com.tripsok_back.dto.TourApiPlaceResponseDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceDetailResponseDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
 import com.tripsok_back.model.place.accommodation.Accommodation;
 import com.tripsok_back.model.place.restaurant.Restaurant;
 import com.tripsok_back.model.place.tour.Tour;
