@@ -86,8 +86,7 @@ public class AuthService {
 				default -> throw new Exception();
 			}
 		} catch (Exception e) {
-			log.error("Unsupported social type: {}", type);
-			throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
+			throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE, e.getMessage());
 		}
 
 		validateRegisteredAndSave(user);
@@ -122,8 +121,7 @@ public class AuthService {
 
 			return getTokenResponse(Integer.parseInt(userDetails.getUserId()), userDetails.getAuthorities());
 		} catch (Exception e) {
-			log.error("Login failed for email: {}", email, e);
-			throw new AuthException(ErrorCode.INVALID_CREDENTIALS);
+			throw new AuthException(ErrorCode.INVALID_CREDENTIALS, e.getMessage());
 		}
 	}
 
@@ -215,8 +213,7 @@ public class AuthService {
 				.toEntity(GoogleTokenResponse.class)
 				.getBody();
 		} catch (HttpClientErrorException e) {
-			log.error("Failed to retrieve Google token: {}", e.getMessage());
-			throw new AuthException(ErrorCode.INVALID_SOCIAL_CODE);
+			throw new AuthException(ErrorCode.INVALID_SOCIAL_CODE, e.getMessage());
 		}
 	}
 

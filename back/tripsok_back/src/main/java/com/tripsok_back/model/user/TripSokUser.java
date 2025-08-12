@@ -22,7 +22,7 @@ public class TripSokUser extends BaseModifiableEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
-	@Column(nullable = false, length = 100)
+	@Column(nullable = false, length = 100, updatable = false)
 	private String name;
 
 	@Column(nullable = false)
@@ -31,7 +31,7 @@ public class TripSokUser extends BaseModifiableEntity {
 
 	private String socialId;
 
-	@Column(nullable = false, unique = true, length = 100)
+	@Column(nullable = false, unique = true, updatable = false, length = 100)
 	private String email;
 
 	private String password;
@@ -74,10 +74,6 @@ public class TripSokUser extends BaseModifiableEntity {
 
 	public void changePassword(String encodedPassword) {
 		this.password = encodedPassword;
-	}
-
-	public void changeCountryCode(String countryCode) {
-		this.countryCode = countryCode;
 	}
 
 	public void changeContactEmail(String contactEmail) {
