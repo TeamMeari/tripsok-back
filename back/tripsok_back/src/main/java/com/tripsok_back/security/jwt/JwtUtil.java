@@ -124,4 +124,13 @@ public class JwtUtil {
 	public long getEmailVerificationTokenExpirationTime() {
 		return jwtProperties.getEmailVerificationTokenExpirationTime();
 	}
+
+	public Date getTokenExpirationTime(String token) {
+		return Jwts.parser()
+			.verifyWith(key)
+			.build()
+			.parseSignedClaims(token)
+			.getPayload()
+			.getExpiration();
+	}
 }
