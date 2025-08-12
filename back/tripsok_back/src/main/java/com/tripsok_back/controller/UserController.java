@@ -3,7 +3,7 @@ package com.tripsok_back.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,18 +23,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UserController {
 	private final UserService userService;
+
 	@GetMapping("/info")
 	public ResponseEntity<UserInfoResponse> getUserInfo(@AuthenticationPrincipal Integer userId) {
 		return ResponseEntity.ok().body(userService.getUserInfo(userId));
 	}
 
-	@PostMapping("/contact-email")
-	public ResponseEntity<Void> changeContactEmail(@AuthenticationPrincipal Integer userId, @Valid @RequestBody ChangeContactEmailRequest request) {
+	@PatchMapping("/contact-email")
+	public ResponseEntity<Void> changeContactEmail(@AuthenticationPrincipal Integer userId,
+		@Valid @RequestBody ChangeContactEmailRequest request) {
 		userService.changeContactEmail(userId, request.getEmailVerifyToken());
 		return ResponseEntity.noContent().build();
 	}
 
-	@PostMapping("/interest-themes")
+	@PatchMapping("/interest-themes")
 	public ResponseEntity<Void> changeInterestThemes(@AuthenticationPrincipal Integer userId,
 		@Valid @RequestBody ChangeInterestThemeRequest request) {
 		userService.changeInterestThemes(userId, request.getInterestThemeIds());

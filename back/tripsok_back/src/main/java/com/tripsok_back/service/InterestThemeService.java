@@ -1,6 +1,7 @@
 package com.tripsok_back.service;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
@@ -32,11 +33,17 @@ public class InterestThemeService {
 	}
 
 	public List<InterestThemeResponse> getInterestThemes(TripSokUser user) {
-		return interestThemeRepository.findByUser(user).stream().map(it -> new InterestThemeResponse(it.getTheme().getId(), it.getTheme().getType())).toList();
+		return interestThemeRepository.findByUser(user)
+			.stream()
+			.map(it -> new InterestThemeResponse(it.getTheme().getId(), it.getTheme().getType()))
+			.toList();
 	}
 
-	public void updateInterestThemes(TripSokUser user, List<Integer> interestThemeIds) {
-		List<Integer> existingInterestIds = interestThemeRepository.findByUser(user).stream().map(it -> it.getTheme().getId()).toList();
+	public void updateInterestThemes(TripSokUser user, Set<Integer> interestThemeIds) {
+		List<Integer> existingInterestIds = interestThemeRepository.findByUser(user)
+			.stream()
+			.map(it -> it.getTheme().getId())
+			.toList();
 		List<Integer> themesToDeleteIds = existingInterestIds.stream()
 			.filter(it -> !interestThemeIds.contains(it)).toList();
 

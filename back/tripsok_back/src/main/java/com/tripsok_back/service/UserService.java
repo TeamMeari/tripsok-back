@@ -1,6 +1,7 @@
 package com.tripsok_back.service;
 
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,8 +26,9 @@ public class UserService {
 	@Transactional(readOnly = true)
 	public UserInfoResponse getUserInfo(Integer userId) {
 		TripSokUser user = findUserById(userId);
-		 List< InterestThemeResponse> interestThemes = interestThemeService.getInterestThemes(user);
-		return new UserInfoResponse(user.getName(), user.getEmail(), user.getContactEmail(), user.getCountryCode(), user.getSocialType(),interestThemes);
+		List<InterestThemeResponse> interestThemes = interestThemeService.getInterestThemes(user);
+		return new UserInfoResponse(user.getName(), user.getEmail(), user.getContactEmail(), user.getCountryCode(),
+			user.getSocialType(), interestThemes);
 	}
 
 	@Transactional
@@ -37,7 +39,7 @@ public class UserService {
 	}
 
 	@Transactional
-	public void changeInterestThemes(Integer userId, List<Integer> interestThemeIds) {
+	public void changeInterestThemes(Integer userId, Set<Integer> interestThemeIds) {
 		TripSokUser user = findUserById(userId);
 		interestThemeService.updateInterestThemes(user, interestThemeIds);
 	}
