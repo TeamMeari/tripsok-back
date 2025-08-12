@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.tripsok_back.exception.AuthException;
+import com.tripsok_back.exception.ErrorCode;
 import com.tripsok_back.model.user.SocialType;
 import com.tripsok_back.model.user.TripSokUser;
 import com.tripsok_back.repository.UserRepository;
@@ -24,10 +26,8 @@ public class TripSokUserDetailsService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		TripSokUser user = userRepository.findByEmailAndSocialType(username, SocialType.EMAIL);
-		if (user == null) {
-			throw new UsernameNotFoundException("해당 이메일을 가진 사용자를 찾을 수 없습니다: " + username);
-		}
+		TripSokUser user = userRepository.findByEmailAndSocialType(username, SocialType.EMAIL)
+			.orElseThrow(() -> new AuthException(ErrorCode.USER_NOT_FOUND));
 		log.info("사용자 정보 조회 성공(Id): {}", user.getId());
 		return new TripSokUserDto(
 			user.getId().toString(), user.getPassword(), user.getSocialType(),

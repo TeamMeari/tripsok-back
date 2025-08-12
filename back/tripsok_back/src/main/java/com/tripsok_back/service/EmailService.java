@@ -36,7 +36,7 @@ public class EmailService {
 	@Transactional
 	public void sendVerificationEmail(String email) {
 		String code = createCode();
-		String subject = "[TripSok] 회원가입 인증 코드 안내";
+		String subject = "[TripSok] 이메일 인증 코드 안내";
 		try {
 			EmailVerificationToken codeFoundByEmail = emailVerificationTokenRepository.findByEmail(email);
 			if (codeFoundByEmail != null) {

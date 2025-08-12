@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,9 +16,12 @@ import com.tripsok_back.dto.auth.request.EmailSignUpRequest;
 import com.tripsok_back.dto.auth.request.NicknameDuplicateCheckRequest;
 import com.tripsok_back.dto.auth.request.OauthLoginRequest;
 import com.tripsok_back.dto.auth.request.OauthSignUpRequest;
+import com.tripsok_back.dto.auth.request.ResetPasswordRequest;
 import com.tripsok_back.dto.auth.response.LoginResponse;
 import com.tripsok_back.dto.auth.response.NicknameDuplicateCheckResponse;
 import com.tripsok_back.dto.auth.response.TokenResponse;
+import com.tripsok_back.exception.AuthException;
+import com.tripsok_back.exception.ErrorCode;
 import com.tripsok_back.service.AuthService;
 
 import jakarta.validation.Valid;
@@ -82,6 +86,24 @@ public class AuthController {
 			.body(new NicknameDuplicateCheckResponse(authService.nicknameDuplicateCheck(request.getNickname())));
 	}
 
+	@PostMapping("/logout")
+	public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authHeader) {
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			throw new AuthException(ErrorCode.INVALID_TOKEN);
+		}
+		String accessToken = authHeader.substring(7);
+		authService.logout(accessToken);
+		return ResponseEntity.status(HttpStatus.NO_CONTENT)
+			.header(COOKIE_HEARER, getExpiredCookie().toString())
+			.build();
+	}
+
+	@PostMapping("/reset/password")
+	public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+		authService.resetPassword(request.getEmailVerifyToken(), request.getPassword());
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+	}
+
 	private HttpCookie getRefreshTokenCookie(String refreshToken) {
 		return ResponseCookie
 			.from("refreshToken", refreshToken)
@@ -92,7 +114,6 @@ public class AuthController {
 			.build();
 	}
 
-	//TODO: 쿠키 만료 처리
 	private HttpCookie getExpiredCookie() {
 		return ResponseCookie
 			.from("refreshToken", "")
