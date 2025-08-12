@@ -1,4 +1,4 @@
-package com.tripsok_back.batch.scheduler;
+package com.tripsok_back.scheduler;
 
 import java.util.List;
 
@@ -6,8 +6,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.tripsok_back.batch.domain.TourismType;
-import com.tripsok_back.batch.service.PlaceService;
+import com.tripsok_back.service.place.PlaceService;
+import com.tripsok_back.type.TourismType;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;

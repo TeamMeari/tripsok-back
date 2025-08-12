@@ -1,4 +1,4 @@
-package com.tripsok_back.batch.api;
+package com.tripsok_back.util;
 
 import java.net.URI;
 import java.util.List;
@@ -11,10 +11,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.tripsok_back.dto.TourApiPlaceDetailRequestDto;
-import com.tripsok_back.dto.TourApiPlaceDetailResponseDto;
-import com.tripsok_back.dto.TourApiPlaceRequestDto;
-import com.tripsok_back.dto.TourApiPlaceResponseDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceDetailRequestDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceDetailResponseDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceRequestDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class TouristApiClient {
+public class TouristApiClientUtil {
 
 	private final WebClient touristApiWebClient;
 	private final ObjectMapper objectMapper;

@@ -1,4 +1,4 @@
-package com.tripsok_back.batch.service;
+package com.tripsok_back.service.place;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -7,16 +7,16 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.tripsok_back.batch.api.TouristApiClient;
-import com.tripsok_back.batch.domain.TourismType;
-import com.tripsok_back.batch.repository.AccommodationRepository;
 import com.tripsok_back.config.ApiKeyConfig;
-import com.tripsok_back.dto.TourApiPlaceDetailRequestDto;
-import com.tripsok_back.dto.TourApiPlaceDetailResponseDto;
-import com.tripsok_back.dto.TourApiPlaceRequestDto;
-import com.tripsok_back.dto.TourApiPlaceResponseDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceDetailRequestDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceDetailResponseDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceRequestDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
 import com.tripsok_back.model.place.Place;
+import com.tripsok_back.repository.place.RestaurantRepository;
+import com.tripsok_back.type.TourismType;
 import com.tripsok_back.util.TimeUtil;
+import com.tripsok_back.util.TouristApiClientUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,15 +24,15 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class AccommodationServiceImpl implements PlaceService {
+public class RestaurantServiceImpl implements PlaceService {
 
 	private final ApiKeyConfig apiKeyConfig;
-	private final TouristApiClient tourApiClient;
-	private final AccommodationRepository accommodationRepository;
+	private final TouristApiClientUtil tourApiClient;
+	private final RestaurantRepository restaurantRepository;
 
 	@Override
 	public TourismType getType() {
-		return TourismType.ACCOMMODATION;
+		return TourismType.RESTAURANT;
 	}
 
 	@Override
@@ -40,17 +40,15 @@ public class AccommodationServiceImpl implements PlaceService {
 
 		List<TourApiPlaceResponseDto> responseDtoList = requestPlace(numOfRow, pageNo);
 
-		if (responseDtoList.isEmpty()) {
-			log.info("응답받은 API 값이 없습니다");
+		if (responseDtoList.isEmpty())
 			return;
-		}
 		for (TourApiPlaceResponseDto responseDto : responseDtoList) {
 			checkAndUpdatePlace(responseDto);
 		}
 	}
 
 	public List<TourApiPlaceResponseDto> requestPlace(int numOfRow, int pageNo) throws JsonProcessingException {
-		TourApiPlaceRequestDto accommodationRequestDto = TourApiPlaceRequestDto.builder()
+		TourApiPlaceRequestDto restaurantRequestDto = TourApiPlaceRequestDto.builder()
 			.numOfRows(numOfRow)
 			.pageNo(pageNo)
 			.mobileOS("ETC")
@@ -61,16 +59,14 @@ public class AccommodationServiceImpl implements PlaceService {
 			.contentTypeId(this.getType().getId())
 			.serviceKey(apiKeyConfig.getTourApiKey())
 			.build();
-		List<TourApiPlaceResponseDto> responseDtoList = tourApiClient.fetchPlaceData(accommodationRequestDto);
-		if (!responseDtoList.isEmpty()) {
-			log.info("{}개 응답 성공 (미리보기): {}", responseDtoList.size(), responseDtoList.getFirst());
-		}
+		List<TourApiPlaceResponseDto> responseDtoList = tourApiClient.fetchPlaceData(restaurantRequestDto);
+		log.info("{}개 응답 성공 (미리보기): {}", responseDtoList.size(), responseDtoList.getFirst());
 		return responseDtoList;
 	}
 
 	public Optional<TourApiPlaceDetailResponseDto> requestPlaceDetail(Integer contentId) throws
 		JsonProcessingException {
-		TourApiPlaceDetailRequestDto accommodationRequestDto = TourApiPlaceDetailRequestDto.builder()
+		TourApiPlaceDetailRequestDto restaurantRequestDto = TourApiPlaceDetailRequestDto.builder()
 			.mobileOS("ETC")
 			.mobileApp("tripsok-batch")
 			.responseType("json")
@@ -79,24 +75,24 @@ public class AccommodationServiceImpl implements PlaceService {
 			.build();
 
 		return Optional.ofNullable(tourApiClient.fetchPlaceDataDetail(
-			accommodationRequestDto));
+			restaurantRequestDto));
 	}
 
 	public Boolean checkAndUpdatePlace(TourApiPlaceResponseDto placeDto) throws JsonProcessingException {
 		LocalDateTime placeUpdatedAt = LocalDateTime.from(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
-		Optional<Place> place = accommodationRepository.findByContentId(placeDto.getContentId());
+		Optional<Place> place = restaurantRepository.findByContentId(placeDto.getContentId());
 		if (place.isEmpty()) {
 			addPlace(placeDto);
-			log.info("숙소: ContentId:{} 신규 항목으로 추가", placeDto.getContentId());
+			log.info("식당: ContentId:{} 신규 항목으로 추가", placeDto.getContentId());
 			return true;
 		}
 		Place placeData = place.get();
 		if (placeData.getUpdatedAt().equals(placeUpdatedAt)) {
-			log.info("숙소: ContentId:{} 변경사항 없음", placeDto.getContentId());
+			log.info("식당: ContentId:{} 변경사항 없음", placeDto.getContentId());
 			return false;
 		} else {
 			updatePlace(placeData, placeDto);
-			log.info("숙소: ContentId:{} 변경사항으로 업데이트 진행", placeDto.getContentId());
+			log.info("식당: ContentId:{} 변경사항으로 업데이트 진행", placeDto.getContentId());
 			return true;
 		}
 	}
@@ -105,8 +101,8 @@ public class AccommodationServiceImpl implements PlaceService {
 		Optional<TourApiPlaceDetailResponseDto> detailResponseDto = requestPlaceDetail(existingPlace.getContentId());
 		detailResponseDto.ifPresent(e -> {
 			log.info("상세정보 응답 성공 (미리보기): {}", detailResponseDto.get());
-			existingPlace.updateAccommodation(placeDto, detailResponseDto.get());
-			accommodationRepository.save(existingPlace);
+			existingPlace.updateRestaurant(placeDto, detailResponseDto.get());
+			restaurantRepository.save(existingPlace);
 		});
 	}
 
@@ -114,8 +110,8 @@ public class AccommodationServiceImpl implements PlaceService {
 		Optional<TourApiPlaceDetailResponseDto> detailResponseDto = requestPlaceDetail(placeDto.getContentId());
 		detailResponseDto.ifPresent(e -> {
 			log.info("상세정보 응답 성공 (미리보기): {}", detailResponseDto.get());
-			Place accommodationPlace = Place.buildAccommodation(placeDto, detailResponseDto.get());
-			accommodationRepository.save(accommodationPlace);
+			Place restaurantPlace = Place.buildRestaurant(placeDto, detailResponseDto.get());
+			restaurantRepository.save(restaurantPlace);
 		});
 	}
 }

@@ -1,4 +1,4 @@
-package com.tripsok_back.batch.service;
+package com.tripsok_back.service.place;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -7,16 +7,16 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.tripsok_back.batch.api.TouristApiClient;
-import com.tripsok_back.batch.domain.TourismType;
-import com.tripsok_back.batch.repository.TourRepository;
 import com.tripsok_back.config.ApiKeyConfig;
-import com.tripsok_back.dto.TourApiPlaceDetailRequestDto;
-import com.tripsok_back.dto.TourApiPlaceDetailResponseDto;
-import com.tripsok_back.dto.TourApiPlaceRequestDto;
-import com.tripsok_back.dto.TourApiPlaceResponseDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceDetailRequestDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceDetailResponseDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceRequestDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
 import com.tripsok_back.model.place.Place;
+import com.tripsok_back.repository.place.TourRepository;
+import com.tripsok_back.type.TourismType;
 import com.tripsok_back.util.TimeUtil;
+import com.tripsok_back.util.TouristApiClientUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 public class TourServiceImpl implements PlaceService {
 
 	private final ApiKeyConfig apiKeyConfig;
-	private final TouristApiClient tourApiClient;
+	private final TouristApiClientUtil tourApiClient;
 	private final TourRepository tourRepository;
 
 	@Override
