@@ -12,12 +12,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tripsok_back.dto.auth.request.EmailLoginRequest;
 import com.tripsok_back.dto.auth.request.EmailSignUpRequest;
+import com.tripsok_back.dto.auth.request.NicknameDuplicateCheckRequest;
 import com.tripsok_back.dto.auth.request.OauthLoginRequest;
 import com.tripsok_back.dto.auth.request.OauthSignUpRequest;
 import com.tripsok_back.dto.auth.response.LoginResponse;
+import com.tripsok_back.dto.auth.response.NicknameDuplicateCheckResponse;
 import com.tripsok_back.dto.auth.response.TokenResponse;
 import com.tripsok_back.service.AuthService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,13 +34,13 @@ public class AuthController {
 	private final String COOKIE_HEARER = "Set-Cookie";
 
 	@PostMapping("/signup/email")
-	public ResponseEntity<Void> signUpWithEmail(@RequestBody EmailSignUpRequest request) {
+	public ResponseEntity<Void> signUpWithEmail(@Valid @RequestBody EmailSignUpRequest request) {
 		authService.signUpEmail(request);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
 	@PostMapping("/signup/oauth2")
-	public ResponseEntity<LoginResponse> signUpWithOAuth2(@RequestBody OauthSignUpRequest request) {
+	public ResponseEntity<LoginResponse> signUpWithOAuth2(@Valid @RequestBody OauthSignUpRequest request) {
 		TokenResponse tokenResponse = authService.signUpOAuth(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
@@ -45,7 +48,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/login/oauth2")
-	public ResponseEntity<LoginResponse> loginWithOAuth2(@RequestBody OauthLoginRequest request) {
+	public ResponseEntity<LoginResponse> loginWithOAuth2(@Valid @RequestBody OauthLoginRequest request) {
 		TokenResponse tokenResponse = authService.loginWithOauth2(request);
 		if (tokenResponse.refreshToken() == null) {
 			return ResponseEntity.status(HttpStatus.SEE_OTHER).body(new LoginResponse(tokenResponse.accessToken()));
@@ -56,7 +59,7 @@ public class AuthController {
 	}
 
 	@PostMapping("/login/email")
-	public ResponseEntity<LoginResponse> loginWithEmail(@RequestBody EmailLoginRequest request) {
+	public ResponseEntity<LoginResponse> loginWithEmail(@Valid @RequestBody EmailLoginRequest request) {
 		TokenResponse tokenResponse = authService.loginWithEmail(request.getEmail(), request.getPassword());
 		return ResponseEntity.status(HttpStatus.OK)
 			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
@@ -71,8 +74,15 @@ public class AuthController {
 			.body(new LoginResponse(tokenResponse.accessToken()));
 	}
 
-	private HttpCookie getRefreshTokenCookie(String refreshToken) {
+	// 닉네임 중복 확인
+	@PostMapping("/validate/nickname")
+	public ResponseEntity<NicknameDuplicateCheckResponse> nicknameDuplicateCheck(
+		@Valid @RequestBody NicknameDuplicateCheckRequest request) {
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(new NicknameDuplicateCheckResponse(authService.nicknameDuplicateCheck(request.getNickname())));
+	}
 
+	private HttpCookie getRefreshTokenCookie(String refreshToken) {
 		return ResponseCookie
 			.from("refreshToken", refreshToken)
 			.httpOnly(true) // JavaScript 에서 쿠키에 접근할 수 없도록
