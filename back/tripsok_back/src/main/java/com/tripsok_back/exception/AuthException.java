@@ -10,4 +10,9 @@ public class AuthException extends CustomException {
 		super(errorCode);
 		log.error("AuthException occurred: {}", errorCode);
 	}
+
+	public AuthException(ErrorCode errorCode, String message) {
+		super(errorCode, message);
+		log.error("AuthException occurred: {}, message: {}", errorCode, message);
+	}
 }

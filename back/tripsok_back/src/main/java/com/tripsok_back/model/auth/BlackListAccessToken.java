@@ -10,19 +10,16 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-@RedisHash(value = "refreshToken")
-public class RefreshToken {
+@RedisHash(value = "blackListAccessToken")
+public class BlackListAccessToken {
 	@Id
 	private Integer id;
-
 	@Indexed
-	private Integer userId;
 	private String token;
 	@TimeToLive
 	private Long expirationTime;
 
-	public RefreshToken(Integer userId, String token, Long expirationTime) {
-		this.userId = userId;
+	public BlackListAccessToken(String token, Long expirationTime) {
 		this.token = token;
 		this.expirationTime = expirationTime;
 	}

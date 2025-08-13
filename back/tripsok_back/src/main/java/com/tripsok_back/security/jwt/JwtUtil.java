@@ -37,7 +37,7 @@ public class JwtUtil {
 		this.key = Keys.hmacShaKeyFor(jwtProperties.getSecretKey().getBytes());
 	}
 
-	public String generateAccessToken(String userId, Collection<GrantedAuthority> authorities) {
+	public String generateAccessToken(Integer userId, Collection<GrantedAuthority> authorities) {
 		Map<String, Object> claims = Map.of(
 			"authorities", authorities.stream().map(GrantedAuthority::getAuthority).toList(),
 			"userId", userId
@@ -45,7 +45,7 @@ public class JwtUtil {
 		return generateToken(claims, jwtProperties.getAccessTokenExpirationTime());
 	}
 
-	public String generateRefreshToken(String userId) {
+	public String generateRefreshToken(Integer userId) {
 		Map<String, Object> claims = Map.of(
 			"userId", userId
 		);
@@ -54,7 +54,8 @@ public class JwtUtil {
 
 	public String generateEmailVerificationToken(String email) {
 		Map<String, Object> claims = Map.of(
-			"email", email
+			"email", email,
+			"tokenType", TokenType.EMAIL_VERIFICATION.name()
 		);
 		return generateToken(claims, jwtProperties.getEmailVerificationTokenExpirationTime());
 	}
@@ -62,7 +63,8 @@ public class JwtUtil {
 	public String generateOAuth2Token(String authAccessToken, SocialType socialType) {
 		Map<String, Object> claims = Map.of(
 			"authAccessToken", authAccessToken,
-			"socialType", socialType.name()
+			"socialType", socialType.name(),
+			"tokenType", TokenType.SOCIAL_SIGNUP.name()
 		);
 		return generateToken(claims, jwtProperties.getOauth2AccessTokenExpirationTime());
 	}
@@ -70,7 +72,7 @@ public class JwtUtil {
 	private String generateToken(Map<String, Object> claims, long expirationMinutes) {
 		return Jwts.builder()
 			.issuedAt(new Date())
-			.expiration(Date.from(ZonedDateTime.now().plusMinutes(expirationMinutes).toInstant()))
+			.expiration(Date.from(ZonedDateTime.now().plusSeconds(expirationMinutes).toInstant()))
 			.claims(claims)
 			.signWith(key)
 			.compact();
@@ -85,11 +87,24 @@ public class JwtUtil {
 				.getPayload()
 				.get(claimName, targetType);
 			if (content == null) {
-				throw new JwtException(ErrorCode.INVALID_TOKEN);
+				throw new Exception();
 			}
 			return content;
 		} catch (ExpiredJwtException e) {
-			throw new JwtException(ErrorCode.TOKEN_EXPIRED);
+			TokenType tokenType;
+			try {
+				tokenType = TokenType.valueOf(e.getClaims().get("tokenType", String.class));
+			} catch (Exception ex) {
+				tokenType = TokenType.UNKNOWN;
+			}
+			switch (tokenType) {
+				case EMAIL_VERIFICATION:
+					throw new JwtException(ErrorCode.EXPIRED_EMAIL_VERIFICATION_TOKEN);
+				case SOCIAL_SIGNUP:
+					throw new JwtException(ErrorCode.EXPIRED_SOCIAL_SIGNUP_TOKEN);
+				default:
+					throw new JwtException(ErrorCode.TOKEN_EXPIRED);
+			}
 		} catch (Exception e) {
 			throw new JwtException(ErrorCode.INVALID_TOKEN);
 		}
@@ -104,5 +119,18 @@ public class JwtUtil {
 
 	public long getRefreshTokenExpirationTime() {
 		return jwtProperties.getRefreshTokenExpirationTime();
+	}
+
+	public long getEmailVerificationTokenExpirationTime() {
+		return jwtProperties.getEmailVerificationTokenExpirationTime();
+	}
+
+	public Date getTokenExpirationTime(String token) {
+		return Jwts.parser()
+			.verifyWith(key)
+			.build()
+			.parseSignedClaims(token)
+			.getPayload()
+			.getExpiration();
 	}
 }

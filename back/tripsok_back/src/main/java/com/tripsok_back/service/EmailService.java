@@ -36,14 +36,15 @@ public class EmailService {
 	@Transactional
 	public void sendVerificationEmail(String email) {
 		String code = createCode();
-		String subject = "[TripSok] 회원가입 인증 코드 안내";
+		String subject = "[TripSok] 이메일 인증 코드 안내";
 		try {
 			EmailVerificationToken codeFoundByEmail = emailVerificationTokenRepository.findByEmail(email);
 			if (codeFoundByEmail != null) {
 				emailVerificationTokenRepository.delete(codeFoundByEmail);
 			}
 			MimeMessage message = createEmailMessage(email, subject, code);
-			emailVerificationTokenRepository.save(new EmailVerificationToken(email, code));
+			emailVerificationTokenRepository.save(
+				new EmailVerificationToken(email, code, jwtUtil.getEmailVerificationTokenExpirationTime()));
 			mailSender.send(message);
 			// TODO: 비동기 처리 고려
 			log.info("이메일 전송 완료: {}, 인증코드: {}", email, code);
