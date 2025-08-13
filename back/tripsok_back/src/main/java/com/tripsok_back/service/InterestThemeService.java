@@ -2,11 +2,12 @@ package com.tripsok_back.service;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import com.tripsok_back.dto.user.response.InterestThemeResponse;
-import com.tripsok_back.model.Theme.Theme;
+import com.tripsok_back.model.theme.Theme;
 import com.tripsok_back.model.user.InterestTheme;
 import com.tripsok_back.model.user.TripSokUser;
 import com.tripsok_back.repository.InterestThemeRepository;
