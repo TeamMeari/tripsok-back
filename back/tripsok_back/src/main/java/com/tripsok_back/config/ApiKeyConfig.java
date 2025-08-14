@@ -11,5 +11,4 @@ public class ApiKeyConfig {
 
 	@Value("${TOUR_API_KEY}")
 	private String tourApiKey;
-
 }
