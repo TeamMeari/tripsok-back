@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class TouristApiScheduler {
 
-	static int NUM_OF_ROW = 1;
+	static int NUM_OF_ROW = 300;
 	static int PAGE_NO = 1;
 	private final List<PlaceService> placeService;
 	private final CategoryService categoryService;
@@ -38,7 +38,6 @@ public class TouristApiScheduler {
 		runBatchRestaurantRequestApi();
 		runBatchTourRequestApi();
 		runBatchCategoryRequestApi();
-
 	}
 
 	public void runBatchAccommodationRequestApi() throws JsonProcessingException {

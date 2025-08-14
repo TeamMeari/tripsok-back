@@ -48,8 +48,9 @@ public class CategoryServiceImpl implements CategoryService {
 
 			PlaceLclsCategory entity = PlaceLclsCategory.fromDto(dto);
 			toInsert.add(entity);
-			lclsCategoryRepository.saveAll(toInsert);
-			log.info("신규 카테고리 {}건 저장", toInsert.size());
 		}
+		lclsCategoryRepository.saveAll(toInsert);
+		log.info("신규 카테고리 {}건 저장", toInsert.size());
+
 	}
 }
