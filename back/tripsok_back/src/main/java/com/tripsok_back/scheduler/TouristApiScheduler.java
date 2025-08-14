@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.tripsok_back.service.place.CategoryService;
 import com.tripsok_back.service.place.PlaceService;
 import com.tripsok_back.type.TourismType;
 
@@ -21,6 +22,7 @@ public class TouristApiScheduler {
 	static int NUM_OF_ROW = 1;
 	static int PAGE_NO = 1;
 	private final List<PlaceService> placeService;
+	private final CategoryService categoryService;
 
 	private PlaceService getService(TourismType type) {
 		return placeService.stream()
@@ -35,6 +37,8 @@ public class TouristApiScheduler {
 		runBatchAccommodationRequestApi();
 		runBatchRestaurantRequestApi();
 		runBatchTourRequestApi();
+		runBatchCategoryRequestApi();
+
 	}
 
 	public void runBatchAccommodationRequestApi() throws JsonProcessingException {
@@ -53,5 +57,10 @@ public class TouristApiScheduler {
 		log.info("***속초 신규 투어정보 요청 시작***");
 		getService(TourismType.TOURIST_SPOT).startPlaceUpdate(NUM_OF_ROW, PAGE_NO);
 		//log.error("신규 관광정보 처리 실패");
+	}
+
+	public void runBatchCategoryRequestApi() throws JsonProcessingException {
+		log.info("***관광정보 카테고리 요청 시작***");
+		categoryService.requestAndUpdateCategory();
 	}
 }

@@ -1,5 +1,7 @@
 package com.tripsok_back.model.place;
 
+import com.tripsok_back.dto.tourApi.LclsCategoryItemResponseDto;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -51,4 +53,18 @@ public class PlaceLclsCategory {
 	@Column(name = "LCLS_SYSTM3_NAME", nullable = false, length = 200)
 	private String lclsSystm3Name;
 
+	public static PlaceLclsCategory fromDto(LclsCategoryItemResponseDto dto) {
+		PlaceLclsCategory entity = new PlaceLclsCategory();
+		entity.setLclsSystm1Code(dto.getLclsSystm1Cd());
+		entity.setLclsSystm1Name(dto.getLclsSystm1Nm());
+		entity.setLclsSystm2Code(dto.getLclsSystm2Cd());
+		entity.setLclsSystm2Name(dto.getLclsSystm2Nm());
+		entity.setLclsSystm3Code(dto.getLclsSystm3Cd());
+		entity.setLclsSystm3Name(dto.getLclsSystm3Nm());
+		return entity;
+	}
+
+	public void updateCategory(LclsCategoryItemResponseDto dto) {
+		this.lclsSystm3Name = dto.getLclsSystm3Nm();
+	}
 }
