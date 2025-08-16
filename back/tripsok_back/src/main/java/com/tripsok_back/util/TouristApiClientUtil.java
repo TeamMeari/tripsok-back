@@ -20,6 +20,8 @@ import com.tripsok_back.dto.tourApi.TourApiPlaceDetailRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceDetailResponseDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
+import com.tripsok_back.exception.InternalErrorCode;
+import com.tripsok_back.exception.TourApiException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +35,7 @@ public class TouristApiClientUtil {
 	private final ObjectMapper objectMapper;
 
 	public List<TourApiPlaceResponseDto> fetchPlaceData(TourApiPlaceRequestDto dto) throws
-		JsonProcessingException {
+		{
 
 		ObjectWriter prettyPrinter = objectMapper.writerWithDefaultPrettyPrinter();
 
@@ -58,8 +60,9 @@ public class TouristApiClientUtil {
 			.retrieve()
 			.bodyToMono(String.class)
 			.block();
-		log.info("관광 API 응답: \n{}", prettyPrinter.writeValueAsString(objectMapper.readValue(body, Object.class)));
+
 		try {
+			log.info("관광 API 응답: \n{}", prettyPrinter.writeValueAsString(objectMapper.readValue(body, Object.class)));
 			JsonNode root = objectMapper.readTree(body);
 			log.info(root.asText());
 			JsonNode itemsNode = root.path("response").path("body").path("items").path("item");
@@ -83,7 +86,7 @@ public class TouristApiClientUtil {
 	}
 
 	public TourApiPlaceDetailResponseDto fetchPlaceDataDetail(TourApiPlaceDetailRequestDto dto) throws
-		JsonProcessingException {
+		TourApiException {
 
 		ObjectWriter prettyPrinter = objectMapper.writerWithDefaultPrettyPrinter();
 
@@ -104,16 +107,15 @@ public class TouristApiClientUtil {
 			.retrieve()
 			.bodyToMono(String.class)
 			.block();
-
-		log.info("관광 API 응답: \n{}", prettyPrinter.writeValueAsString(objectMapper.readValue(body, Object.class)));
 		try {
+			log.info("관광 API 응답: \n{}", prettyPrinter.writeValueAsString(objectMapper.readValue(body, Object.class)));
 			JsonNode root = objectMapper.readTree(body);
 			log.info(root.asText());
 			JsonNode itemsNode = root.path("response").path("body").path("items").path("item");
 
 			if (itemsNode.isMissingNode() || itemsNode.isNull()) {
 				log.warn("'item' 노드가 없음");
-				return null;
+				throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
 			}
 
 			List<TourApiPlaceDetailResponseDto> result = objectMapper
@@ -121,7 +123,7 @@ public class TouristApiClientUtil {
 				.readValue(itemsNode);
 			if (result.isEmpty()) {
 				log.warn("상세 정보 API 응답 결과가 비어있습니다.");
-				return null;
+				throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
 			}
 			log.info("응답 처리 완료: {}개", result.size());
 			return result.getFirst();

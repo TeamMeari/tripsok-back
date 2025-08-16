@@ -37,7 +37,10 @@ public enum ErrorCode {
 
 	// Email-verification API error 12000대
 	EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, -12000, "이메일 전송에 실패했습니다."),
-	EMAIL_VERIFICATION_CODE_INVALID(HttpStatus.BAD_REQUEST, -12001, "유효하지 않은 이메일 인증 코드입니다.");
+	EMAIL_VERIFICATION_CODE_INVALID(HttpStatus.BAD_REQUEST, -12001, "유효하지 않은 이메일 인증 코드입니다."),
+
+	//Place API 13000대
+	PLACE_NOT_FOUND(HttpStatus.NOT_FOUND, -13000, "존재하지 않는 장소입니다");
 
 	private final HttpStatus httpStatus;
 	private final int code;
