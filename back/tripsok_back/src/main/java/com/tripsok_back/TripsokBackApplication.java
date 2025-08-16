@@ -2,8 +2,14 @@ package com.tripsok_back;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+
+import com.tripsok_back.config.EmailProperties;
+import com.tripsok_back.config.JwtProperties;
+import com.tripsok_back.config.OAuth2Properties;
 
 @SpringBootApplication
+@EnableConfigurationProperties({JwtProperties.class, EmailProperties.class, OAuth2Properties.class})
 public class TripsokBackApplication {
 
 	public static void main(String[] args) {

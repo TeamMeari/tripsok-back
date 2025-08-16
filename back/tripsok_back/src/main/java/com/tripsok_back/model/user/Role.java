@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public enum Role {
 	USER(List.of("ROLE_USER")),
-	ADMIN(List.of("ROLE_USER", "ROLE_ADMIN"));
+	ADMIN(List.of("ROLE_ADMIN"));
 
 	private final List<String> authority;
 
