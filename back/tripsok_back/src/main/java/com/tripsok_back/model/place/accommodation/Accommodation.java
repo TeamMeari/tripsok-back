@@ -58,4 +58,12 @@ public class Accommodation extends BaseModifiableEntity {
 	public void updateAccommodation(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto) {
 		this.accommodationType = detailResponseDto.getLargeClassificationSystem1();
 	}
+
+	public void addImageUrl(String image) {
+		this.accommodationImages.add(AccommodationImage.buildUrlImage(image));
+	}
+
+	public void addImageBucket(String bucket) {
+		this.accommodationImages.add(new AccommodationImage());
+	}
 }

@@ -37,7 +37,6 @@ public class TourImage extends BaseModifiableEntity {
 	@JoinColumn(name = "TOUR_ID", nullable = false)
 	private Tour tour;
 
-	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "ATTRACTION_ID", nullable = false)
