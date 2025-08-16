@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import com.tripsok_back.config.ApiKeyConfig;
 import com.tripsok_back.dto.tourApi.LclsCategoryItemResponseDto;
 import com.tripsok_back.dto.tourApi.LclsSystmCodeRequestDto;
+import com.tripsok_back.exception.CustomInternalException;
+import com.tripsok_back.exception.InternalErrorCode;
 import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.repository.place.LclsCategoryRepository;
 import com.tripsok_back.util.TouristApiClientUtil;
@@ -52,5 +54,13 @@ public class CategoryServiceImpl implements CategoryService {
 		lclsCategoryRepository.saveAll(toInsert);
 		log.info("신규 카테고리 {}건 저장", toInsert.size());
 
+	}
+
+	@Override
+	public String getCategoryByCode(String code) {
+		log.info("카테고리 코드 {} 조회 시작", code);
+		PlaceLclsCategory category = lclsCategoryRepository.findByLclsSystm3Code(code)
+			.orElseThrow(() -> new CustomInternalException(InternalErrorCode.CATEGORY_NOT_FOUND));
+		return category.getLclsSystm3Name();
 	}
 }
