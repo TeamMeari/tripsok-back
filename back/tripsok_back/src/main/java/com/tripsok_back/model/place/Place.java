@@ -221,4 +221,12 @@ public class Place extends BaseModifiableEntity {
 
 		setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
 	}
+
+	public void updateAccomodationDetail(TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto,
+		String categoryName) {
+		Accommodation accommodation = this.getAccommodation();
+		accommodation.setAccommodationType(categoryName);
+
+		tourApiPlaceDetailResponseDto.getFirstImageUrl();
+	}
 }
