@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -34,8 +33,7 @@ public class TouristApiClientUtil {
 	private final WebClient touristApiWebClient;
 	private final ObjectMapper objectMapper;
 
-	public List<TourApiPlaceResponseDto> fetchPlaceData(TourApiPlaceRequestDto dto) throws
-		{
+	public List<TourApiPlaceResponseDto> fetchPlaceData(TourApiPlaceRequestDto dto) {
 
 		ObjectWriter prettyPrinter = objectMapper.writerWithDefaultPrettyPrinter();
 
