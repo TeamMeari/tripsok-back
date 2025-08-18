@@ -1,7 +1,7 @@
 package com.tripsok_back.model.place.accommodation;
 
-import com.tripsok_back.dto.TourApiPlaceDetailResponseDto;
-import com.tripsok_back.dto.TourApiPlaceResponseDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceDetailResponseDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
 import com.tripsok_back.support.BaseModifiableEntity;
 
 import jakarta.persistence.Column;

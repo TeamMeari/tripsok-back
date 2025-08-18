@@ -1,4 +1,4 @@
-package com.tripsok_back.batch.repository;
+package com.tripsok_back.repository.place;
 
 import java.util.Optional;
 

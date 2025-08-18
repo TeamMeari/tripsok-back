@@ -1,4 +1,4 @@
-package com.tripsok_back.batch.domain;
+package com.tripsok_back.type;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

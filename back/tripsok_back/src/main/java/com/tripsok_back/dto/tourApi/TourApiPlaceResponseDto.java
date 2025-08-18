@@ -1,4 +1,4 @@
-package com.tripsok_back.dto;
+package com.tripsok_back.dto.tourApi;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
