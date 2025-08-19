@@ -1,4 +1,4 @@
-package com.tripsok_back.repository.place;
+package com.tripsok_back.repository.place.accomodation;
 
 import java.util.Optional;
 
