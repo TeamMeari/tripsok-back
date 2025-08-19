@@ -222,11 +222,27 @@ public class Place extends BaseModifiableEntity {
 		setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
 	}
 
-	public void updateAccomodationDetail(TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto,
+	public void updateNullAccommodationDetail(TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto,
 		String categoryName) {
 		Accommodation accommodation = this.getAccommodation();
 		accommodation.setAccommodationType(categoryName);
+		accommodation.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrl());
+		accommodation.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrlSecondary());
+	}
 
-		tourApiPlaceDetailResponseDto.getFirstImageUrl();
+	public void updateNullTourDetail(TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto,
+		String categoryName) {
+		Tour tour = this.getTour();
+		tour.setTourType(categoryName);
+		tour.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrl());
+		tour.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrlSecondary());
+	}
+
+	public void incrementViewCount() {
+		this.view++;
+	}
+
+	public void incrementLikeCount() {
+		this.like++;
 	}
 }
