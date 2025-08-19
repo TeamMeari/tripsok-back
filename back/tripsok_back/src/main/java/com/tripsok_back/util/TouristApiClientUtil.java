@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
@@ -107,28 +108,47 @@ public class TouristApiClientUtil {
 			.block();
 		try {
 			log.info("관광 API 응답: \n{}", prettyPrinter.writeValueAsString(objectMapper.readValue(body, Object.class)));
-			JsonNode root = objectMapper.readTree(body);
-			log.info(root.asText());
-			JsonNode itemsNode = root.path("response").path("body").path("items").path("item");
 
-			if (itemsNode.isMissingNode() || itemsNode.isNull()) {
+			JsonNode root = objectMapper.readTree(body);
+			JsonNode itemsNode = root.path("response").path("body").path("items");
+
+			JsonNode itemNode = itemsNode.path("item");
+			if (itemNode.isMissingNode() || itemNode.isNull()) {
 				log.warn("'item' 노드가 없음");
 				throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
 			}
-
-			List<TourApiPlaceDetailResponseDto> result = objectMapper
-				.readerForListOf(TourApiPlaceDetailResponseDto.class)
-				.readValue(itemsNode);
-			if (result.isEmpty()) {
-				log.warn("상세 정보 API 응답 결과가 비어있습니다.");
+			TourApiPlaceDetailResponseDto result;
+			if (itemNode.isArray()) {
+				if (itemNode.isEmpty()) {
+					log.warn("상세 정보 API 응답 결과가 비어있습니다.");
+					throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
+				}
+				result = objectMapper
+					.readerFor(TourApiPlaceDetailResponseDto.class)
+					.readValue(itemNode.get(0)); // 첫 원소만 사용
+			} else if (itemNode.isObject()) {
+				// 단일 오브젝트 케이스
+				result = objectMapper
+					.readerFor(TourApiPlaceDetailResponseDto.class)
+					.readValue(itemNode);
+			} else {
+				log.warn("'item' 노드 타입이 예상과 다름: {}", itemNode.getNodeType());
 				throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
 			}
-			log.info("응답 처리 완료: {}개", result.size());
-			return result.getFirst();
 
-		} catch (Exception e) {
+			log.info("응답 처리 완료: 1개");
+			return result;
+		}
+		// ★ 도메인 예외는 그대로 통과
+		catch (TourApiException e) {
+			log.error("TourApi Exception occurred:", e);
+			throw e;
+		} catch (JsonProcessingException e) {
 			log.error("JSON 파싱 오류", e);
-			throw new RuntimeException("Tourist API 응답 파싱 오류", e);
+			throw new TourApiException(InternalErrorCode.JSON_PARSE_ERROR);
+		} catch (Exception e) {
+			log.error("상세정보 조회 중 알 수 없는 오류", e);
+			throw new TourApiException(InternalErrorCode.INTERNAL_SERVER_ERROR);
 		}
 	}
 
