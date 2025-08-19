@@ -56,4 +56,8 @@ public class Tour extends BaseModifiableEntity {
 
 		return tour;
 	}
+
+	public void addImageUrl(String image) {
+		this.tourImages.add(TourImage.buildUrlImage(image));
+	}
 }

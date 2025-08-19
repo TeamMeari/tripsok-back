@@ -46,4 +46,9 @@ public class TourImage extends BaseModifiableEntity {
 	@Column(name = "URL", length = 2000)
 	private String url;
 
+	public static TourImage buildUrlImage(String image) {
+		TourImage tourImage = new TourImage();
+		tourImage.setUrl(image);
+		return tourImage;
+	}
 }
