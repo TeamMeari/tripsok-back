@@ -4,20 +4,28 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.logging.log4j.util.InternalException;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripsok_back.config.ApiKeyConfig;
+import com.tripsok_back.dto.place.PlaceDetailResponseDto;
+import com.tripsok_back.dto.place.ReviewRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceDetailRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceDetailResponseDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
+import com.tripsok_back.exception.InternalErrorCode;
+import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.model.place.Place;
-import com.tripsok_back.repository.place.AccommodationRepository;
+import com.tripsok_back.repository.place.accomodation.AccommodationRepository;
+import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
+import com.tripsok_back.util.JsonMapperUtil;
 import com.tripsok_back.util.TimeUtil;
 import com.tripsok_back.util.TouristApiClientUtil;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,7 +36,9 @@ public class AccommodationServiceImpl implements PlaceService {
 
 	private final ApiKeyConfig apiKeyConfig;
 	private final TouristApiClientUtil tourApiClient;
+	private final CategoryService categoryService;
 	private final AccommodationRepository accommodationRepository;
+	private final ObjectMapper om;
 
 	@Override
 	public TourismType getType() {
@@ -36,7 +46,7 @@ public class AccommodationServiceImpl implements PlaceService {
 	}
 
 	@Override
-	public void startPlaceUpdate(int numOfRow, int pageNo) throws JsonProcessingException {
+	public void startPlaceUpdate(int numOfRow, int pageNo) {
 
 		List<TourApiPlaceResponseDto> responseDtoList = requestPlace(numOfRow, pageNo);
 
@@ -49,7 +59,43 @@ public class AccommodationServiceImpl implements PlaceService {
 		}
 	}
 
-	public List<TourApiPlaceResponseDto> requestPlace(int numOfRow, int pageNo) throws JsonProcessingException {
+	@Override
+	public PlaceDetailResponseDto getPlaceDetail(int placeId) {
+		Optional<Place> optPlace = accommodationRepository.findById(placeId);
+		if (optPlace.isEmpty())
+			throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
+		Place placeAccommodation = optPlace.get();
+		if (placeAccommodation.getAccommodation().getAccommodationType().isEmpty()) {
+			TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto = requestPlaceDetail(
+				placeAccommodation.getContentId());
+			String categoryName = categoryService.getCategoryByCode(tourApiPlaceDetailResponseDto.getCategoryLevel3());
+			placeAccommodation.updateNullAccommodationDetail(tourApiPlaceDetailResponseDto, categoryName);
+		}
+		addView(placeAccommodation);
+		return PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION);
+	}
+
+	@Override
+	public void addView(Place place) {
+		place.incrementViewCount();
+	}
+
+	@Override
+	public void addLike(Place place) {
+		place.incrementLikeCount();
+	}
+
+	@Override
+	public List<PlaceDetailResponseDto> getPlaceRanking(int rankNum) {
+		return List.of();
+	}
+
+	@Override
+	public void addReview(Integer userId, ReviewRequestDto reviewRequestdto) {
+
+	}
+
+	public List<TourApiPlaceResponseDto> requestPlace(int numOfRow, int pageNo) {
 		TourApiPlaceRequestDto accommodationRequestDto = TourApiPlaceRequestDto.builder()
 			.numOfRows(numOfRow)
 			.pageNo(pageNo)
@@ -63,13 +109,14 @@ public class AccommodationServiceImpl implements PlaceService {
 			.build();
 		List<TourApiPlaceResponseDto> responseDtoList = tourApiClient.fetchPlaceData(accommodationRequestDto);
 		if (!responseDtoList.isEmpty()) {
-			log.info("{}개 응답 성공 (미리보기): {}", responseDtoList.size(), responseDtoList.getFirst());
+			log.info("RequestPlace: {}개 응답 성공 (미리보기): {}", responseDtoList.size(),
+				JsonMapperUtil.pretty(om, responseDtoList.getFirst()));
 		}
 		return responseDtoList;
 	}
 
-	public Optional<TourApiPlaceDetailResponseDto> requestPlaceDetail(Integer contentId) throws
-		JsonProcessingException {
+	public TourApiPlaceDetailResponseDto requestPlaceDetail(Integer contentId) throws
+		InternalException {
 		TourApiPlaceDetailRequestDto accommodationRequestDto = TourApiPlaceDetailRequestDto.builder()
 			.mobileOS("ETC")
 			.mobileApp("tripsok-batch")
@@ -77,17 +124,18 @@ public class AccommodationServiceImpl implements PlaceService {
 			.contentId(contentId)
 			.serviceKey(apiKeyConfig.getTourApiKey())
 			.build();
+		TourApiPlaceDetailResponseDto responseDto = tourApiClient.fetchPlaceDataDetail(accommodationRequestDto);
 
-		return Optional.ofNullable(tourApiClient.fetchPlaceDataDetail(
-			accommodationRequestDto));
+		log.info("RequestPlace: 상세정보 조회 성공 (미리보기): {}", responseDto, JsonMapperUtil.pretty(om, responseDto));
+		return responseDto;
 	}
 
-	public Boolean checkAndUpdatePlace(TourApiPlaceResponseDto placeDto) throws JsonProcessingException {
+	public Boolean checkAndUpdatePlace(TourApiPlaceResponseDto placeDto) {
 		LocalDateTime placeUpdatedAt = TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime());
 		Optional<Place> place = accommodationRepository.findByContentId(placeDto.getContentId());
 		if (place.isEmpty()) {
-			addPlace(placeDto);
 			log.info("숙소: ContentId:{} 신규 항목으로 추가", placeDto.getContentId());
+			addPlace(placeDto);
 			return true;
 		}
 		Place placeData = place.get();
@@ -95,27 +143,35 @@ public class AccommodationServiceImpl implements PlaceService {
 			log.info("숙소: ContentId:{} 변경사항 없음", placeDto.getContentId());
 			return false;
 		} else {
-			updatePlace(placeData, placeDto);
 			log.info("숙소: ContentId:{} 변경사항으로 업데이트 진행", placeDto.getContentId());
+			updatePlace(placeData, placeDto);
 			return true;
 		}
 	}
 
-	public void updatePlace(Place existingPlace, TourApiPlaceResponseDto placeDto) throws JsonProcessingException {
-		Optional<TourApiPlaceDetailResponseDto> detailResponseDto = requestPlaceDetail(existingPlace.getContentId());
-		detailResponseDto.ifPresent(e -> {
-			log.info("상세정보 응답 성공 (미리보기): {}", detailResponseDto.get());
-			existingPlace.updateAccommodation(placeDto, detailResponseDto.get());
-			accommodationRepository.save(existingPlace);
-		});
+	@Transactional
+	public void updatePlace(Place existingPlace, TourApiPlaceResponseDto placeDto) {
+		TourApiPlaceDetailResponseDto detailResponseDto = requestPlaceDetail(existingPlace.getContentId());
+		log.info("updatePlace: 상세정보 응답 성공 (미리보기):  (pretty)\n{}",
+			JsonMapperUtil.pretty(om, detailResponseDto));
+		existingPlace.updateAccommodation(placeDto, detailResponseDto,
+			categoryService.getCategoryByCode(detailResponseDto.getLargeClassificationSystem3()));
+		accommodationRepository.save(existingPlace);
+		log.info("상세정보 업데이트 완료 : contentId={}, placeId={}, title={}, categoryName={}",
+			existingPlace.getContentId(),
+			existingPlace.getId(),
+			existingPlace.getAccommodation() != null ? existingPlace.getAccommodation().getId() : null,
+			existingPlace.getAccommodation() != null ? existingPlace.getAccommodation().getAccommodationType() : null
+		);
 	}
 
-	public void addPlace(TourApiPlaceResponseDto placeDto) throws JsonProcessingException {
-		Optional<TourApiPlaceDetailResponseDto> detailResponseDto = requestPlaceDetail(placeDto.getContentId());
-		detailResponseDto.ifPresent(e -> {
-			log.info("상세정보 응답 성공 (미리보기): {}", detailResponseDto.get());
-			Place accommodationPlace = Place.buildAccommodation(placeDto, detailResponseDto.get());
-			accommodationRepository.save(accommodationPlace);
-		});
+	public void addPlace(TourApiPlaceResponseDto placeDto) {
+		TourApiPlaceDetailResponseDto detailResponseDto = requestPlaceDetail(placeDto.getContentId());
+		log.info("addPlace: 상세정보 응답 성공 (미리보기): (pretty)\n{}",
+			JsonMapperUtil.pretty(om, detailResponseDto));
+
+		Place accommodationPlace = Place.buildAccommodation(placeDto, detailResponseDto);
+		accommodationRepository.save(accommodationPlace);
 	}
+
 }
