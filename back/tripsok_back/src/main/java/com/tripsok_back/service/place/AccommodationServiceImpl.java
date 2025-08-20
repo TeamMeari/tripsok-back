@@ -60,6 +60,7 @@ public class AccommodationServiceImpl implements PlaceService {
 	}
 
 	@Override
+	@Transactional
 	public PlaceDetailResponseDto getPlaceDetail(int placeId) {
 		Optional<Place> optPlace = accommodationRepository.findById(placeId);
 		if (optPlace.isEmpty())
@@ -86,7 +87,7 @@ public class AccommodationServiceImpl implements PlaceService {
 	}
 
 	@Override
-	public List<PlaceDetailResponseDto> getPlaceRanking(int rankNum) {
+	public List<PlaceDetailResponseDto> getPlaceList(int rankNum) {
 		return List.of();
 	}
 
@@ -126,7 +127,7 @@ public class AccommodationServiceImpl implements PlaceService {
 			.build();
 		TourApiPlaceDetailResponseDto responseDto = tourApiClient.fetchPlaceDataDetail(accommodationRequestDto);
 
-		log.info("RequestPlace: 상세정보 조회 성공 (미리보기): {}", responseDto, JsonMapperUtil.pretty(om, responseDto));
+		log.info("RequestPlace: 상세정보 조회 성공 (미리보기): {}", JsonMapperUtil.pretty(om, responseDto));
 		return responseDto;
 	}
 
@@ -149,7 +150,6 @@ public class AccommodationServiceImpl implements PlaceService {
 		}
 	}
 
-	@Transactional
 	public void updatePlace(Place existingPlace, TourApiPlaceResponseDto placeDto) {
 		TourApiPlaceDetailResponseDto detailResponseDto = requestPlaceDetail(existingPlace.getContentId());
 		log.info("updatePlace: 상세정보 응답 성공 (미리보기):  (pretty)\n{}",
