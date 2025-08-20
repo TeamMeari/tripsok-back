@@ -1,5 +1,8 @@
 package com.tripsok_back.type;
 
+import com.tripsok_back.exception.CustomException;
+import com.tripsok_back.exception.ErrorCode;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -25,5 +28,17 @@ public enum TourismType {
 			}
 		}
 		throw new IllegalArgumentException("Unknown TourismType id: " + id);
+	}
+
+	public static TourismType getTourismTypeById(String category) {
+		if (category.equals("accommodation"))
+			return ACCOMMODATION;
+		if (category.equals("shopping"))
+			return SHOPPING;
+		if (category.equals("tour"))
+			return TOURIST_SPOT;
+		if (category.equals("festival"))
+			return FESTIVAL_EVENT;
+		throw new CustomException(ErrorCode.INVALID_TOUR_TYPE);
 	}
 }

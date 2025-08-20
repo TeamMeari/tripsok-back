@@ -169,8 +169,8 @@ public class AccommodationServiceImpl implements PlaceService {
 		TourApiPlaceDetailResponseDto detailResponseDto = requestPlaceDetail(placeDto.getContentId());
 		log.info("addPlace: 상세정보 응답 성공 (미리보기): (pretty)\n{}",
 			JsonMapperUtil.pretty(om, detailResponseDto));
-
-		Place accommodationPlace = Place.buildAccommodation(placeDto, detailResponseDto);
+		String categoryName = categoryService.getCategoryByCode(detailResponseDto.getLargeClassificationSystem3());
+		Place accommodationPlace = Place.buildAccommodation(placeDto, detailResponseDto, categoryName);
 		accommodationRepository.save(accommodationPlace);
 	}
 

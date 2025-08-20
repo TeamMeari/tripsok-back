@@ -27,8 +27,8 @@ import lombok.Setter;
 @Table(name = "TOUR", schema = "TRIPSOK")
 public class Tour extends BaseModifiableEntity {
 	@Id
-	@SequenceGenerator(name = "tour_seq", sequenceName = "TOUR_SEQ", allocationSize = 1)
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tour_seq")
+	@SequenceGenerator(name = "global_place_seq", sequenceName = "GLOBAL_PLACE_SEQ", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "global_place_seq")
 	@Column(name = "ID", nullable = false)
 	private Integer id;
 

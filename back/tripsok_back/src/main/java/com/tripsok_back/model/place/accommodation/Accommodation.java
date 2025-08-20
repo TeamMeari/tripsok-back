@@ -26,8 +26,8 @@ import lombok.Setter;
 @Table(name = "ACCOMMODATION", schema = "TRIPSOK")
 public class Accommodation extends BaseModifiableEntity {
 	@Id
-	@SequenceGenerator(name = "accommodation_seq", sequenceName = "ACCOMMODATION_SEQ", allocationSize = 1)
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "accommodation_seq")
+	@SequenceGenerator(name = "global_place_seq", sequenceName = "GLOBAL_PLACE_SEQ", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "global_place_seq")
 	private Integer id;
 
 	@Size(max = 255)
@@ -53,10 +53,6 @@ public class Accommodation extends BaseModifiableEntity {
 		accommodation.setAccommodationType(detailResponseDto.getLargeClassificationSystem1());
 
 		return accommodation;
-	}
-
-	public void updateAccommodation(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto) {
-		this.accommodationType = detailResponseDto.getLargeClassificationSystem1();
 	}
 
 	public void addImageUrl(String image) {
