@@ -8,7 +8,5 @@ import lombok.extern.slf4j.Slf4j;
 public class TourApiException extends CustomInternalException {
 	public TourApiException(InternalErrorCode errorCode) {
 		super(errorCode);
-		log.error("TourApi Exception occurred:");
 	}
-
 }
