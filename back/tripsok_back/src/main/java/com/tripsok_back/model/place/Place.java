@@ -36,8 +36,8 @@ import lombok.Setter;
 @Table(name = "PLACE", schema = "TRIPSOK")
 public class Place extends BaseModifiableEntity {
 	@Id
-	@SequenceGenerator(name = "place_seq", sequenceName = "PLACE_SEQ", allocationSize = 1)
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "place_seq")
+	@SequenceGenerator(name = "global_place_seq", sequenceName = "GLOBAL_PLACE_SEQ", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "global_place_seq")
 	@Column(name = "ID", nullable = false)
 	private Integer id;
 
@@ -93,7 +93,7 @@ public class Place extends BaseModifiableEntity {
 	private BigDecimal mapY;
 
 	public static Place buildAccommodation(TourApiPlaceResponseDto placeDto,
-		TourApiPlaceDetailResponseDto detailResponseDto) {
+		TourApiPlaceDetailResponseDto detailResponseDto, String categoryName) {
 		Place place = new Place();
 
 		place.setContentId(placeDto.getContentId());
@@ -116,6 +116,10 @@ public class Place extends BaseModifiableEntity {
 		place.setTour(null);
 		place.setRestaurant(null);
 		place.setAccommodation(Accommodation.buildAccommodation(placeDto, detailResponseDto));
+		Accommodation accommodation = place.getAccommodation();
+		accommodation.setAccommodationType(categoryName);
+		accommodation.addImageUrl(detailResponseDto.getFirstImageUrl());
+		accommodation.addImageUrl(detailResponseDto.getFirstImageUrlSecondary());
 		return place;
 	}
 
@@ -220,5 +224,29 @@ public class Place extends BaseModifiableEntity {
 		}
 
 		setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
+	}
+
+	public void updateNullAccommodationDetail(TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto,
+		String categoryName) {
+		Accommodation accommodation = this.getAccommodation();
+		accommodation.setAccommodationType(categoryName);
+		accommodation.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrl());
+		accommodation.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrlSecondary());
+	}
+
+	public void updateNullTourDetail(TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto,
+		String categoryName) {
+		Tour tour = this.getTour();
+		tour.setTourType(categoryName);
+		tour.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrl());
+		tour.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrlSecondary());
+	}
+
+	public void incrementViewCount() {
+		this.view++;
+	}
+
+	public void incrementLikeCount() {
+		this.like++;
 	}
 }

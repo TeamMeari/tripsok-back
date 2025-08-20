@@ -37,7 +37,6 @@ public class RestaurantImage extends BaseModifiableEntity {
 	@JoinColumn(name = "RESTAURANT_ID", nullable = false)
 	private Restaurant restaurant;
 
-	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "MENU_ID", nullable = false)
