@@ -144,7 +144,7 @@ public class Place extends BaseModifiableEntity {
 
 		place.setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
 
-		place.setTour(null);
+		place.setAccommodation(null);
 		place.setRestaurant(null);
 		place.setTour(Tour.buildTour(placeDto, detailResponseDto));
 		Tour tour = place.getTour();
@@ -176,7 +176,7 @@ public class Place extends BaseModifiableEntity {
 		place.setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
 
 		place.setTour(null);
-		place.setRestaurant(null);
+		place.setAccommodation(null);
 		place.setRestaurant(Restaurant.buildRestaurant(placeDto, detailResponseDto));
 		Restaurant restaurant = place.getRestaurant();
 		restaurant.setRestaurantType(categoryName);
