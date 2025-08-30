@@ -1,4 +1,4 @@
-package com.tripsok_back.service;
+package com.tripsok_back.service.user;
 
 import java.util.List;
 import java.util.Set;
@@ -19,11 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class InterestThemeService {
+public class InterestThemeServiceImpl implements InterestThemeService {
 
 	private final ThemeRepository themeRepository;
 	private final InterestThemeRepository interestThemeRepository;
 
+	@Override
 	public void saveInterestThemes(TripSokUser user, List<Integer> interestThemeIds) {
 		if (interestThemeIds != null && !interestThemeIds.isEmpty()) {
 			List<Theme> interestThemes = themeRepository.findAllById(interestThemeIds);
@@ -34,6 +35,7 @@ public class InterestThemeService {
 		}
 	}
 
+	@Override
 	public List<InterestThemeResponse> getInterestThemes(TripSokUser user) {
 		return interestThemeRepository.findByUser(user)
 			.stream()
@@ -41,6 +43,7 @@ public class InterestThemeService {
 			.toList();
 	}
 
+	@Override
 	public void updateInterestThemes(TripSokUser user, Set<Integer> interestThemeIds) {
 		List<Integer> existingInterestIds = interestThemeRepository.findByUser(user)
 			.stream()

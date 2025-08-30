@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tripsok_back.dto.user.request.ChangeContactEmailRequest;
 import com.tripsok_back.dto.user.request.ChangeInterestThemeRequest;
 import com.tripsok_back.dto.user.response.UserInfoResponse;
-import com.tripsok_back.service.UserService;
+import com.tripsok_back.service.user.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
