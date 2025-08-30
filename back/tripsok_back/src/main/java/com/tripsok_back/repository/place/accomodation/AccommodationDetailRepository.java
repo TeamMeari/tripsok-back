@@ -11,5 +11,5 @@ import com.tripsok_back.model.place.accommodation.Accommodation;
 @Repository
 public interface AccommodationDetailRepository extends JpaRepository<Accommodation, Integer> {
 	@EntityGraph(attributePaths = {"accommodation"})
-	Optional<Accommodation> findById(Integer Id);
+	Optional<Accommodation> findById(Integer id);
 }
