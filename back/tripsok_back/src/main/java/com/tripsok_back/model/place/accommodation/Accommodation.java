@@ -18,7 +18,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "ACCOMMODATION", schema = "TRIPSOK")
+@Table(name = "ACCOMMODATION")
 public class Accommodation extends BaseModifiableEntity {
 	@Id
 	@SequenceGenerator(name = "accommodation_seq", sequenceName = "ACCOMMODATION_SEQ", allocationSize = 1)
