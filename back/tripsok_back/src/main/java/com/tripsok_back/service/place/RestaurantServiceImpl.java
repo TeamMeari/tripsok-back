@@ -90,8 +90,8 @@ public class RestaurantServiceImpl implements PlaceService {
 	@Override
 	public PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable) {
 		Page<Place> placeList = restaurantRepository.findByRestaurantIsNotNull(pageable);
-		if (placeList.isEmpty())
-			throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
+		if (placeList.getTotalPages() == 0)
+			return PageResponse.empty();
 		Page<PlaceBriefResponseDto> dtoList = placeList.map(
 			e -> PlaceBriefResponseDto.from(e, getType().name(),
 				e.getRestaurant().getImageUrlList().getFirst(),

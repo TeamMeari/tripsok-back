@@ -23,4 +23,8 @@ public class PageResponse<E> {
 			dtoPage.getContent()
 		);
 	}
+
+	public static <E> PageResponse<E> empty() {
+		return new PageResponse<>(0, 0, 0L, List.of());
+	}
 }

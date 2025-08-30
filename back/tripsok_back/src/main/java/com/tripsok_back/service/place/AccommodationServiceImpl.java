@@ -93,8 +93,9 @@ public class AccommodationServiceImpl implements PlaceService {
 	@Override
 	public PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable) throws TourApiException {
 		Page<Place> placeList = accommodationRepository.findByAccommodationIsNotNull(pageable);
-		if (placeList.isEmpty())
-			throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
+		if (placeList.getTotalPages() == 0)
+			return PageResponse.empty();
+		//throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
 		Page<PlaceBriefResponseDto> dtoList = placeList.map(
 			e -> PlaceBriefResponseDto.from(e, getType().name(),
 				e.getAccommodation().getImageUrlList().getFirst(),

@@ -49,7 +49,7 @@ public record PlaceDetailResponseDto(
 				case RESTAURANT -> {
 					Restaurant r = place.getRestaurant();
 					yield r == null ? null :
-						new RestaurantSummary(r.getId(), r.getRestaurantType(), r.getRestaurantUrlList());
+						new RestaurantSummary(r.getId(), r.getRestaurantType(), r.getImageUrlList());
 				}
 				case TOUR -> {
 					Tour t = place.getTour();

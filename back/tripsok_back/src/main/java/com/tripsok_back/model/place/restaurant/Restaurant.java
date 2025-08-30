@@ -62,10 +62,6 @@ public class Restaurant extends BaseModifiableEntity {
 		return restaurant;
 	}
 
-	public List<String> getRestaurantUrlList() {
-		return null;
-	}
-
 	public void addImageUrl(String image) {
 		RestaurantImage newImage = RestaurantImage.buildUrlImage(image);
 		this.restaurantImages.add(newImage);
