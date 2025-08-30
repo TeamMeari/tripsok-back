@@ -23,6 +23,7 @@ import com.tripsok_back.type.TourismType;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -57,14 +58,14 @@ public class PlaceController {
 	)
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "조회 성공"),
-		@ApiResponse(responseCode = "400", description = "잘못된 카테고리 값 등 잘못된 요청"),
-		@ApiResponse(responseCode = "500", description = "서버 오류")
+		@ApiResponse(responseCode = "400", description = "잘못된 카테고리 값 등 잘못된 요청", content = @Content),
+		@ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)
 	})
 	@GetMapping("/{category}")
 	public ResponseEntity<PageResponse<PlaceBriefResponseDto>> getPlaceList(
 		@Parameter(
 			description = "카테고리",
-			schema = @Schema(allowableValues = {"accommodation", "restaurant", "tour"})
+			schema = @Schema(allowableValues = {"accommodation", "restaurant", "tour", "wrong-category"})
 		)
 		@PathVariable String category,
 
@@ -101,15 +102,15 @@ public class PlaceController {
 	)
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "상세 조회 성공"),
-		@ApiResponse(responseCode = "400", description = "잘못된 카테고리 값"),
-		@ApiResponse(responseCode = "404", description = "해당 리소스 없음"),
-		@ApiResponse(responseCode = "500", description = "서버 오류")
+		@ApiResponse(responseCode = "400", description = "잘못된 카테고리 값", content = @Content),
+		@ApiResponse(responseCode = "404", description = "해당 리소스 없음", content = @Content),
+		@ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)
 	})
 	@GetMapping("/{category}/{id}")
 	public ResponseEntity<PlaceDetailResponseDto> getPlaceDetail(
 		@Parameter(
 			description = "카테고리",
-			schema = @Schema(allowableValues = {"accommodation", "restaurant", "tour"})
+			schema = @Schema(allowableValues = {"accommodation", "restaurant", "tour", "wrong-category"})
 		)
 		@PathVariable String category,
 
