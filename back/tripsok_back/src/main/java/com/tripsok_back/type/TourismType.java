@@ -30,15 +30,18 @@ public enum TourismType {
 		throw new IllegalArgumentException("Unknown TourismType id: " + id);
 	}
 
-	public static TourismType getTourismTypeById(String category) {
-		if (category.equals("accommodation"))
-			return ACCOMMODATION;
-		if (category.equals("shopping"))
-			return SHOPPING;
-		if (category.equals("tour"))
-			return TOURIST_SPOT;
-		if (category.equals("festival"))
-			return FESTIVAL_EVENT;
-		throw new CustomException(ErrorCode.INVALID_TOUR_TYPE);
+	public static TourismType fromOrThrow(String category) {
+		if (category == null || category.isBlank()) {
+			throw new CustomException(ErrorCode.INVALID_TOUR_TYPE);
+		}
+		String key = category.trim().toLowerCase(java.util.Locale.ROOT);
+
+		return switch (key) {
+			case "accommodation" -> ACCOMMODATION;
+			case "restaurant" -> RESTAURANT;
+			case "tour" -> TOURIST_SPOT;
+			default -> throw new CustomException(ErrorCode.INVALID_TOUR_TYPE);
+		};
 	}
+
 }

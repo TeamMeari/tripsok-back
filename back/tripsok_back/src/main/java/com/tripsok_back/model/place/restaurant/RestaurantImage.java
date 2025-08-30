@@ -46,4 +46,9 @@ public class RestaurantImage extends BaseModifiableEntity {
 	@Column(name = "URL", length = 2000)
 	private String url;
 
+	public static RestaurantImage buildUrlImage(String image) {
+		RestaurantImage restaurantImage = new RestaurantImage();
+		restaurantImage.setUrl(image);
+		return restaurantImage;
+	}
 }

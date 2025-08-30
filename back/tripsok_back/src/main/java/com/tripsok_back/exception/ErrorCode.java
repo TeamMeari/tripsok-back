@@ -41,7 +41,7 @@ public enum ErrorCode {
 
 	//Place API 13000대
 	PLACE_NOT_FOUND(HttpStatus.NOT_FOUND, -13000, "존재하지 않는 장소입니다"),
-	INVALID_TOUR_TYPE(HttpStatus.NOT_FOUND, -13001, "올바르지 않은 투어 타입입니다");
+	INVALID_TOUR_TYPE(HttpStatus.BAD_REQUEST, -13001, "올바르지 않은 투어 타입입니다");
 
 	private final HttpStatus httpStatus;
 	private final int code;

@@ -51,4 +51,5 @@ public class AccommodationImage extends BaseModifiableEntity {
 		accommodationImage.setUrl(image);
 		return accommodationImage;
 	}
+
 }

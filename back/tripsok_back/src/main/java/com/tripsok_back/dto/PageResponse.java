@@ -9,18 +9,22 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class PageResponse<T> {
+public class PageResponse<E> {
 	private int currentPage;
 	private int totalPages;
 	private long totalItems;
-	private List<T> items;
+	private List<E> items;
 
-	public static <T> PageResponse<T> fromPage(Page<T> page) {
+	public static <T, E> PageResponse<E> fromPage(Page<T> page, Page<E> dtoPage) {
 		return new PageResponse<>(
 			page.getNumber(),
 			page.getTotalPages(),
 			page.getTotalElements(),
-			page.getContent()
+			dtoPage.getContent()
 		);
+	}
+
+	public static <E> PageResponse<E> empty() {
+		return new PageResponse<>(0, 0, 0L, List.of());
 	}
 }
