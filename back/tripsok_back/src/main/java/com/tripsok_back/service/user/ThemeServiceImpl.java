@@ -12,10 +12,9 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class ThemeServiceImpl implements ThemeService {
-	private ThemeRepository themeRepository;
-
+	private final ThemeRepository themeRepository;
 	@Override
 	public List<ThemeResponse> getThemeList() {
-		return themeRepository.findAll().stream().map(it-> new ThemeResponse(it.getId(), it.getType())).toList();
+		return themeRepository.findAlllByOrderByIdAsc().stream().map(it-> new ThemeResponse(it.getId(), it.getType())).toList();
 	}
 }

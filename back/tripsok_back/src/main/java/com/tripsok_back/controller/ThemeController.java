@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class ThemeController {
-	private ThemeService themeService;
+	private final ThemeService themeService;
 
 	@GetMapping
 	public ResponseEntity<List<ThemeResponse>> getThemeList() {
