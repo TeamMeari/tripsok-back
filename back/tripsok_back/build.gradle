@@ -30,6 +30,7 @@ jib {
         environment = [
                 'TZ': 'Asia/Seoul'
         ]
+        jvmFlags = ['-Dspring.profiles.active=stable'] // JVM 옵션 설정
     }
 }
 
