@@ -1,0 +1,10 @@
+REDIS_DATABASE: 0
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate       # Flyway 돌리면 validate 권장
+  sql:
+    init:
+      mode: never
+  flyway:
+    enabled: false
