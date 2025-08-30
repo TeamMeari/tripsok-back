@@ -4,17 +4,27 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripsok_back.config.ApiKeyConfig;
+import com.tripsok_back.dto.PageResponse;
+import com.tripsok_back.dto.place.PlaceBriefResponseDto;
+import com.tripsok_back.dto.place.PlaceDetailResponseDto;
+import com.tripsok_back.dto.place.ReviewRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceDetailRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceDetailResponseDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
+import com.tripsok_back.exception.InternalErrorCode;
+import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.repository.place.TourRepository;
+import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
+import com.tripsok_back.util.JsonMapperUtil;
 import com.tripsok_back.util.TimeUtil;
 import com.tripsok_back.util.TouristApiClientUtil;
 
@@ -29,6 +39,8 @@ public class TourServiceImpl implements PlaceService {
 	private final ApiKeyConfig apiKeyConfig;
 	private final TouristApiClientUtil tourApiClient;
 	private final TourRepository tourRepository;
+	private final CategoryService categoryService;
+	private final ObjectMapper om;
 
 	@Override
 	public TourismType getType() {
@@ -36,7 +48,7 @@ public class TourServiceImpl implements PlaceService {
 	}
 
 	@Override
-	public void startPlaceUpdate(int numOfRow, int pageNo) throws JsonProcessingException {
+	public void startPlaceUpdate(int numOfRow, int pageNo) {
 		List<TourApiPlaceResponseDto> responseDtoList = requestPlace(numOfRow, pageNo);
 
 		if (responseDtoList.isEmpty())
@@ -46,7 +58,51 @@ public class TourServiceImpl implements PlaceService {
 		}
 	}
 
-	public List<TourApiPlaceResponseDto> requestPlace(int numOfRow, int pageNo) throws JsonProcessingException {
+	@Override
+	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId) {
+		Optional<Place> optPlace = tourRepository.findById(placeId);
+		if (optPlace.isEmpty())
+			throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
+		Place placeTour = optPlace.get();
+		if (placeTour.getTour().getTourType().isEmpty()) {
+			TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto = requestPlaceDetail(
+				placeTour.getContentId());
+			String categoryName = categoryService.getCategoryByCode(tourApiPlaceDetailResponseDto.getCategoryLevel3());
+			placeTour.updateNullTourDetail(tourApiPlaceDetailResponseDto, categoryName);
+		}
+		addView(placeTour);
+		return Optional.of(PlaceDetailResponseDto.from(placeTour, PlaceJoinType.TOUR));
+	}
+
+	@Override
+	public void addView(Place place) {
+		place.incrementViewCount();
+	}
+
+	@Override
+	public void addLike(Place place) {
+		place.incrementLikeCount();
+	}
+
+	@Override
+	public PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable) {
+		Page<Place> placeList = tourRepository.findByTourIsNotNull(pageable);
+		if (placeList.isEmpty())
+			throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
+		Page<PlaceBriefResponseDto> dtoList = placeList.map(
+			e -> PlaceBriefResponseDto.from(e, getType().name(),
+				e.getTour().getImageUrlList().getFirst(),
+				e.getTour().getTourImages().size(),
+				e.getTour().getTourReviews().size()));
+		return PageResponse.fromPage(placeList, dtoList);
+	}
+
+	@Override
+	public void addReview(Integer userId, ReviewRequestDto reviewRequestdto) {
+
+	}
+
+	public List<TourApiPlaceResponseDto> requestPlace(int numOfRow, int pageNo) {
 		TourApiPlaceRequestDto TourRequestDto = TourApiPlaceRequestDto.builder()
 			.numOfRows(numOfRow)
 			.pageNo(pageNo)
@@ -63,8 +119,7 @@ public class TourServiceImpl implements PlaceService {
 		return responseDtoList;
 	}
 
-	public Optional<TourApiPlaceDetailResponseDto> requestPlaceDetail(Integer contentId) throws
-		JsonProcessingException {
+	public TourApiPlaceDetailResponseDto requestPlaceDetail(Integer contentId) {
 		TourApiPlaceDetailRequestDto TourRequestDto = TourApiPlaceDetailRequestDto.builder()
 			.mobileOS("ETC")
 			.mobileApp("tripsok-batch")
@@ -73,11 +128,10 @@ public class TourServiceImpl implements PlaceService {
 			.serviceKey(apiKeyConfig.getTourApiKey())
 			.build();
 
-		return Optional.ofNullable(tourApiClient.fetchPlaceDataDetail(
-			TourRequestDto));
+		return tourApiClient.fetchPlaceDataDetail(TourRequestDto);
 	}
 
-	public Boolean checkAndUpdatePlace(TourApiPlaceResponseDto placeDto) throws JsonProcessingException {
+	public Boolean checkAndUpdatePlace(TourApiPlaceResponseDto placeDto) {
 		LocalDateTime placeUpdatedAt = TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime());
 		Optional<Place> place = tourRepository.findByContentId(placeDto.getContentId());
 		if (place.isEmpty()) {
@@ -96,21 +150,27 @@ public class TourServiceImpl implements PlaceService {
 		}
 	}
 
-	public void updatePlace(Place existingPlace, TourApiPlaceResponseDto placeDto) throws JsonProcessingException {
-		Optional<TourApiPlaceDetailResponseDto> detailResponseDto = requestPlaceDetail(existingPlace.getContentId());
-		detailResponseDto.ifPresent(e -> {
-			log.info("상세정보 응답 성공 (미리보기): {}", detailResponseDto.get());
-			existingPlace.updateTour(placeDto, detailResponseDto.get());
-			tourRepository.save(existingPlace);
-		});
+	public void updatePlace(Place existingPlace, TourApiPlaceResponseDto placeDto) {
+		TourApiPlaceDetailResponseDto detailResponseDto = requestPlaceDetail(existingPlace.getContentId());
+		log.info("updatePlace: 상세정보 응답 성공 (미리보기):  (pretty)\n{}",
+			JsonMapperUtil.pretty(om, detailResponseDto));
+		existingPlace.updateTour(placeDto, detailResponseDto,
+			categoryService.getCategoryByCode(detailResponseDto.getLargeClassificationSystem3()));
+		tourRepository.save(existingPlace);
+		log.info("상세정보 업데이트 완료 : contentId={}, placeId={}, title={}, categoryName={}",
+			existingPlace.getContentId(),
+			existingPlace.getId(),
+			existingPlace.getTour() != null ? existingPlace.getTour().getId() : null,
+			existingPlace.getTour() != null ? existingPlace.getTour().getTourType() : null
+		);
 	}
 
-	public void addPlace(TourApiPlaceResponseDto placeDto) throws JsonProcessingException {
-		Optional<TourApiPlaceDetailResponseDto> detailResponseDto = requestPlaceDetail(placeDto.getContentId());
-		detailResponseDto.ifPresent(e -> {
-			log.info("상세정보 응답 성공 (미리보기): {}", detailResponseDto.get());
-			Place tourPlace = Place.buildTour(placeDto, detailResponseDto.get());
-			tourRepository.save(tourPlace);
-		});
+	public void addPlace(TourApiPlaceResponseDto placeDto) {
+		TourApiPlaceDetailResponseDto detailResponseDto = requestPlaceDetail(placeDto.getContentId());
+		log.info("addPlace: 상세정보 응답 성공 (미리보기): (pretty)\n{}",
+			JsonMapperUtil.pretty(om, detailResponseDto));
+		String categoryName = categoryService.getCategoryByCode(detailResponseDto.getLargeClassificationSystem3());
+		Place tourPlace = Place.buildTour(placeDto, detailResponseDto, categoryName);
+		tourRepository.save(tourPlace);
 	}
 }

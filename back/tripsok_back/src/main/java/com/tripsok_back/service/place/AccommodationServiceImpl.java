@@ -5,10 +5,14 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.logging.log4j.util.InternalException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripsok_back.config.ApiKeyConfig;
+import com.tripsok_back.dto.PageResponse;
+import com.tripsok_back.dto.place.PlaceBriefResponseDto;
 import com.tripsok_back.dto.place.PlaceDetailResponseDto;
 import com.tripsok_back.dto.place.ReviewRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceDetailRequestDto;
@@ -61,7 +65,7 @@ public class AccommodationServiceImpl implements PlaceService {
 
 	@Override
 	@Transactional
-	public PlaceDetailResponseDto getPlaceDetail(int placeId) {
+	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId) throws TourApiException {
 		Optional<Place> optPlace = accommodationRepository.findById(placeId);
 		if (optPlace.isEmpty())
 			throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
@@ -73,7 +77,7 @@ public class AccommodationServiceImpl implements PlaceService {
 			placeAccommodation.updateNullAccommodationDetail(tourApiPlaceDetailResponseDto, categoryName);
 		}
 		addView(placeAccommodation);
-		return PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION);
+		return Optional.of(PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION));
 	}
 
 	@Override
@@ -87,8 +91,16 @@ public class AccommodationServiceImpl implements PlaceService {
 	}
 
 	@Override
-	public List<PlaceDetailResponseDto> getPlaceList(int rankNum) {
-		return List.of();
+	public PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable) throws TourApiException {
+		Page<Place> placeList = accommodationRepository.findByAccommodationIsNotNull(pageable);
+		if (placeList.isEmpty())
+			throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
+		Page<PlaceBriefResponseDto> dtoList = placeList.map(
+			e -> PlaceBriefResponseDto.from(e, getType().name(),
+				e.getAccommodation().getImageUrlList().getFirst(),
+				e.getAccommodation().getAccommodationImages().size(),
+				e.getAccommodation().getAccommodationReviews().size()));
+		return PageResponse.fromPage(placeList, dtoList);
 	}
 
 	@Override
@@ -131,6 +143,7 @@ public class AccommodationServiceImpl implements PlaceService {
 		return responseDto;
 	}
 
+	@Transactional
 	public Boolean checkAndUpdatePlace(TourApiPlaceResponseDto placeDto) {
 		LocalDateTime placeUpdatedAt = TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime());
 		Optional<Place> place = accommodationRepository.findByContentId(placeDto.getContentId());
