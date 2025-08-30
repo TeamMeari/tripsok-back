@@ -2,14 +2,19 @@ package com.tripsok_back.dto.place;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.tripsok_back.model.place.Place;
+import com.tripsok_back.model.place.accommodation.Accommodation;
+import com.tripsok_back.model.place.restaurant.Restaurant;
+import com.tripsok_back.model.place.tour.Tour;
 import com.tripsok_back.type.PlaceJoinType;
 
 import lombok.Builder;
 
 public record PlaceDetailResponseDto(
-	Integer id, String placeName, String address, String contact, String email, String information,
+	Integer id, String placeName, String address, String contact, String email,
+	String information,
 	Integer view, Integer like, BigDecimal mapX, BigDecimal mapY, LocalDateTime createdAt, LocalDateTime updatedAt,
 	PlaceJoinType type,
 	ChildSummary child
@@ -37,16 +42,18 @@ public record PlaceDetailResponseDto(
 			.type(type)
 			.child(switch (type) {
 				case ACCOMMODATION -> {
-					var a = place.getAccommodation();
-					yield a == null ? null : new AccommodationSummary(a.getId(), a.getAccommodationType());
+					Accommodation a = place.getAccommodation();
+					yield a == null ? null :
+						new AccommodationSummary(a.getId(), a.getAccommodationType(), a.getImageUrlList());
 				}
 				case RESTAURANT -> {
-					var r = place.getRestaurant();
-					yield r == null ? null : new RestaurantSummary(r.getId(), r.getRestaurantType());
+					Restaurant r = place.getRestaurant();
+					yield r == null ? null :
+						new RestaurantSummary(r.getId(), r.getRestaurantType(), r.getRestaurantUrlList());
 				}
 				case TOUR -> {
-					var t = place.getTour();
-					yield t == null ? null : new TourSummary(t.getId(), t.getTourType());
+					Tour t = place.getTour();
+					yield t == null ? null : new TourSummary(t.getId(), t.getTourType(), t.getImageUrlList());
 				}
 			})
 			.build();
@@ -55,12 +62,13 @@ public record PlaceDetailResponseDto(
 	public sealed interface ChildSummary permits AccommodationSummary, RestaurantSummary, TourSummary {
 	}
 
-	public record AccommodationSummary(Integer id, String accommodationType) implements ChildSummary {
+	public record AccommodationSummary(Integer id, String accommodationType, List<String> imageList)
+		implements ChildSummary {
 	}
 
-	public record RestaurantSummary(Integer id, String name) implements ChildSummary {
+	public record RestaurantSummary(Integer id, String restaurantType, List<String> imageList) implements ChildSummary {
 	}
 
-	public record TourSummary(Integer id, String title) implements ChildSummary {
+	public record TourSummary(Integer id, String tourType, List<String> imageList) implements ChildSummary {
 	}
 }
