@@ -44,7 +44,8 @@ public class SecurityConfig {
 		http.cors(it -> it.configurationSource(corsConfigurationSource())).csrf(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(auth -> {
-				auth.requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**")
+				auth.requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
+						"/api/v1/places/**")
 					.permitAll()
 					.requestMatchers("/api/v1/user/**")
 					.hasAnyAuthority(Role.USER.getAuthority().getFirst(), Role.ADMIN.getAuthority().getFirst())
