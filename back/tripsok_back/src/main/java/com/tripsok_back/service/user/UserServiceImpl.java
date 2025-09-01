@@ -1,4 +1,4 @@
-package com.tripsok_back.service;
+package com.tripsok_back.service.user;
 
 import java.util.List;
 import java.util.Set;
@@ -18,11 +18,12 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserServiceImpl implements UserService {
 	private final UserRepository userRepository;
 	private final InterestThemeService interestThemeService;
 	private final JwtUtil jwtUtil;
 
+	@Override
 	@Transactional(readOnly = true)
 	public UserInfoResponse getUserInfo(Integer userId) {
 		TripSokUser user = findUserById(userId);
@@ -31,6 +32,7 @@ public class UserService {
 			user.getSocialType(), interestThemes);
 	}
 
+	@Override
 	@Transactional
 	public void changeContactEmail(Integer userId, String emailVerificationToken) {
 		String contactEmail = jwtUtil.validateAndExtract(emailVerificationToken, "email", String.class);
@@ -38,6 +40,7 @@ public class UserService {
 		user.changeContactEmail(contactEmail);
 	}
 
+	@Override
 	@Transactional
 	public void changeInterestThemes(Integer userId, Set<Integer> interestThemeIds) {
 		TripSokUser user = findUserById(userId);

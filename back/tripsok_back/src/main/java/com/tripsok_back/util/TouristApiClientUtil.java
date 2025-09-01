@@ -34,6 +34,14 @@ public class TouristApiClientUtil {
 	private final WebClient touristApiWebClient;
 	private final ObjectMapper objectMapper;
 
+	private static <T> T orDefault(T v, T d) {
+		return v == null ? d : v;
+	}
+
+	private static String nullToEmpty(String s) {
+		return s == null ? "" : s;
+	}
+
 	public List<TourApiPlaceResponseDto> fetchPlaceData(TourApiPlaceRequestDto dto) {
 
 		ObjectWriter prettyPrinter = objectMapper.writerWithDefaultPrettyPrinter();
@@ -197,14 +205,6 @@ public class TouristApiClientUtil {
 			log.error("분류코드 파싱 실패", e);
 			throw new RuntimeException("KorService2/lclsSystmCode2 응답 파싱 오류", e);
 		}
-	}
-
-	private static <T> T orDefault(T v, T d) {
-		return v == null ? d : v;
-	}
-
-	private static String nullToEmpty(String s) {
-		return s == null ? "" : s;
 	}
 
 }
