@@ -22,7 +22,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
@@ -71,17 +71,17 @@ public class Place extends BaseModifiableEntity {
 	@Column(name = "\"like\"")
 	private Integer like;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "TOUR_ID")
 	private Tour tour;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "RESTAURANT_ID")
 	private Restaurant restaurant;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "ACCOMMODATION_ID")
 	private Accommodation accommodation;
@@ -123,8 +123,39 @@ public class Place extends BaseModifiableEntity {
 		return place;
 	}
 
+	public static Place buildTour(TourApiPlaceResponseDto placeDto,
+		TourApiPlaceDetailResponseDto detailResponseDto, String categoryName) {
+		Place place = new Place();
+
+		place.setContentId(placeDto.getContentId());
+		place.setPlaceName(placeDto.getTitle());
+		place.setAddress(
+			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : ""));
+		place.setContact(placeDto.getPhoneNumber());
+		place.setEmail(null);
+		place.setInformation(detailResponseDto.getOverview());
+		place.setView(0);
+		place.setLike(0);
+
+		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
+			place.setMapX(new BigDecimal(placeDto.getLongitude()));
+			place.setMapY(new BigDecimal(placeDto.getLatitude()));
+		}
+
+		place.setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
+
+		place.setAccommodation(null);
+		place.setRestaurant(null);
+		place.setTour(Tour.buildTour(placeDto, detailResponseDto));
+		Tour tour = place.getTour();
+		tour.setTourType(categoryName);
+		tour.addImageUrl(detailResponseDto.getFirstImageUrl());
+		tour.addImageUrl(detailResponseDto.getFirstImageUrlSecondary());
+		return place;
+	}
+
 	public static Place buildRestaurant(TourApiPlaceResponseDto placeDto,
-		TourApiPlaceDetailResponseDto detailResponseDto) {
+		TourApiPlaceDetailResponseDto detailResponseDto, String categoryName) {
 		Place place = new Place();
 
 		place.setContentId(placeDto.getContentId());
@@ -145,36 +176,12 @@ public class Place extends BaseModifiableEntity {
 		place.setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
 
 		place.setTour(null);
-		place.setRestaurant(Restaurant.buildRestaurant(placeDto, detailResponseDto)); // Restaurant 엔티티에서 build 메서드 필요
 		place.setAccommodation(null);
-
-		return place;
-	}
-
-	public static Place buildTour(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto) {
-		Place place = new Place();
-
-		place.setContentId(placeDto.getContentId());
-		place.setPlaceName(placeDto.getTitle());
-		place.setAddress(
-			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : ""));
-		place.setContact(placeDto.getPhoneNumber());
-		place.setEmail(null);
-		place.setInformation(detailResponseDto.getOverview());
-		place.setView(0);
-		place.setLike(0);
-
-		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
-			place.setMapX(new BigDecimal(placeDto.getLongitude()));
-			place.setMapY(new BigDecimal(placeDto.getLatitude()));
-		}
-
-		place.setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
-
-		place.setTour(Tour.buildTour(placeDto, detailResponseDto)); // Tour 엔티티에서 build 메서드 필요
-		place.setRestaurant(null);
-		place.setAccommodation(null);
-
+		place.setRestaurant(Restaurant.buildRestaurant(placeDto, detailResponseDto));
+		Restaurant restaurant = place.getRestaurant();
+		restaurant.setRestaurantType(categoryName);
+		restaurant.addImageUrl(detailResponseDto.getFirstImageUrl());
+		restaurant.addImageUrl(detailResponseDto.getFirstImageUrlSecondary());
 		return place;
 	}
 
@@ -226,6 +233,14 @@ public class Place extends BaseModifiableEntity {
 		setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
 	}
 
+	public void updateNullRestaurantDetail(TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto,
+		String categoryName) {
+		Restaurant restaurant = this.getRestaurant();
+		restaurant.setRestaurantType(categoryName);
+		restaurant.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrl());
+		restaurant.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrlSecondary());
+	}
+
 	public void updateNullAccommodationDetail(TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto,
 		String categoryName) {
 		Accommodation accommodation = this.getAccommodation();
@@ -249,4 +264,5 @@ public class Place extends BaseModifiableEntity {
 	public void incrementLikeCount() {
 		this.like++;
 	}
+
 }
