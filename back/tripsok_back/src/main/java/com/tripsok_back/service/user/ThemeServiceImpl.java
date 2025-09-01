@@ -15,6 +15,6 @@ public class ThemeServiceImpl implements ThemeService {
 	private final ThemeRepository themeRepository;
 	@Override
 	public List<ThemeResponse> getThemeList() {
-		return themeRepository.findAlllByOrderByIdAsc().stream().map(it-> new ThemeResponse(it.getId(), it.getType())).toList();
+		return themeRepository.findAllByOrderByIdAsc().stream().map(it-> new ThemeResponse(it.getId(), it.getType())).toList();
 	}
 }
