@@ -37,7 +37,6 @@ public class AccommodationImage extends BaseModifiableEntity {
 	@JoinColumn(name = "ACCOMMODATION_ID", nullable = false)
 	private Accommodation accommodation;
 
-	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "ROOM_ID", nullable = false)
@@ -46,5 +45,11 @@ public class AccommodationImage extends BaseModifiableEntity {
 	@Size(max = 2000)
 	@Column(name = "URL", length = 2000)
 	private String url;
+
+	public static AccommodationImage buildUrlImage(String image) {
+		AccommodationImage accommodationImage = new AccommodationImage();
+		accommodationImage.setUrl(image);
+		return accommodationImage;
+	}
 
 }

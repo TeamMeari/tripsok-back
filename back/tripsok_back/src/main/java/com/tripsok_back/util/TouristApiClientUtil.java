@@ -20,6 +20,8 @@ import com.tripsok_back.dto.tourApi.TourApiPlaceDetailRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceDetailResponseDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
+import com.tripsok_back.exception.InternalErrorCode;
+import com.tripsok_back.exception.TourApiException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +34,7 @@ public class TouristApiClientUtil {
 	private final WebClient touristApiWebClient;
 	private final ObjectMapper objectMapper;
 
-	public List<TourApiPlaceResponseDto> fetchPlaceData(TourApiPlaceRequestDto dto) throws
-		JsonProcessingException {
+	public List<TourApiPlaceResponseDto> fetchPlaceData(TourApiPlaceRequestDto dto) {
 
 		ObjectWriter prettyPrinter = objectMapper.writerWithDefaultPrettyPrinter();
 
@@ -58,8 +59,9 @@ public class TouristApiClientUtil {
 			.retrieve()
 			.bodyToMono(String.class)
 			.block();
-		log.info("관광 API 응답: \n{}", prettyPrinter.writeValueAsString(objectMapper.readValue(body, Object.class)));
+
 		try {
+			log.info("관광 API 응답: \n{}", prettyPrinter.writeValueAsString(objectMapper.readValue(body, Object.class)));
 			JsonNode root = objectMapper.readTree(body);
 			log.info(root.asText());
 			JsonNode itemsNode = root.path("response").path("body").path("items").path("item");
@@ -83,7 +85,7 @@ public class TouristApiClientUtil {
 	}
 
 	public TourApiPlaceDetailResponseDto fetchPlaceDataDetail(TourApiPlaceDetailRequestDto dto) throws
-		JsonProcessingException {
+		TourApiException {
 
 		ObjectWriter prettyPrinter = objectMapper.writerWithDefaultPrettyPrinter();
 
@@ -104,31 +106,49 @@ public class TouristApiClientUtil {
 			.retrieve()
 			.bodyToMono(String.class)
 			.block();
-
-		log.info("관광 API 응답: \n{}", prettyPrinter.writeValueAsString(objectMapper.readValue(body, Object.class)));
 		try {
+			log.info("관광 API 응답: \n{}", prettyPrinter.writeValueAsString(objectMapper.readValue(body, Object.class)));
+
 			JsonNode root = objectMapper.readTree(body);
-			log.info(root.asText());
-			JsonNode itemsNode = root.path("response").path("body").path("items").path("item");
+			JsonNode itemsNode = root.path("response").path("body").path("items");
 
-			if (itemsNode.isMissingNode() || itemsNode.isNull()) {
+			JsonNode itemNode = itemsNode.path("item");
+			if (itemNode.isMissingNode() || itemNode.isNull()) {
 				log.warn("'item' 노드가 없음");
-				return null;
+				throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
+			}
+			TourApiPlaceDetailResponseDto result;
+			if (itemNode.isArray()) {
+				if (itemNode.isEmpty()) {
+					log.warn("상세 정보 API 응답 결과가 비어있습니다.");
+					throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
+				}
+				result = objectMapper
+					.readerFor(TourApiPlaceDetailResponseDto.class)
+					.readValue(itemNode.get(0)); // 첫 원소만 사용
+			} else if (itemNode.isObject()) {
+				// 단일 오브젝트 케이스
+				result = objectMapper
+					.readerFor(TourApiPlaceDetailResponseDto.class)
+					.readValue(itemNode);
+			} else {
+				log.warn("'item' 노드 타입이 예상과 다름: {}", itemNode.getNodeType());
+				throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
 			}
 
-			List<TourApiPlaceDetailResponseDto> result = objectMapper
-				.readerForListOf(TourApiPlaceDetailResponseDto.class)
-				.readValue(itemsNode);
-			if (result.isEmpty()) {
-				log.warn("상세 정보 API 응답 결과가 비어있습니다.");
-				return null;
-			}
-			log.info("응답 처리 완료: {}개", result.size());
-			return result.getFirst();
-
-		} catch (Exception e) {
+			log.info("응답 처리 완료: 1개");
+			return result;
+		}
+		// ★ 도메인 예외는 그대로 통과
+		catch (TourApiException e) {
+			log.error("TourApi Exception occurred:", e);
+			throw e;
+		} catch (JsonProcessingException e) {
 			log.error("JSON 파싱 오류", e);
-			throw new RuntimeException("Tourist API 응답 파싱 오류", e);
+			throw new TourApiException(InternalErrorCode.JSON_PARSE_ERROR);
+		} catch (Exception e) {
+			log.error("상세정보 조회 중 알 수 없는 오류", e);
+			throw new TourApiException(InternalErrorCode.INTERNAL_SERVER_ERROR);
 		}
 	}
 
