@@ -1,7 +1,7 @@
 spring:
   config.activate.on-profile: dev
   datasource:
-    username: ${DB_DEV_USERNAME}
+    username: ${DB_USERNAME}
   jpa:
     show-sql: true
 
