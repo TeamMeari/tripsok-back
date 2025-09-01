@@ -1,4 +1,4 @@
-package com.tripsok_back.repository.place;
+package com.tripsok_back.repository.place.accomodation;
 
 import java.util.Optional;
 
@@ -11,15 +11,15 @@ import org.springframework.stereotype.Repository;
 import com.tripsok_back.model.place.Place;
 
 @Repository
-public interface RestaurantRepository extends JpaRepository<Place, Integer> {
+public interface AccommodationRepository extends JpaRepository<Place, Integer> {
 
 	@Override
-	@EntityGraph(attributePaths = {"restaurant.restaurantImages"})
+	@EntityGraph(attributePaths = {"accommodation.accommodationImages"})
 	Optional<Place> findById(Integer id);
 
-	@EntityGraph(attributePaths = {"restaurant"})
+	@EntityGraph(attributePaths = {"accommodation"})
 	Optional<Place> findByContentId(Integer contentId);
 
-	@EntityGraph(attributePaths = {"restaurant"})
-	Page<Place> findByRestaurantIsNotNull(Pageable pageable);
+	@EntityGraph(attributePaths = {"accommodation"})
+	Page<Place> findByAccommodationIsNotNull(Pageable pageable);
 }

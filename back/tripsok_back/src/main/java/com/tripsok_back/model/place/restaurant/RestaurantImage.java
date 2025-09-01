@@ -37,7 +37,6 @@ public class RestaurantImage extends BaseModifiableEntity {
 	@JoinColumn(name = "RESTAURANT_ID", nullable = false)
 	private Restaurant restaurant;
 
-	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "MENU_ID", nullable = false)
@@ -47,4 +46,9 @@ public class RestaurantImage extends BaseModifiableEntity {
 	@Column(name = "URL", length = 2000)
 	private String url;
 
+	public static RestaurantImage buildUrlImage(String image) {
+		RestaurantImage restaurantImage = new RestaurantImage();
+		restaurantImage.setUrl(image);
+		return restaurantImage;
+	}
 }
