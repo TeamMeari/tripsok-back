@@ -44,7 +44,8 @@ public class SecurityConfig {
 		http.cors(it -> it.configurationSource(corsConfigurationSource())).csrf(AbstractHttpConfigurer::disable)
 			.formLogin(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(auth -> {
-				auth.requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/health", "/ready",
+				auth.requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
+						"/health", "/ready",
 						"/api/v1/places/**", "/api/v1/theme/**")
 					.permitAll()
 					.requestMatchers("/api/v1/user/**")
@@ -63,7 +64,7 @@ public class SecurityConfig {
 		CorsConfiguration corsConfig = new CorsConfiguration();
 		corsConfig.setAllowedOriginPatterns(
 			List.of("http://localhost:8080", "http://localhost:5173", "http://localhost:3000",
-				"http://localhost:4173","https://trip-sok.jayden-bin.cc"));
+				"http://localhost:4173", "https://trip-sok.jayden-bin.cc"));
 		corsConfig.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"));
 		corsConfig.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 		corsConfig.setAllowCredentials(true);

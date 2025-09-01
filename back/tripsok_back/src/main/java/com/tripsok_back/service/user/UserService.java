@@ -6,6 +6,8 @@ import com.tripsok_back.dto.user.response.UserInfoResponse;
 
 public interface UserService {
 	UserInfoResponse getUserInfo(Integer userId);
+
 	void changeContactEmail(Integer userId, String emailVerificationToken);
+
 	void changeInterestThemes(Integer userId, Set<Integer> interestThemeIds);
 }
