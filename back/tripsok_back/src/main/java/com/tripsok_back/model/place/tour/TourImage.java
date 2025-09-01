@@ -16,6 +16,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -36,10 +37,18 @@ public class TourImage extends BaseModifiableEntity {
 	@JoinColumn(name = "TOUR_ID", nullable = false)
 	private Tour tour;
 
-	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "ATTRACTION_ID", nullable = false)
 	private Attraction attraction;
 
+	@Size(max = 2000)
+	@Column(name = "URL", length = 2000)
+	private String url;
+
+	public static TourImage buildUrlImage(String image) {
+		TourImage tourImage = new TourImage();
+		tourImage.setUrl(image);
+		return tourImage;
+	}
 }

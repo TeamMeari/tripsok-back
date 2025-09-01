@@ -16,11 +16,11 @@ spring:
       database: ${REDIS_DATABASE}
       password: ${REDIS_PASSWORD}
   datasource:
-    hikari:
-      maximum-pool-size: 4
     url: ${DB_URL}
     password: ${DB_PASSWORD}
     driver-class-name: oracle.jdbc.OracleDriver
+    hikari:
+      maximum-pool-size: 4
   mail:
     host: smtp.gmail.com
     port: 587
@@ -36,4 +36,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        show_sql: true
         dialect: org.hibernate.dialect.OracleDialect
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: trace

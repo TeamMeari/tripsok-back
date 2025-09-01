@@ -5,8 +5,8 @@ import java.math.BigDecimal;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import com.tripsok_back.dto.TourApiPlaceDetailResponseDto;
-import com.tripsok_back.dto.TourApiPlaceResponseDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceDetailResponseDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
 import com.tripsok_back.model.place.accommodation.Accommodation;
 import com.tripsok_back.model.place.restaurant.Restaurant;
 import com.tripsok_back.model.place.tour.Tour;
@@ -22,7 +22,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
@@ -36,8 +36,8 @@ import lombok.Setter;
 @Table(name = "PLACE")
 public class Place extends BaseModifiableEntity {
 	@Id
-	@SequenceGenerator(name = "place_seq", sequenceName = "PLACE_SEQ", allocationSize = 1)
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "place_seq")
+	@SequenceGenerator(name = "global_place_seq", sequenceName = "GLOBAL_PLACE_SEQ", allocationSize = 1)
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "global_place_seq")
 	@Column(name = "ID", nullable = false)
 	private Integer id;
 
@@ -71,17 +71,17 @@ public class Place extends BaseModifiableEntity {
 	@Column(name = "\"like\"")
 	private Integer like;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "TOUR_ID")
 	private Tour tour;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "RESTAURANT_ID")
 	private Restaurant restaurant;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "ACCOMMODATION_ID")
 	private Accommodation accommodation;
@@ -93,7 +93,7 @@ public class Place extends BaseModifiableEntity {
 	private BigDecimal mapY;
 
 	public static Place buildAccommodation(TourApiPlaceResponseDto placeDto,
-		TourApiPlaceDetailResponseDto detailResponseDto) {
+		TourApiPlaceDetailResponseDto detailResponseDto, String categoryName) {
 		Place place = new Place();
 
 		place.setContentId(placeDto.getContentId());
@@ -116,11 +116,46 @@ public class Place extends BaseModifiableEntity {
 		place.setTour(null);
 		place.setRestaurant(null);
 		place.setAccommodation(Accommodation.buildAccommodation(placeDto, detailResponseDto));
+		Accommodation accommodation = place.getAccommodation();
+		accommodation.setAccommodationType(categoryName);
+		accommodation.addImageUrl(detailResponseDto.getFirstImageUrl());
+		accommodation.addImageUrl(detailResponseDto.getFirstImageUrlSecondary());
+		return place;
+	}
+
+	public static Place buildTour(TourApiPlaceResponseDto placeDto,
+		TourApiPlaceDetailResponseDto detailResponseDto, String categoryName) {
+		Place place = new Place();
+
+		place.setContentId(placeDto.getContentId());
+		place.setPlaceName(placeDto.getTitle());
+		place.setAddress(
+			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : ""));
+		place.setContact(placeDto.getPhoneNumber());
+		place.setEmail(null);
+		place.setInformation(detailResponseDto.getOverview());
+		place.setView(0);
+		place.setLike(0);
+
+		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
+			place.setMapX(new BigDecimal(placeDto.getLongitude()));
+			place.setMapY(new BigDecimal(placeDto.getLatitude()));
+		}
+
+		place.setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
+
+		place.setAccommodation(null);
+		place.setRestaurant(null);
+		place.setTour(Tour.buildTour(placeDto, detailResponseDto));
+		Tour tour = place.getTour();
+		tour.setTourType(categoryName);
+		tour.addImageUrl(detailResponseDto.getFirstImageUrl());
+		tour.addImageUrl(detailResponseDto.getFirstImageUrlSecondary());
 		return place;
 	}
 
 	public static Place buildRestaurant(TourApiPlaceResponseDto placeDto,
-		TourApiPlaceDetailResponseDto detailResponseDto) {
+		TourApiPlaceDetailResponseDto detailResponseDto, String categoryName) {
 		Place place = new Place();
 
 		place.setContentId(placeDto.getContentId());
@@ -141,46 +176,23 @@ public class Place extends BaseModifiableEntity {
 		place.setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
 
 		place.setTour(null);
-		place.setRestaurant(Restaurant.buildRestaurant(placeDto, detailResponseDto)); // Restaurant 엔티티에서 build 메서드 필요
 		place.setAccommodation(null);
-
+		place.setRestaurant(Restaurant.buildRestaurant(placeDto, detailResponseDto));
+		Restaurant restaurant = place.getRestaurant();
+		restaurant.setRestaurantType(categoryName);
+		restaurant.addImageUrl(detailResponseDto.getFirstImageUrl());
+		restaurant.addImageUrl(detailResponseDto.getFirstImageUrlSecondary());
 		return place;
 	}
 
-	public static Place buildTour(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto) {
-		Place place = new Place();
-
-		place.setContentId(placeDto.getContentId());
-		place.setPlaceName(placeDto.getTitle());
-		place.setAddress(
-			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : ""));
-		place.setContact(placeDto.getPhoneNumber());
-		place.setEmail(null);
-		place.setInformation(detailResponseDto.getOverview());
-		place.setView(0);
-		place.setLike(0);
-
-		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
-			place.setMapX(new BigDecimal(placeDto.getLongitude()));
-			place.setMapY(new BigDecimal(placeDto.getLatitude()));
-		}
-
-		place.setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
-
-		place.setTour(Tour.buildTour(placeDto, detailResponseDto)); // Tour 엔티티에서 build 메서드 필요
-		place.setRestaurant(null);
-		place.setAccommodation(null);
-
-		return place;
-	}
-
-	public void updateAccommodation(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto) {
+	public void updateAccommodation(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto,
+		String categoryName) {
 		this.placeName = placeDto.getTitle();
 		this.address =
 			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : "");
 		this.contact = placeDto.getPhoneNumber();
 		this.information = detailResponseDto.getOverview();
-
+		this.accommodation.setAccommodationType(categoryName);
 		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
 			this.mapX = new BigDecimal(placeDto.getLongitude());
 			this.mapY = new BigDecimal(placeDto.getLatitude());
@@ -189,13 +201,14 @@ public class Place extends BaseModifiableEntity {
 		setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
 	}
 
-	public void updateRestaurant(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto) {
+	public void updateRestaurant(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto,
+		String categoryName) {
 		this.placeName = placeDto.getTitle();
 		this.address =
 			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : "");
 		this.contact = placeDto.getPhoneNumber();
 		this.information = detailResponseDto.getOverview();
-
+		this.restaurant.setRestaurantType(categoryName);
 		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
 			this.mapX = new BigDecimal(placeDto.getLongitude());
 			this.mapY = new BigDecimal(placeDto.getLatitude());
@@ -204,13 +217,14 @@ public class Place extends BaseModifiableEntity {
 		setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
 	}
 
-	public void updateTour(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto) {
+	public void updateTour(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto,
+		String categoryName) {
 		this.placeName = placeDto.getTitle();
 		this.address =
 			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : "");
 		this.contact = placeDto.getPhoneNumber();
 		this.information = detailResponseDto.getOverview();
-
+		this.tour.setTourType(categoryName);
 		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
 			this.mapX = new BigDecimal(placeDto.getLongitude());
 			this.mapY = new BigDecimal(placeDto.getLatitude());
@@ -218,4 +232,37 @@ public class Place extends BaseModifiableEntity {
 
 		setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
 	}
+
+	public void updateNullRestaurantDetail(TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto,
+		String categoryName) {
+		Restaurant restaurant = this.getRestaurant();
+		restaurant.setRestaurantType(categoryName);
+		restaurant.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrl());
+		restaurant.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrlSecondary());
+	}
+
+	public void updateNullAccommodationDetail(TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto,
+		String categoryName) {
+		Accommodation accommodation = this.getAccommodation();
+		accommodation.setAccommodationType(categoryName);
+		accommodation.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrl());
+		accommodation.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrlSecondary());
+	}
+
+	public void updateNullTourDetail(TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto,
+		String categoryName) {
+		Tour tour = this.getTour();
+		tour.setTourType(categoryName);
+		tour.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrl());
+		tour.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrlSecondary());
+	}
+
+	public void incrementViewCount() {
+		this.view++;
+	}
+
+	public void incrementLikeCount() {
+		this.like++;
+	}
+
 }

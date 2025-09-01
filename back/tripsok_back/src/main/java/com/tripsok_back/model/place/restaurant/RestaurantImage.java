@@ -16,6 +16,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -36,10 +37,18 @@ public class RestaurantImage extends BaseModifiableEntity {
 	@JoinColumn(name = "RESTAURANT_ID", nullable = false)
 	private Restaurant restaurant;
 
-	@NotNull
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "MENU_ID", nullable = false)
 	private Menu menu;
 
+	@Size(max = 2000)
+	@Column(name = "URL", length = 2000)
+	private String url;
+
+	public static RestaurantImage buildUrlImage(String image) {
+		RestaurantImage restaurantImage = new RestaurantImage();
+		restaurantImage.setUrl(image);
+		return restaurantImage;
+	}
 }

@@ -39,20 +39,7 @@ java {
         languageVersion = JavaLanguageVersion.of(21)
     }
 }
-/*
-def loadEnvToProjectProps() {
-    def envFile = file(".env") // 상위 경로 정확히 맞게 수정
-    if (envFile.exists()) {
-        def props = new Properties()
-        envFile.withInputStream { props.load(it) }
-        props.each { key, value ->
-            project.ext.set(key.toString(), value.toString())
-        }
-    }
-}
 
-loadEnvToProjectProps()
-*/
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -73,6 +60,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.projectlombok:lombok'
     testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:oracle-xe'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
@@ -83,6 +73,7 @@ dependencies {
 
     // Test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    runtimeOnly 'com.h2database:h2'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // .env support
