@@ -2,6 +2,7 @@ package com.tripsok_back.model.theme;
 
 import com.tripsok_back.support.BaseTimeEntity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,5 +21,6 @@ public class Theme extends BaseTimeEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 
+	@Column(nullable = false, unique = true, length = 100)
 	private String type;
 }

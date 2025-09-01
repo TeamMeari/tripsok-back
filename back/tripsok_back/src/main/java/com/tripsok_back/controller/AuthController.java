@@ -110,7 +110,7 @@ public class AuthController {
 			.httpOnly(true) // JavaScript 에서 쿠키에 접근할 수 없도록
 			.maxAge(authService.getRefreshTokenExpirationTime() * 60) // 쿠키의 만료 시간 설정
 			.secure(true) // cookie 가 https 에서만 전송되도록
-			.path("/api/auth") // 쿠키가 유효한 경로 설정
+			.path("/api/v1/auth") // 쿠키가 유효한 경로 설정
 			.build();
 	}
 
@@ -119,7 +119,7 @@ public class AuthController {
 			.from("refreshToken", "")
 			.httpOnly(true)
 			.maxAge(0)
-			.path("/api/auth")
+			.path("/api/v1/auth")
 			.build();
 	}
 }

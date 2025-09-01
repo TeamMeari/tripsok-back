@@ -40,6 +40,7 @@ import com.tripsok_back.repository.RedisRefreshTokenRepository;
 import com.tripsok_back.repository.UserRepository;
 import com.tripsok_back.security.dto.TripSokUserDto;
 import com.tripsok_back.security.jwt.JwtUtil;
+import com.tripsok_back.service.user.InterestThemeService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
