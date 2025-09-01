@@ -16,6 +16,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -41,5 +42,9 @@ public class RestaurantImage extends BaseModifiableEntity {
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "MENU_ID", nullable = false)
 	private Menu menu;
+
+	@Size(max = 2000)
+	@Column(name = "URL", length = 2000)
+	private String url;
 
 }

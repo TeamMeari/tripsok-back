@@ -5,8 +5,8 @@ import java.math.BigDecimal;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import com.tripsok_back.dto.TourApiPlaceDetailResponseDto;
-import com.tripsok_back.dto.TourApiPlaceResponseDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceDetailResponseDto;
+import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
 import com.tripsok_back.model.place.accommodation.Accommodation;
 import com.tripsok_back.model.place.restaurant.Restaurant;
 import com.tripsok_back.model.place.tour.Tour;
@@ -174,13 +174,14 @@ public class Place extends BaseModifiableEntity {
 		return place;
 	}
 
-	public void updateAccommodation(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto) {
+	public void updateAccommodation(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto,
+		String categoryName) {
 		this.placeName = placeDto.getTitle();
 		this.address =
 			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : "");
 		this.contact = placeDto.getPhoneNumber();
 		this.information = detailResponseDto.getOverview();
-
+		this.accommodation.setAccommodationType(categoryName);
 		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
 			this.mapX = new BigDecimal(placeDto.getLongitude());
 			this.mapY = new BigDecimal(placeDto.getLatitude());
@@ -189,13 +190,14 @@ public class Place extends BaseModifiableEntity {
 		setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
 	}
 
-	public void updateRestaurant(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto) {
+	public void updateRestaurant(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto,
+		String categoryName) {
 		this.placeName = placeDto.getTitle();
 		this.address =
 			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : "");
 		this.contact = placeDto.getPhoneNumber();
 		this.information = detailResponseDto.getOverview();
-
+		this.restaurant.setRestaurantType(categoryName);
 		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
 			this.mapX = new BigDecimal(placeDto.getLongitude());
 			this.mapY = new BigDecimal(placeDto.getLatitude());
@@ -204,13 +206,14 @@ public class Place extends BaseModifiableEntity {
 		setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
 	}
 
-	public void updateTour(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto) {
+	public void updateTour(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto,
+		String categoryName) {
 		this.placeName = placeDto.getTitle();
 		this.address =
 			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : "");
 		this.contact = placeDto.getPhoneNumber();
 		this.information = detailResponseDto.getOverview();
-
+		this.tour.setTourType(categoryName);
 		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
 			this.mapX = new BigDecimal(placeDto.getLongitude());
 			this.mapY = new BigDecimal(placeDto.getLatitude());
