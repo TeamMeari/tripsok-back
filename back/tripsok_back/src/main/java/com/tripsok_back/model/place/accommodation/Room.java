@@ -23,7 +23,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "ROOM", schema = "TRIPSOK")
+@Table(name = "ROOM")
 public class Room extends BaseModifiableEntity {
 	@Id
 	@SequenceGenerator(name = "room_seq", sequenceName = "ROOM_SEQ", allocationSize = 1)

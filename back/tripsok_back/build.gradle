@@ -3,10 +3,36 @@ plugins {
     id 'org.springframework.boot' version '3.5.0'
     id 'io.spring.dependency-management' version '1.1.7'
     id "org.flywaydb.flyway" version '11.10.1'
+    id 'com.google.cloud.tools.jib' version '3.4.0'
 }
 
 group = 'com'
 version = '0.0.1-SNAPSHOT'
+
+jib {
+    from {
+        image = "eclipse-temurin:21-jre"
+        platforms {
+            platform {
+                architecture = "arm64"
+                os = "linux"
+            }
+        }
+    }
+    to {
+        image = 'chaechae121/trip-sok:latest'
+        auth {
+            username = System.getenv("DOCKER_USERNAME") ?: ""
+            password = System.getenv("DOCKER_PASSWORD") ?: ""
+        }
+    }
+    container {
+        environment = [
+                'TZ': 'Asia/Seoul'
+        ]
+        jvmFlags = ['-Dspring.profiles.active=stable'] // JVM 옵션 설정
+    }
+}
 
 java {
     toolchain {

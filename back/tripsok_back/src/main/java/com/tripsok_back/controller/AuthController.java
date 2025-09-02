@@ -1,6 +1,7 @@
 package com.tripsok_back.controller;
 
 import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthController {
 
 	private final AuthService authService;
-	private final String COOKIE_HEARER = "Set-Cookie";
+	private final String COOKIE_HEARER = HttpHeaders.SET_COOKIE;
 
 	@PostMapping("/signup/email")
 	public ResponseEntity<Void> signUpWithEmail(@Valid @RequestBody EmailSignUpRequest request) {

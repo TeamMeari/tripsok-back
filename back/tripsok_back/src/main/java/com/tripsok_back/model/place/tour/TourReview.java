@@ -23,7 +23,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "TOUR_REVIEW", schema = "TRIPSOK")
+@Table(name = "TOUR_REVIEW")
 public class TourReview extends BaseModifiableEntity {
 	@Id
 	@SequenceGenerator(name = "tour_review_seq", sequenceName = "TOUR_REVIEW_SEQ", allocationSize = 1)
