@@ -16,7 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "PLACE_LCLS_CATEGORY", schema = "TRIPSOK")
+@Table(name = "PLACE_LCLS_CATEGORY")
 public class PlaceLclsCategory {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
