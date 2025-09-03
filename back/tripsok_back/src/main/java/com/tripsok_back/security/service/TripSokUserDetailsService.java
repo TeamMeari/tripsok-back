@@ -8,11 +8,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import com.tripsok_back.exception.AuthException;
 import com.tripsok_back.exception.ErrorCode;
+import com.tripsok_back.exception.AuthException;
 import com.tripsok_back.model.user.SocialType;
 import com.tripsok_back.model.user.TripSokUser;
-import com.tripsok_back.repository.UserRepository;
+import com.tripsok_back.repository.user.UserRepository;
 import com.tripsok_back.security.dto.TripSokUserDto;
 
 import lombok.RequiredArgsConstructor;

@@ -1,4 +1,4 @@
-package com.tripsok_back.repository;
+package com.tripsok_back.repository.user;
 
 import java.util.Optional;
 

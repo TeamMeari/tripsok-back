@@ -7,9 +7,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.tripsok_back.exception.AuthException;
 import com.tripsok_back.exception.ErrorCode;
-import com.tripsok_back.repository.RedisBlackListAccessTokenRepository;
+import com.tripsok_back.exception.AuthException;
+import com.tripsok_back.repository.auth.RedisBlackListAccessTokenRepository;
 import com.tripsok_back.security.jwt.JwtUtil;
 
 import jakarta.servlet.FilterChain;
