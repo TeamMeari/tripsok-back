@@ -21,9 +21,9 @@ import com.tripsok_back.dto.auth.request.ResetPasswordRequest;
 import com.tripsok_back.dto.auth.response.LoginResponse;
 import com.tripsok_back.dto.auth.response.NicknameDuplicateCheckResponse;
 import com.tripsok_back.dto.auth.response.TokenResponse;
-import com.tripsok_back.exception.AuthException;
 import com.tripsok_back.exception.ErrorCode;
-import com.tripsok_back.service.AuthService;
+import com.tripsok_back.exception.AuthException;
+import com.tripsok_back.service.auth.AuthService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

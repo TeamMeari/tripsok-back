@@ -1,4 +1,4 @@
-package com.tripsok_back.service;
+package com.tripsok_back.service.email;
 
 import static com.tripsok_back.exception.ErrorCode.*;
 
@@ -15,7 +15,7 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import com.tripsok_back.dto.email.response.EmailVerifyResponse;
 import com.tripsok_back.exception.EmailException;
 import com.tripsok_back.model.auth.EmailVerificationToken;
-import com.tripsok_back.repository.RedisEmailVerificationTokenRepository;
+import com.tripsok_back.repository.email.RedisEmailVerificationTokenRepository;
 import com.tripsok_back.security.jwt.JwtUtil;
 
 import jakarta.mail.MessagingException;
@@ -23,16 +23,16 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@Transactional
 @RequiredArgsConstructor
 @Slf4j
 @Service
-public class EmailService {
+public class EmailServiceImpl implements EmailService {
 	private final JavaMailSender mailSender;
 	private final SpringTemplateEngine templateEngine;
 	private final RedisEmailVerificationTokenRepository emailVerificationTokenRepository;
 	private final JwtUtil jwtUtil;
 
+	@Override
 	@Transactional
 	public void sendVerificationEmail(String email) {
 		String code = createCode();
@@ -54,6 +54,7 @@ public class EmailService {
 		}
 	}
 
+	@Override
 	@Transactional
 	public EmailVerifyResponse verifyEmailCode(String email, String code) {
 		EmailVerificationToken codeFoundByEmail = emailVerificationTokenRepository.findByEmail(email);
