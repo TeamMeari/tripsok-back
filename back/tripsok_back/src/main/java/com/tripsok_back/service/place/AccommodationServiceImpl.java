@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class AccommodationServiceImpl implements PlaceService {
+public class AccommodationServiceImpl extends PlaceService {
 
 	private final ApiKeyConfig apiKeyConfig;
 	private final TouristApiClientUtil tourApiClient;

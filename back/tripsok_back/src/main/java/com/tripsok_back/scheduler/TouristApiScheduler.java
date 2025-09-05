@@ -10,7 +10,6 @@ import com.tripsok_back.service.place.CategoryService;
 import com.tripsok_back.service.place.PlaceService;
 import com.tripsok_back.type.TourismType;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,7 +31,6 @@ public class TouristApiScheduler {
 	}
 
 	@Scheduled(cron = "0 0 1 * * *")
-	@PostConstruct
 	public void initTourPlaceRequest() throws JsonProcessingException {
 		runBatchAccommodationRequestApi();
 		runBatchRestaurantRequestApi();

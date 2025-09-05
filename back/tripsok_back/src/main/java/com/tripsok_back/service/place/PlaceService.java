@@ -1,6 +1,8 @@
 package com.tripsok_back.service.place;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.domain.Pageable;
 
@@ -9,21 +11,29 @@ import com.tripsok_back.dto.place.PlaceBriefResponseDto;
 import com.tripsok_back.dto.place.PlaceDetailResponseDto;
 import com.tripsok_back.dto.place.ReviewRequestDto;
 import com.tripsok_back.model.place.Place;
+import com.tripsok_back.model.place.PlaceTag;
 import com.tripsok_back.type.TourismType;
 
-public interface PlaceService {
+public abstract class PlaceService {
+	protected List<PlaceTag> getPlaceTagsByIds(List<Integer> tagIds) {
+		return null;
+	}
 
-	TourismType getType();
+	protected Set<PlaceTag> getPlaceTags(Place place) {
+		return place.getTags();
+	}
 
-	void startPlaceUpdate(int numOfRow, int pageNo);
+	public abstract TourismType getType();
 
-	Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId);
+	public abstract void startPlaceUpdate(int numOfRow, int pageNo);
 
-	void addView(Place place);
+	public abstract Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId);
 
-	void addLike(Place place);
+	abstract void addView(Place place);
 
-	PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable);
+	public abstract void addLike(Place place);
 
-	void addReview(Integer userId, ReviewRequestDto reviewRequestdto);
+	public abstract PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable);
+
+	public abstract void addReview(Integer userId, ReviewRequestDto reviewRequestdto);
 }

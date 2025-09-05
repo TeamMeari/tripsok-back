@@ -5,3 +5,5 @@ client:
     refresh-token-expiration-time: ${JWT_REFRESH_TOKEN_EXPIRATION_TIME}
     email-verification-token-expiration-time: ${JWT_EMAIL_VERIFICATION_TOKEN_EXPIRATION_TIME}
     oauth2-access-token-expiration-time: ${JWT_OAUTH2_ACCESS_TOKEN_EXPIRATION_TIME}
+  ai:
+    github-token: ${GIT_HUB_TOKEN}

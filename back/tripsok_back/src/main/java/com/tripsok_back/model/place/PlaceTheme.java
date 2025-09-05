@@ -37,7 +37,7 @@ public class PlaceTheme extends BaseTimeEntity {
 	@JoinColumn(name = "PLACE_ID", nullable = false)
 	private Place place;
 
-	@ManyToMany
+	@ManyToOne
 	@JoinColumn(name = "THEME_ID", nullable = false)
 	private Theme theme;
 }
