@@ -1,4 +1,4 @@
-package com.tripsok_back.config;
+package com.tripsok_back.config.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -8,8 +8,6 @@ import lombok.Setter;
 @ConfigurationProperties(prefix = "client.ai")
 @Getter
 @Setter
-public class AccidentCaseProperties {
-String apiKey;
-String embeddingKey;
-String embeddingUrl;
+public class AiProperties {
+	private String githubToken;
 }
