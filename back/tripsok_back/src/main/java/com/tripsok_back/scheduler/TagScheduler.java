@@ -35,12 +35,13 @@ public class TagScheduler {
 	private final PlaceThemeRepository placeThemeRepository;
 	private final PlaceTagRepository placeTagRepository;
 
-	@Scheduled(cron = "0 0 5 * * *")
+	@Scheduled(fixedRateString = "PT48H", initialDelayString = "PT2H")
 	void runBatchTagRequestApi() {
 		log.info("Place Tag 업데이트 시작");
 		int pageNum = 0;
 		while (true) {
 			Pageable pageable = PageRequest.of(pageNum, 50);
+			log.info("pageNum={} 장소 태그 업데이트 시작", pageNum);
 			List<Place> places = placeRepository.findByOrderByCreatedAtDesc(pageable).getContent();
 			if (places.isEmpty()) {
 				log.info("Place Tag 업데이트 종료 - 업데이트할 장소가 없습니다");
