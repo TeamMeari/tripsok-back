@@ -1,6 +1,8 @@
 package com.tripsok_back.model.place;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -22,6 +24,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
@@ -91,6 +94,14 @@ public class Place extends BaseModifiableEntity {
 
 	@Column(name = "MAP_Y", precision = 13, scale = 10)
 	private BigDecimal mapY;
+
+	// 정해진 테마 1~3개 저장
+	@OneToMany(mappedBy = "place", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<PlaceTheme> themes = new HashSet<>();
+
+	// 자유 태그 2~4개 저장
+	@OneToMany(mappedBy = "place", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<PlaceTag> tags = new HashSet<>();
 
 	public static Place buildAccommodation(TourApiPlaceResponseDto placeDto,
 		TourApiPlaceDetailResponseDto detailResponseDto, String categoryName) {
