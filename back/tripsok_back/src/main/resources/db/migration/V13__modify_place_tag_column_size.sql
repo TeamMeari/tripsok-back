@@ -1,2 +1,0 @@
-ALTER TABLE tag
-    MODIFY name VARCHAR2(28);
