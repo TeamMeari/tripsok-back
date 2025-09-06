@@ -10,8 +10,8 @@ import com.tripsok_back.dto.user.response.InterestThemeResponse;
 import com.tripsok_back.model.theme.Theme;
 import com.tripsok_back.model.user.InterestTheme;
 import com.tripsok_back.model.user.TripSokUser;
+import com.tripsok_back.repository.theme.ThemeRepository;
 import com.tripsok_back.repository.user.InterestThemeRepository;
-import com.tripsok_back.repository.user.ThemeRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

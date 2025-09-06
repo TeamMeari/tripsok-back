@@ -1,4 +1,4 @@
-package com.tripsok_back.repository.user;
+package com.tripsok_back.repository.theme;
 
 import java.util.List;
 import java.util.Set;
