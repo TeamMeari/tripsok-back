@@ -5,9 +5,13 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.tripsok_back.dto.tourApi.TourApiPlaceDetailResponseDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
 import com.tripsok_back.model.place.Place;
+import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.support.BaseModifiableEntity;
 
 import jakarta.persistence.CascadeType;
@@ -17,10 +21,13 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -50,6 +57,12 @@ public class Accommodation extends BaseModifiableEntity {
 
 	@OneToMany(mappedBy = "accommodation")
 	private Set<Room> rooms = new LinkedHashSet<>();
+
+	@NotNull
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@OnDelete(action = OnDeleteAction.RESTRICT)
+	@JoinColumn(name = "PLACE_LCLS_CATEGORY_ID", nullable = false)
+	private PlaceLclsCategory placeLclsCategory;
 
 	public static Accommodation buildAccommodation(TourApiPlaceResponseDto placeDto,
 		TourApiPlaceDetailResponseDto detailResponseDto) {

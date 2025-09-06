@@ -1,10 +1,15 @@
 package com.tripsok_back.model.place;
 
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import com.tripsok_back.dto.tourApi.LclsCategoryItemResponseDto;
+import com.tripsok_back.model.place.accommodation.Accommodation;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -54,6 +59,12 @@ public class PlaceLclsCategory {
 	@NotNull
 	@Column(name = "LCLS_SYSTM3_NAME", nullable = false, length = 200)
 	private String lclsSystm3Name;
+
+	@OneToMany(mappedBy = "placeLclsCategory")
+	private Set<Accommodation> accommodations = new LinkedHashSet<>();
+
+	@OneToMany(mappedBy = "category")
+	private Set<PlaceLclsCategoryTr> placeLclsCategoryTrs = new LinkedHashSet<>();
 
 	public static PlaceLclsCategory fromDto(LclsCategoryItemResponseDto dto) {
 		return PlaceLclsCategory.builder()
