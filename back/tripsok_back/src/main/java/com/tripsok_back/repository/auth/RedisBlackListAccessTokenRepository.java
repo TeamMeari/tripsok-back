@@ -1,4 +1,4 @@
-package com.tripsok_back.repository;
+package com.tripsok_back.repository.auth;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;

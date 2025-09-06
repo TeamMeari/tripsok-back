@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
+import com.tripsok_back.config.properties.EmailProperties;
+
 import lombok.RequiredArgsConstructor;
 
 @Configuration

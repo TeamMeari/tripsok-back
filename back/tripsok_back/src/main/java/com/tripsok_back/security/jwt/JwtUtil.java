@@ -12,7 +12,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import com.tripsok_back.config.JwtProperties;
+import com.tripsok_back.config.properties.JwtProperties;
 import com.tripsok_back.exception.ErrorCode;
 import com.tripsok_back.exception.JwtException;
 import com.tripsok_back.model.user.SocialType;

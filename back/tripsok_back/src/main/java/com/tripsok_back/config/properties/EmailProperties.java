@@ -1,4 +1,4 @@
-package com.tripsok_back.config;
+package com.tripsok_back.config.properties;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
