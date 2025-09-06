@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class RestaurantServiceImpl extends PlaceService {
+public class RestaurantServiceImpl implements PlaceService {
 
 	private final ApiKeyConfig apiKeyConfig;
 	private final TouristApiClientUtil tourApiClient;
@@ -90,14 +90,13 @@ public class RestaurantServiceImpl extends PlaceService {
 	@Override
 	public PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable) {
 		Page<Place> placeList = restaurantRepository.findByRestaurantIsNotNull(pageable);
-		if (placeList.getTotalPages() == 0)
-			return PageResponse.empty();
-		Page<PlaceBriefResponseDto> dtoList = placeList.map(
-			e -> PlaceBriefResponseDto.from(e, getType().name(),
-				e.getRestaurant().getImageUrlList().getFirst(),
-				e.getRestaurant().getRestaurantImages().size(),
-				e.getRestaurant().getRestaurantReviews().size()));
-		return PageResponse.fromPage(placeList, dtoList);
+		return toPlaceBriefResponseDto(placeList);
+	}
+
+	@Override
+	public PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId) {
+		Page<Place> placeList = restaurantRepository.findByRestaurantIsNotNullAndThemes_Theme_Id(pageable, themeId);
+		return toPlaceBriefResponseDto(placeList);
 	}
 
 	@Override
@@ -179,4 +178,14 @@ public class RestaurantServiceImpl extends PlaceService {
 		Place restaurantPlace = Place.buildRestaurant(placeDto, detailResponseDto, categoryName);
 		restaurantRepository.save(restaurantPlace);
 	}
+	private PageResponse<PlaceBriefResponseDto> toPlaceBriefResponseDto(Page<Place> placeList) {
+		if (placeList.getTotalPages() == 0)
+			return PageResponse.empty();
+		Page<PlaceBriefResponseDto> dtoList = placeList.map(
+			e -> PlaceBriefResponseDto.from(e, getType().name(),
+				e.getRestaurant().getImageUrlList().getFirst(),
+				e.getRestaurant().getRestaurantImages().size(),
+				e.getRestaurant().getRestaurantReviews().size()));
+		return PageResponse.fromPage(placeList, dtoList);
+		}
 }

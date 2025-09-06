@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class AccommodationServiceImpl extends PlaceService {
+public class AccommodationServiceImpl implements PlaceService {
 
 	private final ApiKeyConfig apiKeyConfig;
 	private final TouristApiClientUtil tourApiClient;
@@ -93,15 +93,12 @@ public class AccommodationServiceImpl extends PlaceService {
 	@Override
 	public PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable) throws TourApiException {
 		Page<Place> placeList = accommodationRepository.findByAccommodationIsNotNull(pageable);
-		if (placeList.getTotalPages() == 0)
-			return PageResponse.empty();
-		//throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
-		Page<PlaceBriefResponseDto> dtoList = placeList.map(
-			e -> PlaceBriefResponseDto.from(e, getType().name(),
-				e.getAccommodation().getImageUrlList().getFirst(),
-				e.getAccommodation().getAccommodationImages().size(),
-				e.getAccommodation().getAccommodationReviews().size()));
-		return PageResponse.fromPage(placeList, dtoList);
+		return toPlaceBriefResponseDto(placeList);
+	}
+
+	public PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId) {
+		Page<Place> placeList = accommodationRepository.findByAccommodationIsNotNullAndThemes_Theme_Id(pageable, themeId);
+		return toPlaceBriefResponseDto(placeList);
 	}
 
 	@Override
@@ -186,6 +183,17 @@ public class AccommodationServiceImpl extends PlaceService {
 		String categoryName = categoryService.getCategoryByCode(detailResponseDto.getLargeClassificationSystem3());
 		Place accommodationPlace = Place.buildAccommodation(placeDto, detailResponseDto, categoryName);
 		accommodationRepository.save(accommodationPlace);
+	}
+
+	private PageResponse<PlaceBriefResponseDto> toPlaceBriefResponseDto(Page<Place> placeList) {
+		if (placeList.getTotalPages() == 0)
+			return PageResponse.empty();
+		Page<PlaceBriefResponseDto> dtoList = placeList.map(
+			e -> PlaceBriefResponseDto.from(e, getType().name(),
+				e.getAccommodation().getImageUrlList().getFirst(),
+				e.getAccommodation().getAccommodationImages().size(),
+				e.getAccommodation().getAccommodationReviews().size()));
+		return PageResponse.fromPage(placeList, dtoList);
 	}
 
 }

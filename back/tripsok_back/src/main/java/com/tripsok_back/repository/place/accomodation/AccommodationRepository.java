@@ -22,4 +22,7 @@ public interface AccommodationRepository extends JpaRepository<Place, Integer> {
 
 	@EntityGraph(attributePaths = {"accommodation"})
 	Page<Place> findByAccommodationIsNotNull(Pageable pageable);
+
+	@EntityGraph(attributePaths = {"accommodation"})
+	Page<Place> findByAccommodationIsNotNullAndThemes_Theme_Id(Pageable pageable, Integer themeId);
 }

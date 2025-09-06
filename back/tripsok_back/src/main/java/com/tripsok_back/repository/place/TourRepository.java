@@ -21,4 +21,7 @@ public interface TourRepository extends JpaRepository<Place, Integer> {
 
 	@EntityGraph(attributePaths = {"tour"})
 	Page<Place> findByTourIsNotNull(Pageable pageable);
+
+	@EntityGraph(attributePaths = {"tour"})
+	Page<Place> findByTourIsNotNullAndThemes_Theme_Id(Pageable pageable, Integer themeId);
 }

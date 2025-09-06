@@ -79,7 +79,10 @@ public class PlaceController {
 
 		@Parameter(description = "정렬 스타일(쿼리 파라미터 집합)")
 		@ParameterObject
-		@RequestParam(required = false) PlaceSortStyle sortStyle
+		@RequestParam(required = false) PlaceSortStyle sortStyle,
+
+		@Parameter(description = "테마 ID", example = "1")
+		@RequestParam(required = false) Integer themeId
 	) {
 		Sort sort = (sortStyle != null)
 			? sortStyle.toSort()
@@ -89,7 +92,12 @@ public class PlaceController {
 
 		TourismType type = TourismType.fromOrThrow(category);
 		log.info("{} 항목 리스트 조회 시작", type.name());
-		PageResponse<PlaceBriefResponseDto> body = getService(type).getPlaceList(pageable);
+		PageResponse<PlaceBriefResponseDto> body;
+		if (themeId != null) {
+			body = getService(type).getPlaceListByTheme(pageable, themeId);
+		}else {
+			body = getService(type).getPlaceList(pageable);
+		}
 		return ResponseEntity.ok(body);
 	}
 

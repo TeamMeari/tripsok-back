@@ -22,4 +22,7 @@ public interface RestaurantRepository extends JpaRepository<Place, Integer> {
 
 	@EntityGraph(attributePaths = {"restaurant"})
 	Page<Place> findByRestaurantIsNotNull(Pageable pageable);
+
+	@EntityGraph(attributePaths = {"restaurant"})
+	Page<Place> findByRestaurantIsNotNullAndThemes_Theme_Id(Pageable pageable, Integer themeId);
 }

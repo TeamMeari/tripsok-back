@@ -18,7 +18,7 @@ import com.tripsok_back.repository.PlaceTagRepository;
 import com.tripsok_back.repository.PlaceThemeRepository;
 import com.tripsok_back.repository.place.PlaceRepository;
 import com.tripsok_back.repository.place.TagRepository;
-import com.tripsok_back.repository.user.ThemeRepository;
+import com.tripsok_back.repository.theme.ThemeRepository;
 import com.tripsok_back.util.AiUtil;
 
 import lombok.RequiredArgsConstructor;
