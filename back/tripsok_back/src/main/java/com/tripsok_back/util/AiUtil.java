@@ -72,7 +72,6 @@ public class AiUtil {
 
 	public PlaceThemeAndTagResponse getThemeAndTag(String question) {
 		ArrayList<ChatRequestMessage> chatMessages = new ArrayList<>();
-		ObjectMapper om = new ObjectMapper();
 		String payload;
 		try {
 			payload = om.writeValueAsString(question);
@@ -84,7 +83,7 @@ public class AiUtil {
 		chatMessages.add(new ChatRequestUserMessage(payload));
 
 		ChatCompletionsOptions chatCompletionsOptions = new ChatCompletionsOptions(chatMessages);
-		ChatCompletions completions = getChatComplete(0, chatCompletionsOptions, 0);
+		ChatCompletions completions = getChatComplete(chatCompletionsOptions);
 		try {
 			return om.readValue(completions.getChoices().getFirst().getMessage().getContent(),
 				PlaceThemeAndTagResponse.class);
@@ -94,22 +93,20 @@ public class AiUtil {
 		}
 	}
 
-	private ChatCompletions getChatComplete(int modelIndex, ChatCompletionsOptions chatCompletionsOptions,
-		int retryCount) { //TODO : retryCount 제거
-		ChatCompletionsClient chatCompletionsClient = new ChatCompletionsClientBuilder()
-			.credential(new AzureKeyCredential(aiProperties.getGithubToken()))
-			.endpoint(END_POINT)
-			.buildClient();
-		chatCompletionsOptions.setModel(MODELS.get(modelIndex));
-		chatCompletionsOptions.setResponseFormat(new ChatCompletionsResponseFormatJsonObject());
-		try {
-			return chatCompletionsClient.complete(chatCompletionsOptions);
-		} catch (Exception e) {
-			log.warn("모델 선택 에러 : {} / 모델 : {}", e.getMessage(), MODELS.get(modelIndex));
-			if (retryCount == 2) {
-				throw new AiException(InternalErrorCode.RETRIES_EXCEEDED_ERROR, e.getMessage());
+	private ChatCompletions getChatComplete(ChatCompletionsOptions chatCompletionsOptions) { //TODO : retryCount 제거
+		for (String model : MODELS) {
+			try {
+				ChatCompletionsClient chatCompletionsClient = new ChatCompletionsClientBuilder()
+					.credential(new AzureKeyCredential(aiProperties.getServiceKey()))
+					.endpoint(END_POINT)
+					.buildClient();
+				chatCompletionsOptions.setModel(model);
+				chatCompletionsOptions.setResponseFormat(new ChatCompletionsResponseFormatJsonObject());
+				return chatCompletionsClient.complete(chatCompletionsOptions);
+			} catch (Exception e) {
+				log.warn("모델 {} 호출 실패: {}", model, e.getMessage(), e);
 			}
-			return getChatComplete((modelIndex + 1) % MODELS.size(), chatCompletionsOptions, retryCount + 1);
 		}
+		throw new AiException(InternalErrorCode.RETRIES_EXCEEDED_ERROR, new RuntimeException("모든 AI 모델 호출에 실패했습니다."));
 	}
 }

@@ -1,5 +1,6 @@
 package com.tripsok_back.dto.place;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import lombok.Getter;
@@ -8,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PlaceThemeAndTagResponse {
-	private Set<Item> places;
+	private Set<Item> places = new HashSet<>();
 
 	@Getter
 	@Setter

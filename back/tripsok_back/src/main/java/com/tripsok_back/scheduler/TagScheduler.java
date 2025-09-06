@@ -47,12 +47,14 @@ public class TagScheduler {
 				log.info("Place Tag 업데이트 종료 - 업데이트할 장소가 없습니다");
 				return;
 			}
+			Set<Integer> themedPlaces = placeThemeRepository.findByPlaceIn(places).stream().map(
+				item -> item.getPlace().getId()).collect(Collectors.toSet());
 			Set<Integer> taggedPlaces = placeTagRepository.findByPlaceIn(places).stream().map(
 				item -> item.getPlace().getId()).collect(Collectors.toSet());
-
 			// 존재하지 않는 Place만 남김
 			List<Place> placeList = places.stream()
-				.filter(p -> !taggedPlaces.contains(p.getId()))
+				.filter(p -> !themedPlaces.contains(p.getId()) || !taggedPlaces.contains(
+					p.getId())) // 둘 중 하나라도 없으면 밑에 로직을 탐
 				.toList();
 
 			if (placeList.isEmpty()) {

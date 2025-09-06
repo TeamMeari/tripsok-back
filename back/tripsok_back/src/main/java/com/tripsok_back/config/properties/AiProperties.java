@@ -9,5 +9,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AiProperties {
-	private String githubToken;
+	private String serviceKey;
 }
