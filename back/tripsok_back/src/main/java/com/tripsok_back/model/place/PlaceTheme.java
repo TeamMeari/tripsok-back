@@ -10,11 +10,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
@@ -27,6 +27,7 @@ import lombok.Setter;
 	uniqueConstraints = {
 		@UniqueConstraint(name = "uk_place_theme_place_and_theme", columnNames = {"PLACE_ID", "THEME_ID"})
 	})
+@NoArgsConstructor
 public class PlaceTheme extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,4 +41,9 @@ public class PlaceTheme extends BaseTimeEntity {
 	@ManyToOne
 	@JoinColumn(name = "THEME_ID", nullable = false)
 	private Theme theme;
+
+	public PlaceTheme(Place place, Theme theme) {
+		this.place = place;
+		this.theme = theme;
+	}
 }

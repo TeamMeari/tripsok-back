@@ -13,6 +13,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
@@ -25,6 +26,7 @@ import lombok.Setter;
 	uniqueConstraints = {
 		@UniqueConstraint(name = "uk_place_tag_place_and_tag", columnNames = {"PLACE_ID", "TAG_ID"})
 	})
+@NoArgsConstructor
 public class PlaceTag extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -38,4 +40,9 @@ public class PlaceTag extends BaseTimeEntity {
 	@ManyToOne
 	@JoinColumn(name = "TAG_ID", nullable = false)
 	private Tag tag;
+
+	public PlaceTag(Place place, Tag tag) {
+		this.place = place;
+		this.tag = tag;
+	}
 }

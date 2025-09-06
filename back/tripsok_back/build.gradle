@@ -99,7 +99,7 @@ dependencies {
     implementation 'org.redisson:redisson-spring-boot-starter:3.46.0'
 
     // Azure
-    implementation 'com.azure:azure-ai-inference:1.0.0-beta.1'
+    implementation 'com.azure:azure-ai-inference:1.0.0-beta.5'
 }
 
 flyway {

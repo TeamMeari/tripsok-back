@@ -11,6 +11,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
@@ -19,13 +20,18 @@ import lombok.Setter;
 @Table(name = "TAG", indexes = {
 	@Index(name = "idx_tag_name", columnList = "NAME")
 })
+@NoArgsConstructor
 public class Tag extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "ID")
 	private Integer id;
 
-	@Size(max = 7)
-	@Column(name = "NAME", length = 7, nullable = false, updatable = false, unique = true)
+	@Size(max = 28)
+	@Column(name = "NAME", nullable = false, updatable = false, unique = true)
 	private String name;
+
+	public Tag(String name) {
+		this.name = name;
+	}
 }
