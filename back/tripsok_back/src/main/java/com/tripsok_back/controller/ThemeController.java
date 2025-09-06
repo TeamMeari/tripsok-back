@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tripsok_back.dto.user.response.ThemeResponse;
-import com.tripsok_back.service.user.ThemeService;
+import com.tripsok_back.dto.theme.response.ThemeResponse;
+import com.tripsok_back.service.theme.ThemeService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

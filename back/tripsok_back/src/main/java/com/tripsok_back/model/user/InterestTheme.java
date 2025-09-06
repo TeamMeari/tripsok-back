@@ -1,5 +1,6 @@
 package com.tripsok_back.model.user;
 
+import com.tripsok_back.model.theme.Theme;
 import com.tripsok_back.support.BaseTimeEntity;
 
 import jakarta.persistence.CascadeType;
