@@ -3,25 +3,27 @@ package com.tripsok_back.model.place;
 import com.tripsok_back.dto.tourApi.LclsCategoryItemResponseDto;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "PLACE_LCLS_CATEGORY", schema = "TRIPSOK")
+@Table(name = "PLACE_LCLS_CATEGORY")
+@Builder
+@RequiredArgsConstructor
+@AllArgsConstructor
 public class PlaceLclsCategory {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "ID", nullable = false)
-	private Long id;
+	@EmbeddedId
+	private PlaceLclsCategoryId id;
 
 	@Size(max = 10)
 	@NotNull
@@ -54,17 +56,13 @@ public class PlaceLclsCategory {
 	private String lclsSystm3Name;
 
 	public static PlaceLclsCategory fromDto(LclsCategoryItemResponseDto dto) {
-		PlaceLclsCategory entity = new PlaceLclsCategory();
-		entity.setLclsSystm1Code(dto.getLclsSystm1Cd());
-		entity.setLclsSystm1Name(dto.getLclsSystm1Nm());
-		entity.setLclsSystm2Code(dto.getLclsSystm2Cd());
-		entity.setLclsSystm2Name(dto.getLclsSystm2Nm());
-		entity.setLclsSystm3Code(dto.getLclsSystm3Cd());
-		entity.setLclsSystm3Name(dto.getLclsSystm3Nm());
-		return entity;
-	}
-
-	public void updateCategory(LclsCategoryItemResponseDto dto) {
-		this.lclsSystm3Name = dto.getLclsSystm3Nm();
+		return PlaceLclsCategory.builder()
+			.lclsSystm1Code(dto.getLclsSystm1Cd())
+			.lclsSystm1Name(dto.getLclsSystm1Nm())
+			.lclsSystm2Code(dto.getLclsSystm2Cd())
+			.lclsSystm2Name(dto.getLclsSystm2Nm())
+			.lclsSystm3Code(dto.getLclsSystm3Cd())
+			.lclsSystm3Name(dto.getLclsSystm3Nm())
+			.build();
 	}
 }
