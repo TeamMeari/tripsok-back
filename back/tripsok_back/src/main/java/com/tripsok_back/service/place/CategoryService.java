@@ -1,8 +1,10 @@
 package com.tripsok_back.service.place;
 
+import com.tripsok_back.model.place.PlaceLclsCategory;
+
 public interface CategoryService {
 
 	void requestAndUpdateCategory();
 
-	String getCategoryByCode(String code);
+	PlaceLclsCategory getCategoryByCode(String code);
 }
