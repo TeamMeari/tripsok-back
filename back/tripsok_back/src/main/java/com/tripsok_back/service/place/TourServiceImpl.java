@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripsok_back.config.ApiKeyConfig;
@@ -21,10 +22,13 @@ import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
 import com.tripsok_back.exception.InternalErrorCode;
 import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.model.place.Place;
+import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.repository.place.TourRepository;
+import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
 import com.tripsok_back.util.JsonMapperUtil;
+import com.tripsok_back.util.LocalLlmClientUtil;
 import com.tripsok_back.util.TimeUtil;
 import com.tripsok_back.util.TouristApiClientUtil;
 
@@ -41,6 +45,7 @@ public class TourServiceImpl implements PlaceService {
 	private final TourRepository tourRepository;
 	private final CategoryService categoryService;
 	private final ObjectMapper om;
+	private final LocalLlmClientUtil groqApiClientUtil;
 
 	@Override
 	public TourismType getType() {
@@ -59,19 +64,37 @@ public class TourServiceImpl implements PlaceService {
 	}
 
 	@Override
-	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId) {
+	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, com.tripsok_back.type.LocaleCode locale) {
 		Optional<Place> optPlace = tourRepository.findById(placeId);
 		if (optPlace.isEmpty())
 			throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
 		Place placeTour = optPlace.get();
-		if (placeTour.getTour().getTourType().isEmpty()) {
+
+		// Ensure KO summary exists
+		if (placeTour.getPlaceTr(LocaleCode.KO) == null ||
+			!StringUtils.hasText(placeTour.getPlaceTr(LocaleCode.KO).getSummary())) {
+			createShortDescription(placeTour);
+		}
+		// Ensure requested locale summary/info/phonetics exist
+		if (locale != null && locale != LocaleCode.KO) {
+			if (placeTour.getPlaceTr(locale) == null ||
+				!StringUtils.hasText(placeTour.getPlaceTr(locale).getSummary())) {
+				placeTour.upsertTranslation(locale, null, null, null, null);
+				createSummaryTranslation(placeTour, locale);
+			}
+			createInformationTranslation(placeTour, locale);
+			createTransliterationForNameAndAddress(placeTour, locale);
+		}
+		if (placeTour.getTour().getPlaceLclsCategory() == null ||
+			(placeTour.getTour().getTourImages() == null || placeTour.getTour().getTourImages().isEmpty())) {
 			TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto = requestPlaceDetail(
 				placeTour.getContentId());
-			String categoryName = categoryService.getCategoryByCode(tourApiPlaceDetailResponseDto.getCategoryLevel3());
-			placeTour.updateNullTourDetail(tourApiPlaceDetailResponseDto, categoryName);
+			PlaceLclsCategory category = categoryService.getCategoryByCode(
+				tourApiPlaceDetailResponseDto.getCategoryLevel3());
+			placeTour.updateNullTourDetail(tourApiPlaceDetailResponseDto, category);
 		}
 		addView(placeTour);
-		return Optional.of(PlaceDetailResponseDto.from(placeTour, PlaceJoinType.TOUR));
+		return Optional.of(PlaceDetailResponseDto.from(placeTour, PlaceJoinType.TOUR, locale));
 	}
 
 	@Override
@@ -85,7 +108,8 @@ public class TourServiceImpl implements PlaceService {
 	}
 
 	@Override
-	public PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable) {
+	public PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable,
+		com.tripsok_back.type.LocaleCode locale) {
 		Page<Place> placeList = tourRepository.findByTourIsNotNull(pageable);
 		if (placeList.getTotalPages() == 0)
 			return PageResponse.empty();
@@ -93,7 +117,8 @@ public class TourServiceImpl implements PlaceService {
 			e -> PlaceBriefResponseDto.from(e, getType().name(),
 				e.getTour().getImageUrlList().getFirst(),
 				e.getTour().getTourImages().size(),
-				e.getTour().getTourReviews().size()));
+				e.getTour().getTourReviews().size(),
+				locale));
 		return PageResponse.fromPage(placeList, dtoList);
 	}
 
@@ -150,18 +175,110 @@ public class TourServiceImpl implements PlaceService {
 		}
 	}
 
+	private void createShortDescription(Place place) {
+		if (place.getPlaceTr(LocaleCode.KO) == null) {
+			place.initPlaceTrsWithKorean(null, null, null, null);
+		}
+		String name = place.getPlaceTr(LocaleCode.KO) != null ? place.getPlaceTr(LocaleCode.KO).getPlaceName() : null;
+		String source =
+			place.getPlaceTr(LocaleCode.KO) != null ? place.getPlaceTr(LocaleCode.KO).getInformation() : null;
+		log.info("createShortDescription: placeId={}, contentId={}, locale=KO, name='{}'",
+			place.getId(), place.getContentId(), name);
+		if (!org.springframework.util.StringUtils.hasText(source)) {
+			log.info("createShortDescription: source empty, skip (placeId={})", place.getId());
+			return;
+		}
+		String shortDescription = groqApiClientUtil.requestGroqShortDescription(source);
+		if (place.getPlaceTr(LocaleCode.KO) != null) {
+			String safe = groqApiClientUtil.sanitizeForVarchar(shortDescription, 255);
+			place.getPlaceTr(LocaleCode.KO).setSummary(safe);
+		}
+	}
+
+	private void createSummaryTranslation(Place place, LocaleCode locale) {
+		if (place.getPlaceTr(LocaleCode.KO) == null)
+			return;
+		String name = place.getPlaceTr(LocaleCode.KO).getPlaceName();
+		String base = place.getPlaceTr(LocaleCode.KO).getSummary();
+		log.info("createTranslation: placeId={}, contentId={}, locale={}, name='{}'",
+			place.getId(), place.getContentId(), locale != null ? locale.getCode() : null, name);
+		if (!org.springframework.util.StringUtils.hasText(base)) {
+			log.info("createTranslation: KO summary missing/empty, skip (placeId={}, locale={})",
+				place.getId(), locale != null ? locale.getCode() : null);
+			return;
+		}
+		String translated = groqApiClientUtil.requestTranslation(base, locale);
+		translated = groqApiClientUtil.sanitizeForVarchar(translated, 255);
+		if (place.getPlaceTr(locale) == null) {
+			place.upsertTranslation(locale, null, null, null, null);
+		}
+		place.getPlaceTr(locale).setSummary(translated);
+	}
+
+	private void createInformationTranslation(Place place, LocaleCode locale) {
+		if (place.getPlaceTr(LocaleCode.KO) == null)
+			return;
+		String info = place.getPlaceTr(LocaleCode.KO).getInformation();
+		if (!org.springframework.util.StringUtils.hasText(info))
+			return;
+		if (place.getPlaceTr(locale) == null) {
+			place.upsertTranslation(locale, null, null, null, null);
+		}
+		if (org.springframework.util.StringUtils.hasText(place.getPlaceTr(locale).getInformation()))
+			return;
+		String translated = groqApiClientUtil.requestTranslation(info, locale);
+		place.getPlaceTr(locale).setInformation(translated);
+	}
+
+	private void createTransliterationForNameAndAddress(Place place, LocaleCode locale) {
+		if (place.getPlaceTr(LocaleCode.KO) == null)
+			return;
+		if (locale == LocaleCode.KO)
+			return;
+		String koName = place.getPlaceTr(LocaleCode.KO).getPlaceName();
+		String koAddr = place.getPlaceTr(LocaleCode.KO).getAddress();
+		if (place.getPlaceTr(locale) == null) {
+			place.upsertTranslation(locale, null, null, null, null);
+		}
+		if (org.springframework.util.StringUtils.hasText(koName)
+			&& !org.springframework.util.StringUtils.hasText(place.getPlaceTr(locale).getPlaceName())) {
+			String namePhon = groqApiClientUtil.requestTransliteration(koName, locale);
+			namePhon = groqApiClientUtil.sanitizeForVarchar(namePhon, 255);
+			place.getPlaceTr(locale).setPlaceName(namePhon);
+		}
+		if (org.springframework.util.StringUtils.hasText(koAddr)
+			&& !org.springframework.util.StringUtils.hasText(place.getPlaceTr(locale).getAddress())) {
+			String addrPhon = groqApiClientUtil.requestTransliteration(koAddr, locale);
+			addrPhon = groqApiClientUtil.sanitizeForVarchar(addrPhon, 255);
+			place.getPlaceTr(locale).setAddress(addrPhon);
+		}
+	}
+
 	public void updatePlace(Place existingPlace, TourApiPlaceResponseDto placeDto) {
 		TourApiPlaceDetailResponseDto detailResponseDto = requestPlaceDetail(existingPlace.getContentId());
 		log.info("updatePlace: 상세정보 응답 성공 (미리보기):  (pretty)\n{}",
 			JsonMapperUtil.pretty(om, detailResponseDto));
-		existingPlace.updateTour(placeDto, detailResponseDto,
-			categoryService.getCategoryByCode(detailResponseDto.getLargeClassificationSystem3()));
+		PlaceLclsCategory category = categoryService.getCategoryByCode(
+			detailResponseDto.getLargeClassificationSystem3());
+		existingPlace.updateTour(placeDto, detailResponseDto, category);
+		// 이미지가 비어 있으면 상세 응답으로 보강
+		if (existingPlace.getTour() != null && existingPlace.getTour().getTourImages() == null) {
+			existingPlace.updateNullTourDetail(detailResponseDto, category);
+		}
+		// Ensure translated fields exist for other locales (do not overwrite existing)
+		for (LocaleCode lc : LocaleCode.values()) {
+			if (lc == LocaleCode.KO)
+				continue;
+			createSummaryTranslation(existingPlace, lc);
+			createInformationTranslation(existingPlace, lc);
+			createTransliterationForNameAndAddress(existingPlace, lc);
+		}
 		tourRepository.save(existingPlace);
 		log.info("상세정보 업데이트 완료 : contentId={}, placeId={}, title={}, categoryName={}",
 			existingPlace.getContentId(),
 			existingPlace.getId(),
 			existingPlace.getTour() != null ? existingPlace.getTour().getId() : null,
-			existingPlace.getTour() != null ? existingPlace.getTour().getTourType() : null
+			existingPlace.getTour() != null ? existingPlace.getTour().getPlaceLclsCategory() : null
 		);
 	}
 
@@ -169,8 +286,18 @@ public class TourServiceImpl implements PlaceService {
 		TourApiPlaceDetailResponseDto detailResponseDto = requestPlaceDetail(placeDto.getContentId());
 		log.info("addPlace: 상세정보 응답 성공 (미리보기): (pretty)\n{}",
 			JsonMapperUtil.pretty(om, detailResponseDto));
-		String categoryName = categoryService.getCategoryByCode(detailResponseDto.getLargeClassificationSystem3());
-		Place tourPlace = Place.buildTour(placeDto, detailResponseDto, categoryName);
+		PlaceLclsCategory category = categoryService.getCategoryByCode(
+			detailResponseDto.getLargeClassificationSystem3());
+		Place tourPlace = Place.buildTour(placeDto, detailResponseDto, category);
+		createShortDescription(tourPlace);
+		for (LocaleCode localeCode : LocaleCode.values()) {
+			if (localeCode.equals(LocaleCode.KO))
+				continue;
+			createSummaryTranslation(tourPlace, localeCode);
+			createInformationTranslation(tourPlace, localeCode);
+			createTransliterationForNameAndAddress(tourPlace, localeCode);
+		}
 		tourRepository.save(tourPlace);
 	}
+
 }
