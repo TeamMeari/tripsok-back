@@ -5,40 +5,47 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.tripsok_back.dto.tourApi.TourApiPlaceDetailResponseDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
 import com.tripsok_back.model.place.Place;
+import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.support.BaseModifiableEntity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "RESTAURANT", schema = "TRIPSOK")
+@Table(name = "RESTAURANT")
 public class Restaurant extends BaseModifiableEntity {
 	@Id
-	@SequenceGenerator(name = "global_place_seq", sequenceName = "GLOBAL_PLACE_SEQ", allocationSize = 1)
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "global_place_seq")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "RESTAURANT_id_gen")
+	@SequenceGenerator(name = "RESTAURANT_id_gen", sequenceName = "GLOBAL_PLACE_SEQ", allocationSize = 1)
 	@Column(name = "ID", nullable = false)
 	private Integer id;
 
-	@Size(max = 255)
-	@Column(name = "RESTAURANT_TYPE")
-	private String restaurantType;
+	@NotNull
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@OnDelete(action = OnDeleteAction.RESTRICT)
+	@JoinColumn(name = "PLACE_LCLS_CATEGORY_ID", nullable = false)
+	private PlaceLclsCategory placeLclsCategory;
 
 	@OneToMany(mappedBy = "restaurant")
 	private Set<Menu> menus = new LinkedHashSet<>();
@@ -46,18 +53,18 @@ public class Restaurant extends BaseModifiableEntity {
 	@OneToOne(mappedBy = "restaurant")
 	private Place place;
 
-	@OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	private Set<RestaurantImage> restaurantImages = new LinkedHashSet<>();
+    @OneToMany(mappedBy = "restaurant", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+    private Set<RestaurantImage> restaurantImages = new LinkedHashSet<>();
 
-	@OneToMany(mappedBy = "restaurant", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "restaurant")
 	private Set<RestaurantReview> restaurantReviews = new LinkedHashSet<>();
 
 	public static Restaurant buildRestaurant(TourApiPlaceResponseDto placeDto,
 		TourApiPlaceDetailResponseDto detailResponseDto) {
 		Restaurant restaurant = new Restaurant();
 
-		restaurant.setRestaurantType(
-			detailResponseDto.getLargeClassificationSystem1());
+		//restaurant.setRestaurantType(
+		//	detailResponseDto.getLargeClassificationSystem1());
 
 		return restaurant;
 	}

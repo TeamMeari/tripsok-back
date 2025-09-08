@@ -6,6 +6,8 @@ import java.time.ZoneId;
 import java.util.Objects;
 
 import com.tripsok_back.model.place.Place;
+import com.tripsok_back.model.place.PlaceTr;
+import com.tripsok_back.type.LocaleCode;
 
 public record PlaceBriefResponseDto(
 	Integer id,
@@ -22,28 +24,33 @@ public record PlaceBriefResponseDto(
 	Instant updatedAt
 ) {
 
-	public static PlaceBriefResponseDto from(
-		Place p,
-		String type,
-		String thumbnailUrl,
-		Integer imageCount,
-		Integer reviewCount
-	) {
-		Objects.requireNonNull(p, "place must not be null");
+    public static PlaceBriefResponseDto from(
+        Place p,
+        String type,
+        String thumbnailUrl,
+        Integer imageCount,
+        Integer reviewCount,
+        LocaleCode locale
+    ) {
+        Objects.requireNonNull(p, "place must not be null");
 
-		return new PlaceBriefResponseDto(
-			p.getId(),
-			p.getPlaceName(),
-			p.getAddress(),
-			type,
-			p.getMapY(), // lat
-			p.getMapX(), // lng
-			p.getLike(),
-			p.getView(),
-			reviewCount != null ? reviewCount : 0,
-			thumbnailUrl,
-			imageCount != null ? imageCount : 0,
-			p.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant()
-		);
-	}
+        PlaceTr tr = null;
+        if (locale != null) tr = p.getPlaceTr(locale);
+        if (tr == null) tr = p.getPlaceTr(LocaleCode.KO);
+
+        return new PlaceBriefResponseDto(
+            p.getId(),
+            tr != null ? tr.getPlaceName() : null,
+            tr != null ? tr.getAddress() : null,
+            type,
+            p.getMapY(), // lat
+            p.getMapX(), // lng
+            p.getLike(),
+            p.getView(),
+            reviewCount != null ? reviewCount : 0,
+            thumbnailUrl,
+            imageCount != null ? imageCount : 0,
+            p.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant()
+        );
+    }
 }

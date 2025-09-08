@@ -4,15 +4,21 @@ import java.util.Objects;
 
 import org.hibernate.Hibernate;
 
+import com.tripsok_back.type.LocaleCode;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Embeddable
 public class PlaceLclsCategoryTrId implements java.io.Serializable {
 	private static final long serialVersionUID = -741258900667059267L;
@@ -24,6 +30,14 @@ public class PlaceLclsCategoryTrId implements java.io.Serializable {
 	@NotNull
 	@Column(name = "LOCALE", nullable = false, length = 20)
 	private String locale;
+
+	public LocaleCode getLocaleCode() {
+		return LocaleCode.from(this.locale);
+	}
+
+	public void setLocaleCode(LocaleCode code) {
+		this.locale = code == null ? null : code.getCode();
+	}
 
 	@Override
 	public boolean equals(Object o) {

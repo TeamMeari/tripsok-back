@@ -14,12 +14,14 @@ import com.tripsok_back.model.place.Place;
 public interface AccommodationRepository extends JpaRepository<Place, Integer> {
 
 	@Override
-	@EntityGraph(attributePaths = {"accommodation.accommodationImages"})
+	@EntityGraph(attributePaths = {
+		"placeTrs", "accommodation", "accommodation.accommodationImages", "accommodation.placeLclsCategory"
+	})
 	Optional<Place> findById(Integer id);
 
-	@EntityGraph(attributePaths = {"accommodation"})
+	@EntityGraph(attributePaths = {"placeTrs", "accommodation"})
 	Optional<Place> findByContentId(Integer contentId);
 
-	@EntityGraph(attributePaths = {"accommodation"})
+	@EntityGraph(attributePaths = {"placeTrs", "accommodation.accommodationImages"})
 	Page<Place> findByAccommodationIsNotNull(Pageable pageable);
 }

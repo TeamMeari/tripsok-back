@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import org.hibernate.Hibernate;
 
+import com.tripsok_back.type.LocaleCode;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotNull;
@@ -18,12 +20,20 @@ public class PlaceTrId implements java.io.Serializable {
 	private static final long serialVersionUID = -4061772191487864406L;
 	@NotNull
 	@Column(name = "PLACE_ID", nullable = false)
-	private Long placeId;
+	private Integer placeId;
 
 	@Size(max = 20)
 	@NotNull
 	@Column(name = "LOCALE", nullable = false, length = 20)
 	private String locale;
+
+	public LocaleCode getLocaleCode() {
+		return LocaleCode.from(this.locale);
+	}
+
+	public void setLocaleCode(LocaleCode code) {
+		this.locale = code == null ? null : code.getCode();
+	}
 
 	@Override
 	public boolean equals(Object o) {

@@ -14,7 +14,6 @@ import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.support.BaseModifiableEntity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -28,28 +27,30 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "ACCOMMODATION", schema = "TRIPSOK")
+@Table(name = "ACCOMMODATION")
 public class Accommodation extends BaseModifiableEntity {
 	@Id
-	@SequenceGenerator(name = "global_place_seq", sequenceName = "GLOBAL_PLACE_SEQ", allocationSize = 1)
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "global_place_seq")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ACCOMMODATION_id_gen")
+	@SequenceGenerator(name = "ACCOMMODATION_id_gen", sequenceName = "GLOBAL_PLACE_SEQ", allocationSize = 1)
+	@Column(name = "ID", nullable = false)
 	private Integer id;
 
-	@Size(max = 255)
-	@Column(name = "ACCOMMODATION_TYPE")
-	private String accommodationType;
+	@NotNull
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@OnDelete(action = OnDeleteAction.RESTRICT)
+	@JoinColumn(name = "PLACE_LCLS_CATEGORY_ID", nullable = false)
+	private PlaceLclsCategory placeLclsCategory;
 
-	@OneToMany(mappedBy = "accommodation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	private Set<AccommodationImage> accommodationImages = new LinkedHashSet<>();
+    @OneToMany(mappedBy = "accommodation", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+    private Set<AccommodationImage> accommodationImages = new LinkedHashSet<>();
 
-	@OneToMany(mappedBy = "accommodation", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "accommodation")
 	private Set<AccommodationReview> accommodationReviews = new LinkedHashSet<>();
 
 	@OneToOne(mappedBy = "accommodation")
@@ -58,17 +59,11 @@ public class Accommodation extends BaseModifiableEntity {
 	@OneToMany(mappedBy = "accommodation")
 	private Set<Room> rooms = new LinkedHashSet<>();
 
-	@NotNull
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@OnDelete(action = OnDeleteAction.RESTRICT)
-	@JoinColumn(name = "PLACE_LCLS_CATEGORY_ID", nullable = false)
-	private PlaceLclsCategory placeLclsCategory;
-
 	public static Accommodation buildAccommodation(TourApiPlaceResponseDto placeDto,
-		TourApiPlaceDetailResponseDto detailResponseDto) {
+		TourApiPlaceDetailResponseDto detailResponseDto, PlaceLclsCategory category) {
 		Accommodation accommodation = new Accommodation();
 
-		accommodation.setAccommodationType(detailResponseDto.getLargeClassificationSystem1());
+		accommodation.setPlaceLclsCategory(category);
 
 		return accommodation;
 	}

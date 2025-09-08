@@ -5,41 +5,48 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.tripsok_back.dto.tourApi.TourApiPlaceDetailResponseDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
 import com.tripsok_back.model.place.Place;
+import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.support.BaseModifiableEntity;
 import com.tripsok_back.util.TimeUtil;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "TOUR", schema = "TRIPSOK")
+@Table(name = "TOUR")
 public class Tour extends BaseModifiableEntity {
 	@Id
-	@SequenceGenerator(name = "global_place_seq", sequenceName = "GLOBAL_PLACE_SEQ", allocationSize = 1)
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "global_place_seq")
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "TOUR_id_gen")
+	@SequenceGenerator(name = "TOUR_id_gen", sequenceName = "GLOBAL_PLACE_SEQ", allocationSize = 1)
 	@Column(name = "ID", nullable = false)
 	private Integer id;
 
-	@Size(max = 255)
-	@Column(name = "TOUR_TYPE")
-	private String tourType;
+	@NotNull
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@OnDelete(action = OnDeleteAction.RESTRICT)
+	@JoinColumn(name = "PLACE_LCLS_CATEGORY_ID", nullable = false)
+	private PlaceLclsCategory placeLclsCategory;
 
 	@OneToMany(mappedBy = "tour")
 	private Set<Attraction> attractions = new LinkedHashSet<>();
@@ -47,16 +54,16 @@ public class Tour extends BaseModifiableEntity {
 	@OneToOne(mappedBy = "tour")
 	private Place place;
 
-	@OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	private Set<TourImage> tourImages = new LinkedHashSet<>();
+    @OneToMany(mappedBy = "tour", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+    private Set<TourImage> tourImages = new LinkedHashSet<>();
 
-	@OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "tour")
 	private Set<TourReview> tourReviews = new LinkedHashSet<>();
 
 	public static Tour buildTour(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto) {
 		Tour tour = new Tour();
 
-		tour.setTourType(detailResponseDto.getLargeClassificationSystem1());
+		//tour.setTourType(detailResponseDto.getLargeClassificationSystem1());
 		tour.setCreatedAt(TimeUtil.stringToLocalDateTime(placeDto.getCreatedTime()));
 
 		return tour;
