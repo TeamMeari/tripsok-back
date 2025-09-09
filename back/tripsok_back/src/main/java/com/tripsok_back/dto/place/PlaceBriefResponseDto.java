@@ -11,6 +11,7 @@ import com.tripsok_back.type.LocaleCode;
 
 public record PlaceBriefResponseDto(
 	Integer id,
+	String language,
 	String name,
 	String address,
 	String type,               // 필요시 enum 으로 교체
@@ -24,33 +25,36 @@ public record PlaceBriefResponseDto(
 	Instant updatedAt
 ) {
 
-    public static PlaceBriefResponseDto from(
-        Place p,
-        String type,
-        String thumbnailUrl,
-        Integer imageCount,
-        Integer reviewCount,
-        LocaleCode locale
-    ) {
-        Objects.requireNonNull(p, "place must not be null");
+	public static PlaceBriefResponseDto from(
+		Place p,
+		String type,
+		String thumbnailUrl,
+		Integer imageCount,
+		Integer reviewCount,
+		LocaleCode locale
+	) {
+		Objects.requireNonNull(p, "place must not be null");
 
-        PlaceTr tr = null;
-        if (locale != null) tr = p.getPlaceTr(locale);
-        if (tr == null) tr = p.getPlaceTr(LocaleCode.KO);
+		PlaceTr tr = null;
+		if (locale != null)
+			tr = p.getPlaceTr(locale);
+		if (tr == null)
+			tr = p.getPlaceTr(LocaleCode.KO);
 
-        return new PlaceBriefResponseDto(
-            p.getId(),
-            tr != null ? tr.getPlaceName() : null,
-            tr != null ? tr.getAddress() : null,
-            type,
-            p.getMapY(), // lat
-            p.getMapX(), // lng
-            p.getLike(),
-            p.getView(),
-            reviewCount != null ? reviewCount : 0,
-            thumbnailUrl,
-            imageCount != null ? imageCount : 0,
-            p.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant()
-        );
-    }
+		return new PlaceBriefResponseDto(
+			p.getId(),
+			locale.getCode(),
+			tr != null ? tr.getPlaceName() : null,
+			tr != null ? tr.getAddress() : null,
+			type,
+			p.getMapY(), // lat
+			p.getMapX(), // lng
+			p.getLike(),
+			p.getView(),
+			reviewCount != null ? reviewCount : 0,
+			thumbnailUrl,
+			imageCount != null ? imageCount : 0,
+			p.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant()
+		);
+	}
 }

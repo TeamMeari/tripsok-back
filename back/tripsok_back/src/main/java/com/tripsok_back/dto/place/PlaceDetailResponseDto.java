@@ -35,6 +35,7 @@ public record PlaceDetailResponseDto(
 			tr = place.getPlaceTr(LocaleCode.KO);
 		return PlaceDetailResponseDto.builder()
 			.id(place.getId())
+			.language(locale.getCode())
 			.placeName(tr != null ? tr.getPlaceName() : null)
 			.summary(tr != null ? tr.getSummary() : null)
 			.address(tr != null ? tr.getAddress() : null)
