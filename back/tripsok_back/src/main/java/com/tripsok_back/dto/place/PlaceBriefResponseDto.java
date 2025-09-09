@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.tripsok_back.model.place.Place;
 
@@ -19,7 +21,8 @@ public record PlaceBriefResponseDto(
 	Integer reviewCount,       // 사전 계산 값 사용 권장(아래 설명)
 	String thumbnailUrl,       // 목록엔 보통 1장만
 	Integer imageCount,        // 전체 이미지 수
-	Instant updatedAt
+	Instant updatedAt,
+	Set<Integer> themes
 ) {
 
 	public static PlaceBriefResponseDto from(
@@ -43,7 +46,8 @@ public record PlaceBriefResponseDto(
 			reviewCount != null ? reviewCount : 0,
 			thumbnailUrl,
 			imageCount != null ? imageCount : 0,
-			p.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant()
+			p.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+			p.getThemes().stream().map(it-> it.getTheme().getId()).collect(Collectors.toSet())
 		);
 	}
 }

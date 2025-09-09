@@ -25,5 +25,7 @@ public interface PlaceService {
 
 	PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable);
 
+	PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId);
+
 	void addReview(Integer userId, ReviewRequestDto reviewRequestdto);
 }

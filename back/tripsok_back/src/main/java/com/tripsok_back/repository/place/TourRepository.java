@@ -13,7 +13,7 @@ import com.tripsok_back.model.place.Place;
 @Repository
 public interface TourRepository extends JpaRepository<Place, Integer> {
 	@Override
-	@EntityGraph(attributePaths = {"tour.tourImages"})
+	@EntityGraph(attributePaths = {"tour.tourImages", "tags", "tags.tag"})
 	Optional<Place> findById(Integer id);
 
 	@EntityGraph(attributePaths = {"tour"})
@@ -21,4 +21,7 @@ public interface TourRepository extends JpaRepository<Place, Integer> {
 
 	@EntityGraph(attributePaths = {"tour"})
 	Page<Place> findByTourIsNotNull(Pageable pageable);
+
+	@EntityGraph(attributePaths = {"tour", "themes", "themes.theme"})
+	Page<Place> findByTourIsNotNullAndThemes_Theme_Id(Pageable pageable, Integer themeId);
 }
