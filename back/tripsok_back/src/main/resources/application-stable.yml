@@ -1,0 +1,10 @@
+spring:
+  config.activate.on-profile: stable
+  datasource:
+    username: ${DB_STABLE_USERNAME}
+  jpa:
+    show-sql: false
+
+logging:
+  level:
+    org.springframework.web.reactive.function.client.ExchangeFunctions: WARN

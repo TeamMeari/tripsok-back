@@ -1,0 +1,10 @@
+spring:
+  config.activate.on-profile: dev
+  datasource:
+    username: ${DB_USERNAME}
+  jpa:
+    show-sql: true
+
+logging:
+  level:
+    org.springframework.web.reactive.function.client.ExchangeFunctions: TRACE

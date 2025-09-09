@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tripsok_back.dto.email.request.EmailSendRequest;
 import com.tripsok_back.dto.email.request.EmailVerifyRequest;
 import com.tripsok_back.dto.email.response.EmailVerifyResponse;
-import com.tripsok_back.service.EmailService;
+import com.tripsok_back.service.email.EmailService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

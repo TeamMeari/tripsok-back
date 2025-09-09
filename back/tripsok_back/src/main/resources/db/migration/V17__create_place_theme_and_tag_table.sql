@@ -59,4 +59,3 @@ CREATE INDEX idx_place_theme_place
 
 CREATE INDEX idx_place_theme_theme
     ON PLACE_THEME (THEME_ID);
-

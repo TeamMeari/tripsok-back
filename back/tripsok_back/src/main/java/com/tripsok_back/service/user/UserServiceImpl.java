@@ -11,7 +11,7 @@ import com.tripsok_back.dto.user.response.UserInfoResponse;
 import com.tripsok_back.exception.ErrorCode;
 import com.tripsok_back.exception.UserException;
 import com.tripsok_back.model.user.TripSokUser;
-import com.tripsok_back.repository.UserRepository;
+import com.tripsok_back.repository.user.UserRepository;
 import com.tripsok_back.security.jwt.JwtUtil;
 
 import lombok.RequiredArgsConstructor;

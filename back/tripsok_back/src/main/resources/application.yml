@@ -17,7 +17,6 @@ spring:
       password: ${REDIS_PASSWORD}
   datasource:
     url: ${DB_URL}
-    username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: oracle.jdbc.OracleDriver
     hikari:
@@ -34,15 +33,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: false
     properties:
       hibernate:
         format_sql: true
         show_sql: true
         dialect: org.hibernate.dialect.OracleDialect
-
 logging:
   level:
-    org.springframework.web.reactive.function.client.ExchangeFunctions: TRACE
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
