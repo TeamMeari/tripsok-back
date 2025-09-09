@@ -13,7 +13,7 @@ import com.tripsok_back.model.place.Place;
 @Repository
 public interface TourRepository extends JpaRepository<Place, Integer> {
 	@Override
-	@EntityGraph(attributePaths = {"tour.tourImages, tags, tags.tag"})
+	@EntityGraph(attributePaths = {"tour.tourImages", "tags", "tags.tag"})
 	Optional<Place> findById(Integer id);
 
 	@EntityGraph(attributePaths = {"tour"})

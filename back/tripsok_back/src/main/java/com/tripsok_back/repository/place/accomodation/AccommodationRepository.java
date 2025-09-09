@@ -14,7 +14,7 @@ import com.tripsok_back.model.place.Place;
 public interface AccommodationRepository extends JpaRepository<Place, Integer> {
 
 	@Override
-	@EntityGraph(attributePaths = {"accommodation.accommodationImages, tags, tags.tag"})
+	@EntityGraph(attributePaths = {"accommodation.accommodationImages", "tags", "tags.tag"})
 	Optional<Place> findById(Integer id);
 
 	@EntityGraph(attributePaths = {"accommodation"})
