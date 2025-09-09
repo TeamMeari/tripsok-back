@@ -1,4 +1,4 @@
-package com.tripsok_back.exception;
+package com.tripsok_back.exception.handler;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
+
+import com.tripsok_back.exception.CustomException;
+import com.tripsok_back.exception.ErrorCode;
 
 import lombok.extern.slf4j.Slf4j;
 
