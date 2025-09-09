@@ -13,6 +13,7 @@ import com.tripsok_back.dto.groq.OllamaChatResponse;
 import com.tripsok_back.dto.groq.OllamaMessage;
 import com.tripsok_back.dto.groq.OllamaOptions;
 import com.tripsok_back.type.LocaleCode;
+import com.tripsok_back.util.llm.LlmClient;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class LocalLlmClientUtil {
+public class LocalLlmClientUtil implements LlmClient {
 
 	private final WebClient ollamaApiWebClient;
 	private final ObjectMapper objectMapper;

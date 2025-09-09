@@ -28,7 +28,7 @@ import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
 import com.tripsok_back.util.JsonMapperUtil;
-import com.tripsok_back.util.LocalLlmClientUtil;
+import com.tripsok_back.util.llm.LlmClient;
 import com.tripsok_back.util.TimeUtil;
 import com.tripsok_back.util.TouristApiClientUtil;
 
@@ -45,7 +45,7 @@ public class TourServiceImpl implements PlaceService {
 	private final TourRepository tourRepository;
 	private final CategoryService categoryService;
 	private final ObjectMapper om;
-	private final LocalLlmClientUtil groqApiClientUtil;
+    private final LlmClient groqApiClientUtil;
 
 	@Override
 	public TourismType getType() {

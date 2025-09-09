@@ -29,7 +29,7 @@ import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
 import com.tripsok_back.util.JsonMapperUtil;
-import com.tripsok_back.util.LocalLlmClientUtil;
+import com.tripsok_back.util.llm.LlmClient;
 import com.tripsok_back.util.TimeUtil;
 import com.tripsok_back.util.TouristApiClientUtil;
 
@@ -46,7 +46,7 @@ public class AccommodationServiceImpl implements PlaceService {
 	private final TouristApiClientUtil tourApiClient;
 	private final CategoryService categoryService;
 	private final AccommodationRepository accommodationRepository;
-	private final LocalLlmClientUtil groqApiClientUtil;
+    private final LlmClient groqApiClientUtil;
 	private final ObjectMapper om;
 
 	@Override

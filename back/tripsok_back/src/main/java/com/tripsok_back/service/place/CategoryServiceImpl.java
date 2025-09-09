@@ -19,7 +19,7 @@ import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.model.place.PlaceLclsCategoryTr;
 import com.tripsok_back.repository.place.LclsCategoryRepository;
 import com.tripsok_back.type.LocaleCode;
-import com.tripsok_back.util.LocalLlmClientUtil;
+import com.tripsok_back.util.llm.LlmClient;
 import com.tripsok_back.util.TouristApiClientUtil;
 
 import jakarta.transaction.Transactional;
@@ -34,7 +34,7 @@ public class CategoryServiceImpl implements CategoryService {
 	private final TouristApiClientUtil touristApiClientUtil;
 	private final ApiKeyConfig apiKeyConfig;
 	private final LclsCategoryRepository lclsCategoryRepository;
-	private final LocalLlmClientUtil groqApiClientUtil;
+    private final LlmClient groqApiClientUtil;
 
 	@Override
 	@Transactional
