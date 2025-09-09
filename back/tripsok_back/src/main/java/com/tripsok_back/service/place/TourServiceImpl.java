@@ -28,9 +28,9 @@ import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
 import com.tripsok_back.util.JsonMapperUtil;
-import com.tripsok_back.util.llm.LlmClient;
 import com.tripsok_back.util.TimeUtil;
 import com.tripsok_back.util.TouristApiClientUtil;
+import com.tripsok_back.util.llm.LlmClient;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +45,7 @@ public class TourServiceImpl implements PlaceService {
 	private final TourRepository tourRepository;
 	private final CategoryService categoryService;
 	private final ObjectMapper om;
-    private final LlmClient groqApiClientUtil;
+	private final LlmClient groqApiClientUtil;
 
 	@Override
 	public TourismType getType() {
@@ -70,12 +70,10 @@ public class TourServiceImpl implements PlaceService {
 			throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
 		Place placeTour = optPlace.get();
 
-		// Ensure KO summary exists
 		if (placeTour.getPlaceTr(LocaleCode.KO) == null ||
 			!StringUtils.hasText(placeTour.getPlaceTr(LocaleCode.KO).getSummary())) {
 			createShortDescription(placeTour);
 		}
-		// Ensure requested locale summary/info/phonetics exist
 		if (locale != null && locale != LocaleCode.KO) {
 			if (placeTour.getPlaceTr(locale) == null ||
 				!StringUtils.hasText(placeTour.getPlaceTr(locale).getSummary())) {
@@ -261,11 +259,9 @@ public class TourServiceImpl implements PlaceService {
 		PlaceLclsCategory category = categoryService.getCategoryByCode(
 			detailResponseDto.getLargeClassificationSystem3());
 		existingPlace.updateTour(placeDto, detailResponseDto, category);
-		// 이미지가 비어 있으면 상세 응답으로 보강
 		if (existingPlace.getTour() != null && existingPlace.getTour().getTourImages() == null) {
 			existingPlace.updateNullTourDetail(detailResponseDto, category);
 		}
-		// Ensure translated fields exist for other locales (do not overwrite existing)
 		for (LocaleCode lc : LocaleCode.values()) {
 			if (lc == LocaleCode.KO)
 				continue;

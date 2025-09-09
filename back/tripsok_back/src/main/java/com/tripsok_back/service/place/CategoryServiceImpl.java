@@ -19,8 +19,8 @@ import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.model.place.PlaceLclsCategoryTr;
 import com.tripsok_back.repository.place.LclsCategoryRepository;
 import com.tripsok_back.type.LocaleCode;
-import com.tripsok_back.util.llm.LlmClient;
 import com.tripsok_back.util.TouristApiClientUtil;
+import com.tripsok_back.util.llm.LlmClient;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -34,12 +34,11 @@ public class CategoryServiceImpl implements CategoryService {
 	private final TouristApiClientUtil touristApiClientUtil;
 	private final ApiKeyConfig apiKeyConfig;
 	private final LclsCategoryRepository lclsCategoryRepository;
-    private final LlmClient groqApiClientUtil;
+	private final LlmClient groqApiClientUtil;
 
 	@Override
 	@Transactional
 	public void requestAndUpdateCategory() {
-		// 1) KO 기준 목록
 		Map<String, LclsCategoryItemResponseDto> koMap =
 			touristApiClientUtil.fetchCategories(
 				LclsSystmCodeRequestDto.builder().serviceKey(apiKeyConfig.getTourApiKey()).build(),
@@ -72,7 +71,6 @@ public class CategoryServiceImpl implements CategoryService {
 			newByCode.put(l3code, entity);
 		}
 
-		// 4) 나머지 로케일 번역본 부착 (새 엔티티들만 대상으로)
 		for (LocaleCode localeCode : LocaleCode.values()) {
 			if (localeCode == LocaleCode.KO)
 				continue;
@@ -100,7 +98,6 @@ public class CategoryServiceImpl implements CategoryService {
 			}
 		}
 
-		// 5) 저장
 		lclsCategoryRepository.saveAll(toInsert);
 		log.info("신규 카테고리 {}건 저장(모든 로케일 번역 포함).", toInsert.size());
 	}
