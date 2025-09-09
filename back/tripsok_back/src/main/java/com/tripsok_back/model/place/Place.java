@@ -151,9 +151,14 @@ public class Place extends BaseModifiableEntity {
 		return tr;
 	}
 
-	public void upsertKorean(String name, String address, String information, String summary) {
-		initPlaceTrsWithKorean(name, address, information, summary);
-	}
+    public void upsertKorean(String name, String address, String information, String summary) {
+        // Non-destructive upsert for KO: only overwrite provided fields
+        PlaceTr tr = getOrCreateTr(LocaleCode.KO);
+        if (name != null) tr.setPlaceName(name);
+        if (address != null) tr.setAddress(address);
+        if (information != null) tr.setInformation(information);
+        if (summary != null) tr.setSummary(summary);
+    }
 
 	public void upsertTranslation(LocaleCode lc, String name, String address, String information, String summary) {
 		if (lc == null || lc == LocaleCode.KO)
