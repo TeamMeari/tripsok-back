@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.tripsok_back.model.place.Place;
+import com.tripsok_back.model.place.PlaceTag;
 import com.tripsok_back.model.place.accommodation.Accommodation;
 import com.tripsok_back.model.place.restaurant.Restaurant;
 import com.tripsok_back.model.place.tour.Tour;
@@ -43,8 +44,7 @@ public record PlaceDetailResponseDto(
 			.createdAt(place.getCreatedAt())
 			.updatedAt(place.getUpdatedAt())
 			.type(type)
-			.tags(place.getTags().stream().map(pt -> new PlaceTagResponseDto(pt.getTag().getId(), pt.getTag().getName())).collect(
-				Collectors.toSet()))
+			.tags(place.getTags().stream().map(PlaceTag::toDto).collect(Collectors.toSet()))
 			.child(switch (type) {
 				case ACCOMMODATION -> {
 					Accommodation a = place.getAccommodation();

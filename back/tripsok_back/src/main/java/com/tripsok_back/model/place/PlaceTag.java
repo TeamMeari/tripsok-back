@@ -1,5 +1,6 @@
 package com.tripsok_back.model.place;
 
+import com.tripsok_back.dto.place.PlaceTagResponseDto;
 import com.tripsok_back.support.BaseTimeEntity;
 
 import jakarta.persistence.Column;
@@ -44,5 +45,9 @@ public class PlaceTag extends BaseTimeEntity {
 	public PlaceTag(Place place, Tag tag) {
 		this.place = place;
 		this.tag = tag;
+	}
+
+	public PlaceTagResponseDto toDto() {
+		return new PlaceTagResponseDto(this.getTag().getId(), this.getTag().getName());
 	}
 }
