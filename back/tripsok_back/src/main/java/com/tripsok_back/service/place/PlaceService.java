@@ -1,30 +1,62 @@
 package com.tripsok_back.service.place;
 
+import static com.tripsok_back.exception.ErrorCode.*;
+
 import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tripsok_back.config.ApiKeyConfig;
 import com.tripsok_back.dto.PageResponse;
 import com.tripsok_back.dto.place.PlaceBriefResponseDto;
 import com.tripsok_back.dto.place.PlaceDetailResponseDto;
 import com.tripsok_back.dto.place.ReviewRequestDto;
+import com.tripsok_back.exception.PlaceException;
 import com.tripsok_back.model.place.Place;
+import com.tripsok_back.repository.place.PlaceRepository;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.TourismType;
+import com.tripsok_back.util.TouristApiClientUtil;
+import com.tripsok_back.util.llm.LlmClient;
 
-public interface PlaceService {
+import lombok.RequiredArgsConstructor;
 
-	TourismType getType();
+@RequiredArgsConstructor
+public abstract class PlaceService {
+	private final PlaceRepository placeRepository;
+	final ApiKeyConfig apiKeyConfig;
+	final TouristApiClientUtil tourApiClient;
+	final CategoryService categoryService;
+	final LlmClient groqApiClientUtil;
+	final ObjectMapper om;
 
-	void startPlaceUpdate(int numOfRow, int pageNo);
+	@Transactional
+	public void addLike(Place place){
+		place.incrementLikeCount();
+	}
 
-    Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale);
+	@Transactional
+	public void removeLike(Place place){
+		place.decrementLikeCount();
+	}
 
-	void addView(Place place);
+	public Place findPlaceById(int placeId){
+		return placeRepository.findById(placeId).orElseThrow(() -> new PlaceException(PLACE_NOT_FOUND));
+	}
 
-	void addLike(Place place);
+	protected void addView(Place place){
+		place.incrementViewCount();
+	}
 
-    PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable, LocaleCode locale);
+	public abstract TourismType getType();
 
-	void addReview(Integer userId, ReviewRequestDto reviewRequestdto);
+	public abstract void startPlaceUpdate(int numOfRow, int pageNo);
+
+	public abstract Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale);
+
+	public abstract PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable, LocaleCode locale);
+
+	public abstract void addReview(Integer userId, ReviewRequestDto reviewRequestdto);
 }

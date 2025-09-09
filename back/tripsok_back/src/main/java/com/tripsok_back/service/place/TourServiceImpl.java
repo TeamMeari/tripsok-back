@@ -23,6 +23,7 @@ import com.tripsok_back.exception.InternalErrorCode;
 import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
+import com.tripsok_back.repository.place.PlaceRepository;
 import com.tripsok_back.repository.place.TourRepository;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
@@ -32,20 +33,19 @@ import com.tripsok_back.util.TimeUtil;
 import com.tripsok_back.util.TouristApiClientUtil;
 import com.tripsok_back.util.llm.LlmClient;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
-public class TourServiceImpl implements PlaceService {
-
-	private final ApiKeyConfig apiKeyConfig;
-	private final TouristApiClientUtil tourApiClient;
+public class TourServiceImpl extends PlaceService {
 	private final TourRepository tourRepository;
-	private final CategoryService categoryService;
-	private final ObjectMapper om;
-	private final LlmClient groqApiClientUtil;
+
+	public TourServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
+		TouristApiClientUtil tourApiClient, TourRepository tourRepository, CategoryService categoryService,
+		ObjectMapper om, LlmClient groqApiClientUtil) {
+		super(placeRepository, apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om);
+		this.tourRepository = tourRepository;
+	}
 
 	@Override
 	public TourismType getType() {
@@ -93,16 +93,6 @@ public class TourServiceImpl implements PlaceService {
 		}
 		addView(placeTour);
 		return Optional.of(PlaceDetailResponseDto.from(placeTour, PlaceJoinType.TOUR, locale));
-	}
-
-	@Override
-	public void addView(Place place) {
-		place.incrementViewCount();
-	}
-
-	@Override
-	public void addLike(Place place) {
-		place.incrementLikeCount();
 	}
 
 	@Override

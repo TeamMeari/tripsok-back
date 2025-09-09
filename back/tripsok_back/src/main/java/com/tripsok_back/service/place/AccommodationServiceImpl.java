@@ -24,30 +24,30 @@ import com.tripsok_back.exception.InternalErrorCode;
 import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
+import com.tripsok_back.repository.place.PlaceRepository;
 import com.tripsok_back.repository.place.accomodation.AccommodationRepository;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
 import com.tripsok_back.util.JsonMapperUtil;
-import com.tripsok_back.util.llm.LlmClient;
 import com.tripsok_back.util.TimeUtil;
 import com.tripsok_back.util.TouristApiClientUtil;
+import com.tripsok_back.util.llm.LlmClient;
 
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
-public class AccommodationServiceImpl implements PlaceService {
-
-	private final ApiKeyConfig apiKeyConfig;
-	private final TouristApiClientUtil tourApiClient;
-	private final CategoryService categoryService;
+public class AccommodationServiceImpl extends PlaceService {
 	private final AccommodationRepository accommodationRepository;
-    private final LlmClient groqApiClientUtil;
-	private final ObjectMapper om;
+
+	public AccommodationServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
+		TouristApiClientUtil tourApiClient, CategoryService categoryService,
+		AccommodationRepository accommodationRepository, LlmClient groqApiClientUtil, ObjectMapper om) {
+		super(placeRepository, apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om);
+		this.accommodationRepository = accommodationRepository;
+	}
 
 	@Override
 	public TourismType getType() {
@@ -70,7 +70,7 @@ public class AccommodationServiceImpl implements PlaceService {
 
 	@Override
 	@Transactional
-	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, com.tripsok_back.type.LocaleCode locale) throws
+	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale) throws
 		TourApiException {
 		Optional<Place> optPlace = accommodationRepository.findById(placeId);
 		if (optPlace.isEmpty())
@@ -100,16 +100,6 @@ public class AccommodationServiceImpl implements PlaceService {
 			placeAccommodation.getAccommodation().getPlaceLclsCategory().getLclsSystm3Name());
 		addView(placeAccommodation);
 		return Optional.of(PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION, locale));
-	}
-
-	@Override
-	public void addView(Place place) {
-		place.incrementViewCount();
-	}
-
-	@Override
-	public void addLike(Place place) {
-		place.incrementLikeCount();
 	}
 
 	@Override
