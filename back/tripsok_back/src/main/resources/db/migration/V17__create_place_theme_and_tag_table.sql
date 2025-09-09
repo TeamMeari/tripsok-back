@@ -38,7 +38,7 @@ CREATE TABLE PLACE_THEME (
                              THEME_ID   INTEGER NOT NULL,
                              CREATED_AT TIMESTAMP NOT NULL,
                              CONSTRAINT PK_PLACE_THEME PRIMARY KEY (ID)
-                         );
+);
 
 ALTER TABLE PLACE_THEME
     ADD CONSTRAINT fk_place_theme_place
