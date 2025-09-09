@@ -11,4 +11,7 @@ public class ApiKeyConfig {
 
 	@Value("${TOUR_API_KEY}")
 	private String tourApiKey;
+
+	@Value("${GROQ_API_KEY}")
+	private String groqApiKey;
 }

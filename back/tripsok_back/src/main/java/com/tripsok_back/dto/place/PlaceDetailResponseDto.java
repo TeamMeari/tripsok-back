@@ -15,7 +15,7 @@ import com.tripsok_back.type.PlaceJoinType;
 import lombok.Builder;
 
 public record PlaceDetailResponseDto(
-	Integer id, String placeName, String address, String contact, String email,
+	Integer id, String language, String placeName, String summary, String address, String contact, String email,
 	String information,
 	Integer view, Integer like, BigDecimal mapX, BigDecimal mapY, LocalDateTime createdAt, LocalDateTime updatedAt,
 	PlaceJoinType type,
