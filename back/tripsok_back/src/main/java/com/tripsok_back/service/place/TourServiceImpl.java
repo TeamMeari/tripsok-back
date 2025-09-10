@@ -121,6 +121,19 @@ public class TourServiceImpl implements PlaceService {
 	}
 
 	@Override
+	public PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
+		LocaleCode locale) {
+		Page<Place> placeList = tourRepository.findByTourIsNotNullAndThemes_Theme_Id(pageable, themeId);
+		Page<PlaceBriefResponseDto> dtoList = placeList.map(
+			e -> PlaceBriefResponseDto.from(e, getType().name(),
+				e.getTour().getImageUrlList().getFirst(),
+				e.getTour().getTourImages().size(),
+				e.getTour().getTourReviews().size(),
+				locale));
+		return PageResponse.fromPage(placeList, dtoList);
+	}
+
+	@Override
 	public void addReview(Integer userId, ReviewRequestDto reviewRequestdto) {
 
 	}

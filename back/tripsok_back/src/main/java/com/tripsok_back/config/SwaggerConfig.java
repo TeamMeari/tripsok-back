@@ -28,7 +28,10 @@ public class SwaggerConfig {
 			.servers(List.of(
 				new Server()
 					.url("http://localhost:8080")
-					.description("Local Server")));
+					.description("Local Server"),
+				new Server()
+					.url("https://trip-sok.jayden-bin.cc")
+					.description("Remote Server")));
 	}
 
 	private Components createSecurityComponents() {

@@ -1,6 +1,7 @@
 package com.tripsok_back.model.place;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,10 +24,12 @@ import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
@@ -39,11 +42,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "PLACE")
-@AttributeOverrides({
-	@AttributeOverride(name = "createdAt", column = @Column(name = "CREATED_AT", nullable = false)),
-	@AttributeOverride(name = "updatedAt", column = @Column(name = "UPDATED_AT", nullable = false))
-})
+@Table(name = "PLACE", schema = "TRIPSOK")
 public class Place extends BaseModifiableEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PLACE_id_gen")
@@ -96,6 +95,14 @@ public class Place extends BaseModifiableEntity {
 
 	@OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<PlaceTr> placeTrs = new LinkedHashSet<>();
+
+	// 정해진 테마 1~3개 저장
+	@OneToMany(mappedBy = "place", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<PlaceTheme> themes = new HashSet<>();
+
+	// 자유 태그 2~4개 저장
+	@OneToMany(mappedBy = "place", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<PlaceTag> tags = new HashSet<>();
 
 	public PlaceTr getPlaceTr(String language) {
 		if (language == null)
@@ -169,6 +176,8 @@ public class Place extends BaseModifiableEntity {
 		tr.setInformation(information);
 		tr.setSummary(summary);
 	}
+
+
 
 	public static Place buildAccommodation(TourApiPlaceResponseDto placeDto,
 		TourApiPlaceDetailResponseDto detailResponseDto, PlaceLclsCategory categoryName, String summary) {

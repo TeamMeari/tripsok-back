@@ -19,6 +19,7 @@ import com.tripsok_back.dto.place.PlaceDetailResponseDto;
 import com.tripsok_back.dto.place.PlaceSortStyle;
 import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.service.place.PlaceService;
+import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.TourismType;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -61,8 +62,8 @@ public class PlaceController {
 		@ApiResponse(responseCode = "400", description = "잘못된 카테고리 값 등 잘못된 요청", content = @Content),
 		@ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)
 	})
-    @GetMapping("/{category}")
-    public ResponseEntity<PageResponse<PlaceBriefResponseDto>> getPlaceList(
+	@GetMapping("/{category}")
+	public ResponseEntity<PageResponse<PlaceBriefResponseDto>> getPlaceList(
 		@Parameter(
 			description = "카테고리",
 			schema = @Schema(allowableValues = {"accommodation", "restaurant", "tour", "wrong-category"})
@@ -79,28 +80,37 @@ public class PlaceController {
 
 		@Parameter(description = "정렬 스타일(쿼리 파라미터 집합)")
 		@ParameterObject
-        @RequestParam(required = false) PlaceSortStyle sortStyle,
+		@RequestParam(required = false) PlaceSortStyle sortStyle,
 
-        @Parameter(description = "언어(로케일) 코드", example = "ko", schema = @Schema(allowableValues = {"ko","en","ja","cn"}))
-        @RequestParam(name = "locale", defaultValue = "ko") String locale
-    ) {
+		@Parameter(description = "언어(로케일) 코드", example = "ko", schema = @Schema(allowableValues = {"ko", "en", "ja",
+			"cn"}))
+		@RequestParam(name = "locale", defaultValue = "ko") String locale,
+		@Parameter(description = "테마 ID", example = "1")
+		@RequestParam(required = false) Integer themeId
+	) {
 		Sort sort = (sortStyle != null)
 			? sortStyle.toSort()
 			: Sort.by(Sort.Order.desc("updatedAt"));
 
 		Pageable pageable = PageRequest.of(page, size, sort);
 
-        TourismType type = TourismType.fromOrThrow(category);
-        log.info("{} 항목 리스트 조회 시작", type.name());
-        com.tripsok_back.type.LocaleCode lc;
-        try {
-            lc = com.tripsok_back.type.LocaleCode.from(locale);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().build();
-        }
-        PageResponse<PlaceBriefResponseDto> body = getService(type).getPlaceList(pageable, lc);
-        return ResponseEntity.ok(body);
-    }
+		TourismType type = TourismType.fromOrThrow(category);
+		log.info("{} 항목 리스트 조회 시작", type.name());
+		LocaleCode lc;
+		try {
+			lc = LocaleCode.from(locale);
+		} catch (IllegalArgumentException ex) {
+			return ResponseEntity.badRequest().build();
+		}
+		PageResponse<PlaceBriefResponseDto> body = getService(type).getPlaceList(pageable, lc);
+		log.info("{} 항목 리스트 조회 시작", type.name());
+		if (themeId != null) {
+			body = getService(type).getPlaceListByTheme(pageable, themeId, lc);
+		} else {
+			body = getService(type).getPlaceList(pageable, LocaleCode.from(locale));
+		}
+		return ResponseEntity.ok(body);
+	}
 
 	@Operation(
 		summary = "장소 상세 조회",
@@ -115,8 +125,8 @@ public class PlaceController {
 		@ApiResponse(responseCode = "404", description = "해당 리소스 없음", content = @Content),
 		@ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)
 	})
-    @GetMapping("/{category}/{id}")
-    public ResponseEntity<PlaceDetailResponseDto> getPlaceDetail(
+	@GetMapping("/{category}/{id}")
+	public ResponseEntity<PlaceDetailResponseDto> getPlaceDetail(
 		@Parameter(
 			description = "카테고리",
 			schema = @Schema(allowableValues = {"accommodation", "restaurant", "tour", "wrong-category"})
@@ -124,22 +134,23 @@ public class PlaceController {
 		@PathVariable String category,
 
 		@Parameter(description = "리소스 ID", example = "123")
-        @PathVariable int id,
+		@PathVariable int id,
 
-        @Parameter(description = "언어(로케일) 코드", example = "ko", schema = @Schema(allowableValues = {"ko","en","ja","cn"}))
-        @RequestParam(name = "locale", defaultValue = "ko") String locale
-    ) {
-        TourismType type = TourismType.fromOrThrow(category);
-        com.tripsok_back.type.LocaleCode lc;
-        try {
-            lc = com.tripsok_back.type.LocaleCode.from(locale);
-        } catch (IllegalArgumentException ex) {
-            return ResponseEntity.badRequest().build();
-        }
-        try {
-            return ResponseEntity.of(getService(type).getPlaceDetail(id, lc)); // empty → 404
-        } catch (TourApiException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
+		@Parameter(description = "언어(로케일) 코드", example = "ko", schema = @Schema(allowableValues = {"ko", "en", "ja",
+			"cn"}))
+		@RequestParam(name = "locale", defaultValue = "ko") String locale
+	) {
+		TourismType type = TourismType.fromOrThrow(category);
+		LocaleCode lc;
+		try {
+			lc = LocaleCode.from(locale);
+		} catch (IllegalArgumentException ex) {
+			return ResponseEntity.badRequest().build();
+		}
+		try {
+			return ResponseEntity.of(getService(type).getPlaceDetail(id, lc)); // empty → 404
+		} catch (TourApiException e) {
+			return ResponseEntity.notFound().build();
+		}
+	}
 }

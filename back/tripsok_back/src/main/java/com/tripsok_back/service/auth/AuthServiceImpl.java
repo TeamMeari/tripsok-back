@@ -1,4 +1,4 @@
-package com.tripsok_back.service;
+package com.tripsok_back.service.auth;
 
 import static com.tripsok_back.model.user.SocialType.*;
 
@@ -21,23 +21,23 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClient;
 
-import com.tripsok_back.config.OAuth2Properties;
+import com.tripsok_back.config.properties.OAuth2Properties;
 import com.tripsok_back.dto.auth.GoogleUserInfo;
 import com.tripsok_back.dto.auth.request.EmailSignUpRequest;
 import com.tripsok_back.dto.auth.request.OauthLoginRequest;
 import com.tripsok_back.dto.auth.request.OauthSignUpRequest;
 import com.tripsok_back.dto.auth.response.GoogleTokenResponse;
 import com.tripsok_back.dto.auth.response.TokenResponse;
-import com.tripsok_back.exception.AuthException;
 import com.tripsok_back.exception.ErrorCode;
+import com.tripsok_back.exception.AuthException;
 import com.tripsok_back.model.auth.BlackListAccessToken;
 import com.tripsok_back.model.auth.RefreshToken;
 import com.tripsok_back.model.user.Role;
 import com.tripsok_back.model.user.SocialType;
 import com.tripsok_back.model.user.TripSokUser;
-import com.tripsok_back.repository.RedisBlackListAccessTokenRepository;
-import com.tripsok_back.repository.RedisRefreshTokenRepository;
-import com.tripsok_back.repository.UserRepository;
+import com.tripsok_back.repository.auth.RedisBlackListAccessTokenRepository;
+import com.tripsok_back.repository.auth.RedisRefreshTokenRepository;
+import com.tripsok_back.repository.user.UserRepository;
 import com.tripsok_back.security.dto.TripSokUserDto;
 import com.tripsok_back.security.jwt.JwtUtil;
 import com.tripsok_back.service.user.InterestThemeService;
@@ -48,7 +48,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AuthService {
+public class AuthServiceImpl implements AuthService {
 	private final BCryptPasswordEncoder passwordEncoder;
 	private final RedisRefreshTokenRepository refreshTokenRepository;
 	private final RedisBlackListAccessTokenRepository blackListAccessTokenRepository;
@@ -60,6 +60,7 @@ public class AuthService {
 
 	private final RestClient restClient = RestClient.builder().build();
 
+	@Override
 	@Transactional
 	public void signUpEmail(EmailSignUpRequest request) {
 		String email = getEmailFromToken(request.getEmailVerifyToken());
@@ -70,6 +71,7 @@ public class AuthService {
 		interestThemeService.saveInterestThemes(user, request.getInterestThemeIds());
 	}
 
+	@Override
 	@Transactional
 	public TokenResponse signUpOAuth(OauthSignUpRequest request) {
 		String socialSignUpToken = request.getSocialSignUpToken();
@@ -96,6 +98,7 @@ public class AuthService {
 		return getTokenResponse(user.getId(), getAuthorities(user.getRole()));
 	}
 
+	@Override
 	@Transactional
 	public TokenResponse loginWithOauth2(OauthLoginRequest request) {
 		TripSokUser user;
@@ -113,6 +116,7 @@ public class AuthService {
 		return getTokenResponse(user.getId(), getAuthorities(user.getRole()));
 	}
 
+	@Override
 	@Transactional
 	public TokenResponse loginWithEmail(String email, String password) {
 		try {
@@ -126,6 +130,7 @@ public class AuthService {
 		}
 	}
 
+	@Override
 	@Transactional
 	public TokenResponse refresh(String refreshToken) {
 		Integer userId = jwtUtil.validateAndExtract(refreshToken, "userId", Integer.class);
@@ -141,14 +146,17 @@ public class AuthService {
 		return getTokenResponse(user.getId(), getAuthorities(user.getRole()));
 	}
 
+	@Override
 	public boolean nicknameDuplicateCheck(String nickname) {
 		return !userRepository.existsByName(nickname);
 	}
 
+	@Override
 	public long getRefreshTokenExpirationTime() {
 		return jwtUtil.getRefreshTokenExpirationTime();
 	}
 
+	@Override
 	public void logout(String accessToken) {
 		Integer userId = jwtUtil.validateAndExtract(accessToken, "userId", Integer.class);
 		RefreshToken existingRefreshToken = refreshTokenRepository.findByUserId(userId);
@@ -168,6 +176,7 @@ public class AuthService {
 		}
 	}
 
+	@Override
 	@Transactional
 	public void resetPassword(String emailVerifyToken, String newPassword) {
 		String email = getEmailFromToken(emailVerifyToken);

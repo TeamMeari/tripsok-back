@@ -1,6 +1,7 @@
 package com.tripsok_back.controller;
 
 import org.springframework.http.HttpCookie;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -20,9 +21,9 @@ import com.tripsok_back.dto.auth.request.ResetPasswordRequest;
 import com.tripsok_back.dto.auth.response.LoginResponse;
 import com.tripsok_back.dto.auth.response.NicknameDuplicateCheckResponse;
 import com.tripsok_back.dto.auth.response.TokenResponse;
-import com.tripsok_back.exception.AuthException;
 import com.tripsok_back.exception.ErrorCode;
-import com.tripsok_back.service.AuthService;
+import com.tripsok_back.exception.AuthException;
+import com.tripsok_back.service.auth.AuthService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthController {
 
 	private final AuthService authService;
-	private final String COOKIE_HEARER = "Set-Cookie";
+	private final String COOKIE_HEARER = HttpHeaders.SET_COOKIE;
 
 	@PostMapping("/signup/email")
 	public ResponseEntity<Void> signUpWithEmail(@Valid @RequestBody EmailSignUpRequest request) {

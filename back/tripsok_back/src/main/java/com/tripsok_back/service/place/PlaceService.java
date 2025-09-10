@@ -18,13 +18,15 @@ public interface PlaceService {
 
 	void startPlaceUpdate(int numOfRow, int pageNo);
 
-    Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale);
+	Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale);
 
 	void addView(Place place);
 
 	void addLike(Place place);
 
-    PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable, LocaleCode locale);
+	PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable, LocaleCode locale);
+
+	PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId, LocaleCode locale);
 
 	void addReview(Integer userId, ReviewRequestDto reviewRequestdto);
 }

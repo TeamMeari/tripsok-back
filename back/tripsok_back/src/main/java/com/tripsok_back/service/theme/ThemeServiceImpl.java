@@ -1,11 +1,11 @@
-package com.tripsok_back.service.user;
+package com.tripsok_back.service.theme;
 
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.tripsok_back.dto.user.response.ThemeResponse;
-import com.tripsok_back.repository.ThemeRepository;
+import com.tripsok_back.dto.theme.response.ThemeResponse;
+import com.tripsok_back.repository.theme.ThemeRepository;
 
 import lombok.RequiredArgsConstructor;
 

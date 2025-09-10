@@ -29,9 +29,9 @@ import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
 import com.tripsok_back.util.JsonMapperUtil;
-import com.tripsok_back.util.llm.LlmClient;
 import com.tripsok_back.util.TimeUtil;
 import com.tripsok_back.util.TouristApiClientUtil;
+import com.tripsok_back.util.llm.LlmClient;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -47,7 +47,7 @@ public class RestaurantServiceImpl implements PlaceService {
 	private final RestaurantRepository restaurantRepository;
 	private final CategoryService categoryService;
 	private final ObjectMapper om;
-    private final LlmClient groqApiClientUtil;
+	private final LlmClient groqApiClientUtil;
 
 	@Override
 	public TourismType getType() {
@@ -128,6 +128,19 @@ public class RestaurantServiceImpl implements PlaceService {
 				e.getRestaurant().getImageUrlList().getFirst(),
 				e.getRestaurant().getRestaurantImages().size(),
 				e.getRestaurant().getRestaurantReviews().size(),
+				locale));
+		return PageResponse.fromPage(placeList, dtoList);
+	}
+
+	@Override
+	public PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
+		LocaleCode locale) {
+		Page<Place> placeList = restaurantRepository.findByRestaurantIsNotNullAndThemes_Theme_Id(pageable, themeId);
+		Page<PlaceBriefResponseDto> dtoList = placeList.map(
+			e -> PlaceBriefResponseDto.from(e, getType().name(),
+				e.getAccommodation().getImageUrlList().getFirst(),
+				e.getAccommodation().getAccommodationImages().size(),
+				e.getAccommodation().getAccommodationReviews().size(),
 				locale));
 		return PageResponse.fromPage(placeList, dtoList);
 	}

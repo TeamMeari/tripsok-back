@@ -1,38 +1,50 @@
 package com.tripsok_back.model.place;
 
-import java.time.Instant;
 
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
+import com.tripsok_back.model.theme.Theme;
+import com.tripsok_back.support.BaseTimeEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @Entity
-@Table(name = "PLACE_THEME", schema = "TRIPSOK")
-public class PlaceTheme {
+@Table(name = "PLACE_THEME", indexes = {
+	@Index(name = "idx_place_theme_theme", columnList = "THEME_ID"),
+	@Index(name = "idx_place_theme_place", columnList = "PLACE_ID"),
+},
+	uniqueConstraints = {
+		@UniqueConstraint(name = "uk_place_theme_place_and_theme", columnNames = {"PLACE_ID", "THEME_ID"})
+	})
+@NoArgsConstructor
+public class PlaceTheme extends BaseTimeEntity {
 	@Id
-	@Column(name = "ID", nullable = false)
-	private Long id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "ID")
+	private Integer id;
 
-	@NotNull
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
-	@OnDelete(action = OnDeleteAction.RESTRICT)
+	@ManyToOne
 	@JoinColumn(name = "PLACE_ID", nullable = false)
 	private Place place;
 
-	@NotNull
-	@Column(name = "CREATED_AT", nullable = false)
-	private Instant createdAt;
+	@ManyToOne
+	@JoinColumn(name = "THEME_ID", nullable = false)
+	private Theme theme;
 
+	public PlaceTheme(Place place, Theme theme) {
+		this.place = place;
+		this.theme = theme;
+	}
 }

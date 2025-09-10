@@ -13,13 +13,16 @@ import com.tripsok_back.model.place.Place;
 @Repository
 public interface RestaurantRepository extends JpaRepository<Place, Integer> {
 
-    @Override
-    @EntityGraph(attributePaths = {"placeTrs", "restaurant", "restaurant.restaurantImages", "restaurant.placeLclsCategory"})
-    Optional<Place> findById(Integer id);
+	@Override
+	@EntityGraph(attributePaths = {"placeTrs","restaurant.restaurantImages", "tags", "tags.tag"})
+	Optional<Place> findById(Integer id);
 
 	@EntityGraph(attributePaths = {"placeTrs", "restaurant"})
 	Optional<Place> findByContentId(Integer contentId);
 
 	@EntityGraph(attributePaths = {"placeTrs", "restaurant.restaurantImages"})
 	Page<Place> findByRestaurantIsNotNull(Pageable pageable);
+
+	@EntityGraph(attributePaths = {"placeTrs","restaurant", "themes", "themes.theme"})
+	Page<Place> findByRestaurantIsNotNullAndThemes_Theme_Id(Pageable pageable, Integer themeId);
 }

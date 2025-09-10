@@ -23,7 +23,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "RESTAURANT_IMAGE", schema = "TRIPSOK")
+@Table(name = "RESTAURANT_IMAGE")
 public class RestaurantImage extends BaseModifiableEntity {
 	@Id
 	@SequenceGenerator(name = "restaurant_image_seq", sequenceName = "RESTAURANT_IMAGE_SEQ", allocationSize = 1)
