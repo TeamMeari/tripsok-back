@@ -44,8 +44,8 @@ public record PlaceBriefResponseDto(
 		return new PlaceBriefResponseDto(
 			p.getId(),
 			locale.getCode(),
-			tr != null ? tr.getPlaceName() : null,
-			tr != null ? tr.getAddress() : null,
+			tr.getPlaceName(),
+			tr.getAddress(),
 			type,
 			p.getMapY(), // lat
 			p.getMapX(), // lng
