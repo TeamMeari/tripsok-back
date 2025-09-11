@@ -104,10 +104,23 @@ public class AccommodationServiceImpl extends PlaceService {
 
 	@Override
 	public PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable,
-		com.tripsok_back.type.LocaleCode locale) throws TourApiException {
+		LocaleCode locale) throws TourApiException {
 		Page<Place> placeList = accommodationRepository.findByAccommodationIsNotNull(pageable);
 		if (placeList.getTotalPages() == 0)
 			return PageResponse.empty();
+		Page<PlaceBriefResponseDto> dtoList = placeList.map(
+			e -> PlaceBriefResponseDto.from(e, getType().name(),
+				e.getAccommodation().getImageUrlList().getFirst(),
+				e.getAccommodation().getAccommodationImages().size(),
+				e.getAccommodation().getAccommodationReviews().size(),
+				locale));
+		return PageResponse.fromPage(placeList, dtoList);
+	}
+
+	public PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
+		LocaleCode locale) {
+		Page<Place> placeList = accommodationRepository.findByAccommodationIsNotNullAndThemes_Theme_Id(pageable,
+			themeId);
 		Page<PlaceBriefResponseDto> dtoList = placeList.map(
 			e -> PlaceBriefResponseDto.from(e, getType().name(),
 				e.getAccommodation().getImageUrlList().getFirst(),
@@ -291,4 +304,17 @@ public class AccommodationServiceImpl extends PlaceService {
 		}
 		accommodationRepository.save(accommodationPlace);
 	}
+	/*
+	private PageResponse<PlaceBriefResponseDto> toPlaceBriefResponseDto(Page<Place> placeList) {
+		if (placeList.getTotalPages() == 0)
+			return PageResponse.empty();
+		Page<PlaceBriefResponseDto> dtoList = placeList.map(
+			e -> PlaceBriefResponseDto.from(e, getType().name(),
+				e.getAccommodation().getImageUrlList().getFirst(),
+				e.getAccommodation().getAccommodationImages().size(),
+				e.getAccommodation().getAccommodationReviews().size()));
+		return PageResponse.fromPage(placeList, dtoList);
+	}
+
+	 */
 }

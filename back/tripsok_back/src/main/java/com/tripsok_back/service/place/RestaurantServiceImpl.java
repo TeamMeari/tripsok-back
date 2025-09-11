@@ -119,6 +119,19 @@ public class RestaurantServiceImpl extends PlaceService {
 	}
 
 	@Override
+	public PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
+		LocaleCode locale) {
+		Page<Place> placeList = restaurantRepository.findByRestaurantIsNotNullAndThemes_Theme_Id(pageable, themeId);
+		Page<PlaceBriefResponseDto> dtoList = placeList.map(
+			e -> PlaceBriefResponseDto.from(e, getType().name(),
+				e.getAccommodation().getImageUrlList().getFirst(),
+				e.getAccommodation().getAccommodationImages().size(),
+				e.getAccommodation().getAccommodationReviews().size(),
+				locale));
+		return PageResponse.fromPage(placeList, dtoList);
+	}
+
+	@Override
 	public void addReview(Integer userId, ReviewRequestDto reviewRequestdto) {
 
 	}

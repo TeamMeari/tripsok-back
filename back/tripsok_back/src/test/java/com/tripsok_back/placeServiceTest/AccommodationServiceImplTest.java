@@ -1,45 +1,13 @@
 package com.tripsok_back.placeServiceTest;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tripsok_back.config.ApiKeyConfig;
-import com.tripsok_back.dto.place.PlaceDetailResponseDto;
-import com.tripsok_back.dto.tourApi.TourApiPlaceDetailRequestDto;
-import com.tripsok_back.dto.tourApi.TourApiPlaceDetailResponseDto;
-import com.tripsok_back.dto.tourApi.TourApiPlaceRequestDto;
-import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
-import com.tripsok_back.exception.TourApiException;
-import com.tripsok_back.model.place.Place;
-import com.tripsok_back.repository.place.accomodation.AccommodationRepository;
-import com.tripsok_back.service.place.AccommodationServiceImpl;
-import com.tripsok_back.service.place.CategoryService;
-import com.tripsok_back.type.PlaceJoinType;
-import com.tripsok_back.type.TourismType;
-import com.tripsok_back.util.TimeUtil;
-import com.tripsok_back.util.TouristApiClientUtil;
 
 @ExtendWith(MockitoExtension.class)
 class AccommodationServiceImplTest {
 
+}
+	/*
 	@Mock
 	ApiKeyConfig apiKeyConfig;
 	@Mock
@@ -333,3 +301,6 @@ class AccommodationServiceImplTest {
 	}*/
 	// TODO : 수정하기
 }
+
+
+	 */

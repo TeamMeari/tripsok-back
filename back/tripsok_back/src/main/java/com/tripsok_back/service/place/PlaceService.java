@@ -58,5 +58,7 @@ public abstract class PlaceService {
 
 	public abstract PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable, LocaleCode locale);
 
+	public abstract PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId, LocaleCode locale);
+
 	public abstract void addReview(Integer userId, ReviewRequestDto reviewRequestdto);
 }

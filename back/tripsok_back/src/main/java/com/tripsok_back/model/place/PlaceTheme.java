@@ -1,5 +1,6 @@
 package com.tripsok_back.model.place;
 
+
 import com.tripsok_back.model.theme.Theme;
 import com.tripsok_back.support.BaseTimeEntity;
 

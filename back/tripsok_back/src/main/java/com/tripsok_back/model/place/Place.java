@@ -29,6 +29,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
@@ -42,10 +43,6 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "PLACE")
-@AttributeOverrides({
-	@AttributeOverride(name = "createdAt", column = @Column(name = "CREATED_AT", nullable = false)),
-	@AttributeOverride(name = "updatedAt", column = @Column(name = "UPDATED_AT", nullable = false))
-})
 public class Place extends BaseModifiableEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PLACE_id_gen")
@@ -96,6 +93,9 @@ public class Place extends BaseModifiableEntity {
 	@Column(name = "MAP_Y", precision = 13, scale = 10)
 	private BigDecimal mapY;
 
+	@OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<PlaceTr> placeTrs = new LinkedHashSet<>();
+
 	// 정해진 테마 1~3개 저장
 	@OneToMany(mappedBy = "place", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<PlaceTheme> themes = new HashSet<>();
@@ -103,9 +103,6 @@ public class Place extends BaseModifiableEntity {
 	// 자유 태그 2~4개 저장
 	@OneToMany(mappedBy = "place", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<PlaceTag> tags = new HashSet<>();
-
-	@OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
-	private Set<PlaceTr> placeTrs = new LinkedHashSet<>();
 
 	public PlaceTr getPlaceTr(String language) {
 		if (language == null)
