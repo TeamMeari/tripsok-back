@@ -8,9 +8,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.tripsok_back.model.place.Place;
+import com.tripsok_back.model.place.PlaceTr;
+import com.tripsok_back.type.LocaleCode;
 
 public record PlaceBriefResponseDto(
 	Integer id,
+	String language,
 	String name,
 	String address,
 	String type,               // 필요시 enum 으로 교체
@@ -30,14 +33,22 @@ public record PlaceBriefResponseDto(
 		String type,
 		String thumbnailUrl,
 		Integer imageCount,
-		Integer reviewCount
+		Integer reviewCount,
+		LocaleCode locale
 	) {
 		Objects.requireNonNull(p, "place must not be null");
 
+		PlaceTr tr = null;
+		if (locale != null)
+			tr = p.getPlaceTr(locale);
+		if (tr == null)
+			tr = p.getPlaceTr(LocaleCode.KO);
+
 		return new PlaceBriefResponseDto(
 			p.getId(),
-			p.getPlaceName(),
-			p.getAddress(),
+			locale.getCode(),
+			tr.getPlaceName(),
+			tr.getAddress(),
 			type,
 			p.getMapY(), // lat
 			p.getMapX(), // lng

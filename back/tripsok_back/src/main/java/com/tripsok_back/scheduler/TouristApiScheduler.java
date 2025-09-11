@@ -32,10 +32,12 @@ public class TouristApiScheduler {
 
 	@Scheduled(cron = "0 0 1 * * *")
 	public void initTourPlaceRequest() throws JsonProcessingException {
+
+		runBatchCategoryRequestApi();
 		runBatchAccommodationRequestApi();
 		runBatchRestaurantRequestApi();
 		runBatchTourRequestApi();
-		runBatchCategoryRequestApi();
+		
 	}
 
 	public void runBatchAccommodationRequestApi() throws JsonProcessingException {

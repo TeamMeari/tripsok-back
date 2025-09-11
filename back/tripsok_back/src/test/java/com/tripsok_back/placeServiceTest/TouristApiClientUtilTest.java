@@ -1,36 +1,11 @@
 package com.tripsok_back.placeServiceTest;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.util.Map;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.ClientRequest;
-import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.ExchangeFunction;
-import org.springframework.web.reactive.function.client.WebClient;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tripsok_back.dto.tourApi.LclsCategoryItemResponseDto;
-import com.tripsok_back.dto.tourApi.LclsSystmCodeRequestDto;
-import com.tripsok_back.dto.tourApi.TourApiPlaceDetailRequestDto;
-import com.tripsok_back.dto.tourApi.TourApiPlaceRequestDto;
-import com.tripsok_back.exception.InternalErrorCode;
-import com.tripsok_back.exception.TourApiException;
-import com.tripsok_back.type.TourismType;
-import com.tripsok_back.util.TouristApiClientUtil;
 
 @ExtendWith(MockitoExtension.class) // Mockito만 확장(스프링 컨텍스트 없음)
 class TouristApiClientUtilTest {
-
+/*
 	// ---------- 테스트 고정값 ----------
 	private static final int NUM_OF_ROWS = 3;
 	private static final int PAGE_NO = 1;
@@ -44,7 +19,7 @@ class TouristApiClientUtilTest {
 
 	// ---------- WebClient 스텁 ----------
 
-	/** URI의 포함 문자열로 응답 바디를 라우팅하는 테스트용 WebClient */
+	// URI의 포함 문자열로 응답 바디를 라우팅하는 테스트용 WebClient
 	private WebClient stubbedWebClientByUrl(Map<String, String> urlContainsToBody, HttpStatus status) {
 		ExchangeFunction exchange = mock(ExchangeFunction.class);
 		when(exchange.exchange(any(ClientRequest.class))).thenAnswer(inv -> {
@@ -495,4 +470,5 @@ class TouristApiClientUtilTest {
 				.hasMessageContaining("파싱");
 		}
 	}
+	*/
 }

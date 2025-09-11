@@ -19,6 +19,7 @@ import com.tripsok_back.dto.place.PlaceDetailResponseDto;
 import com.tripsok_back.dto.place.PlaceSortStyle;
 import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.service.place.PlaceService;
+import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.TourismType;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -81,6 +82,9 @@ public class PlaceController {
 		@ParameterObject
 		@RequestParam(required = false) PlaceSortStyle sortStyle,
 
+		@Parameter(description = "언어(로케일) 코드", example = "ko", schema = @Schema(allowableValues = {"ko", "en", "ja",
+			"cn"}))
+		@RequestParam(name = "locale", defaultValue = "ko") String locale,
 		@Parameter(description = "테마 ID", example = "1")
 		@RequestParam(required = false) Integer themeId
 	) {
@@ -92,11 +96,18 @@ public class PlaceController {
 
 		TourismType type = TourismType.fromOrThrow(category);
 		log.info("{} 항목 리스트 조회 시작", type.name());
-		PageResponse<PlaceBriefResponseDto> body;
+		LocaleCode lc;
+		try {
+			lc = LocaleCode.from(locale);
+		} catch (IllegalArgumentException ex) {
+			return ResponseEntity.badRequest().build();
+		}
+		PageResponse<PlaceBriefResponseDto> body = getService(type).getPlaceList(pageable, lc);
+		log.info("{} 항목 리스트 조회 시작", type.name());
 		if (themeId != null) {
-			body = getService(type).getPlaceListByTheme(pageable, themeId);
-		}else {
-			body = getService(type).getPlaceList(pageable);
+			body = getService(type).getPlaceListByTheme(pageable, themeId, lc);
+		} else {
+			body = getService(type).getPlaceList(pageable, lc);
 		}
 		return ResponseEntity.ok(body);
 	}
@@ -123,11 +134,21 @@ public class PlaceController {
 		@PathVariable String category,
 
 		@Parameter(description = "리소스 ID", example = "123")
-		@PathVariable int id
+		@PathVariable int id,
+
+		@Parameter(description = "언어(로케일) 코드", example = "ko", schema = @Schema(allowableValues = {"ko", "en", "ja",
+			"cn"}))
+		@RequestParam(name = "locale", defaultValue = "ko") String locale
 	) {
 		TourismType type = TourismType.fromOrThrow(category);
+		LocaleCode lc;
 		try {
-			return ResponseEntity.of(getService(type).getPlaceDetail(id)); // empty → 404
+			lc = LocaleCode.from(locale);
+		} catch (IllegalArgumentException ex) {
+			return ResponseEntity.badRequest().build();
+		}
+		try {
+			return ResponseEntity.of(getService(type).getPlaceDetail(id, lc)); // empty → 404
 		} catch (TourApiException e) {
 			return ResponseEntity.notFound().build();
 		}

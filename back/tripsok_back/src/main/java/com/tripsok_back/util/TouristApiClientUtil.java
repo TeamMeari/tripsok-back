@@ -22,6 +22,7 @@ import com.tripsok_back.dto.tourApi.TourApiPlaceRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
 import com.tripsok_back.exception.InternalErrorCode;
 import com.tripsok_back.exception.TourApiException;
+import com.tripsok_back.type.LocaleCode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -160,9 +161,10 @@ public class TouristApiClientUtil {
 		}
 	}
 
-	public Map<String, LclsCategoryItemResponseDto> fetchCategories(LclsSystmCodeRequestDto dto) {
+	public Map<String, LclsCategoryItemResponseDto> fetchCategories(LclsSystmCodeRequestDto dto, LocaleCode locale) {
+		String url = "https://apis.data.go.kr/B551011/{path}/lclsSystmCode2".replace("{path}", locale.getUrlPath());
 		URI uri = UriComponentsBuilder
-			.fromHttpUrl("https://apis.data.go.kr/B551011/KorService2/lclsSystmCode2")
+			.fromHttpUrl(url)
 			.queryParam("serviceKey", dto.getServiceKey())
 			.queryParam("MobileApp", orDefault(dto.getMobileApp(), "AppTest"))
 			.queryParam("MobileOS", orDefault(dto.getMobileOS(), "ETC"))

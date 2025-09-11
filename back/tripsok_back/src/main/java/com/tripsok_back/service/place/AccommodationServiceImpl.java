@@ -8,6 +8,7 @@ import org.apache.logging.log4j.util.InternalException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripsok_back.config.ApiKeyConfig;
@@ -22,12 +23,15 @@ import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
 import com.tripsok_back.exception.InternalErrorCode;
 import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.model.place.Place;
-import com.tripsok_back.repository.place.accomodation.AccommodationRepository;
+import com.tripsok_back.model.place.PlaceLclsCategory;
+import com.tripsok_back.repository.place.AccommodationRepository;
+import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
 import com.tripsok_back.util.JsonMapperUtil;
 import com.tripsok_back.util.TimeUtil;
 import com.tripsok_back.util.TouristApiClientUtil;
+import com.tripsok_back.util.llm.LlmClient;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +46,7 @@ public class AccommodationServiceImpl implements PlaceService {
 	private final TouristApiClientUtil tourApiClient;
 	private final CategoryService categoryService;
 	private final AccommodationRepository accommodationRepository;
+	private final LlmClient groqApiClientUtil;
 	private final ObjectMapper om;
 
 	@Override
@@ -65,19 +70,36 @@ public class AccommodationServiceImpl implements PlaceService {
 
 	@Override
 	@Transactional
-	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId) throws TourApiException {
+	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale) throws
+		TourApiException {
 		Optional<Place> optPlace = accommodationRepository.findById(placeId);
 		if (optPlace.isEmpty())
 			throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
 		Place placeAccommodation = optPlace.get();
-		if (placeAccommodation.getAccommodation().getAccommodationType().isEmpty()) {
+		if (placeAccommodation.getPlaceTr(LocaleCode.KO) == null ||
+			!StringUtils.hasText(placeAccommodation.getPlaceTr(LocaleCode.KO).getSummary())) {
+			createShortDescription(placeAccommodation);
+		}
+		if (locale != null && locale != LocaleCode.KO) {
+			if (placeAccommodation.getPlaceTr(locale) == null ||
+				!StringUtils.hasText(placeAccommodation.getPlaceTr(locale).getSummary())) {
+				placeAccommodation.upsertTranslation(locale, null, null, null, null);
+				createSummaryTranslation(placeAccommodation, locale);
+			}
+			createInformationTranslation(placeAccommodation, locale);
+			createTransliterationForNameAndAddress(placeAccommodation, locale);
+		}
+		if (placeAccommodation.getAccommodation().getPlaceLclsCategory() == null) {
 			TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto = requestPlaceDetail(
 				placeAccommodation.getContentId());
-			String categoryName = categoryService.getCategoryByCode(tourApiPlaceDetailResponseDto.getCategoryLevel3());
-			placeAccommodation.updateNullAccommodationDetail(tourApiPlaceDetailResponseDto, categoryName);
+			PlaceLclsCategory category = categoryService.getCategoryByCode(
+				tourApiPlaceDetailResponseDto.getCategoryLevel3());
+			placeAccommodation.updateNullAccommodationDetail(tourApiPlaceDetailResponseDto, category);
 		}
+		log.info("request detail 카테고리 조회 {}",
+			placeAccommodation.getAccommodation().getPlaceLclsCategory().getLclsSystm3Name());
 		addView(placeAccommodation);
-		return Optional.of(PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION));
+		return Optional.of(PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION, locale));
 	}
 
 	@Override
@@ -91,14 +113,31 @@ public class AccommodationServiceImpl implements PlaceService {
 	}
 
 	@Override
-	public PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable) throws TourApiException {
+	public PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable,
+		LocaleCode locale) throws TourApiException {
 		Page<Place> placeList = accommodationRepository.findByAccommodationIsNotNull(pageable);
-		return toPlaceBriefResponseDto(placeList);
+		if (placeList.getTotalPages() == 0)
+			return PageResponse.empty();
+		Page<PlaceBriefResponseDto> dtoList = placeList.map(
+			e -> PlaceBriefResponseDto.from(e, getType().name(),
+				e.getAccommodation().getImageUrlList().getFirst(),
+				e.getAccommodation().getAccommodationImages().size(),
+				e.getAccommodation().getAccommodationReviews().size(),
+				locale));
+		return PageResponse.fromPage(placeList, dtoList);
 	}
 
-	public PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId) {
-		Page<Place> placeList = accommodationRepository.findByAccommodationIsNotNullAndThemes_Theme_Id(pageable, themeId);
-		return toPlaceBriefResponseDto(placeList);
+	public PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
+		LocaleCode locale) {
+		Page<Place> placeList = accommodationRepository.findByAccommodationIsNotNullAndThemes_Theme_Id(pageable,
+			themeId);
+		Page<PlaceBriefResponseDto> dtoList = placeList.map(
+			e -> PlaceBriefResponseDto.from(e, getType().name(),
+				e.getAccommodation().getImageUrlList().getFirst(),
+				e.getAccommodation().getAccommodationImages().size(),
+				e.getAccommodation().getAccommodationReviews().size(),
+				locale));
+		return PageResponse.fromPage(placeList, dtoList);
 	}
 
 	@Override
@@ -161,18 +200,100 @@ public class AccommodationServiceImpl implements PlaceService {
 		}
 	}
 
+	public void createShortDescription(Place place) {
+		if (place.getPlaceTr(LocaleCode.KO) == null) {
+			place.initPlaceTrsWithKorean(null, null, null, null);
+		}
+		String name = place.getPlaceTr(LocaleCode.KO) != null ? place.getPlaceTr(LocaleCode.KO).getPlaceName() : null;
+		String source =
+			place.getPlaceTr(LocaleCode.KO) != null ? place.getPlaceTr(LocaleCode.KO).getInformation() : null;
+		log.info("createShortDescription: placeId={}, contentId={}, locale=KO, name='{}'",
+			place.getId(), place.getContentId(), name);
+		if (!StringUtils.hasText(source)) {
+			log.info("createShortDescription: source empty, skip (placeId={})", place.getId());
+			return;
+		}
+		String shortDescription = groqApiClientUtil.requestGroqShortDescription(source);
+		if (place.getPlaceTr(LocaleCode.KO) != null) {
+			String safe = groqApiClientUtil.sanitizeForVarchar(shortDescription, 255);
+			place.getPlaceTr(LocaleCode.KO).setSummary(safe);
+		}
+	}
+
+	public void createSummaryTranslation(Place place, LocaleCode locale) {
+		String name = place.getPlaceTr(LocaleCode.KO) != null ? place.getPlaceTr(LocaleCode.KO).getPlaceName() : null;
+		String base = place.getPlaceTr(LocaleCode.KO) != null ? place.getPlaceTr(LocaleCode.KO).getSummary() : null;
+		log.info("createTranslation: placeId={}, contentId={}, locale={}, name='{}'",
+			place.getId(), place.getContentId(), locale != null ? locale.getCode() : null, name);
+		if (!StringUtils.hasText(base)) {
+			log.info("createTranslation: KO summary missing/empty, skip (placeId={}, locale={})", place.getId(),
+				locale != null ? locale.getCode() : null);
+			return;
+		}
+		String translation = groqApiClientUtil.requestTranslation(base, locale);
+		translation = groqApiClientUtil.sanitizeForVarchar(translation, 255);
+		place.getPlaceTr(locale).setSummary(translation);
+	}
+
+	public void createInformationTranslation(Place place, LocaleCode locale) {
+		String info = place.getPlaceTr(LocaleCode.KO) != null ? place.getPlaceTr(LocaleCode.KO).getInformation() : null;
+		if (!StringUtils.hasText(info))
+			return;
+		if (place.getPlaceTr(locale) == null) {
+			place.upsertTranslation(locale, null, null, null, null);
+		}
+		if (StringUtils.hasText(place.getPlaceTr(locale).getInformation()))
+			return;
+		String translated = groqApiClientUtil.requestTranslation(info, locale);
+		place.getPlaceTr(locale).setInformation(translated);
+	}
+
+	public void createTransliterationForNameAndAddress(Place place, LocaleCode locale) {
+		if (locale == null || locale == LocaleCode.KO)
+			return;
+		if (place.getPlaceTr(LocaleCode.KO) == null)
+			return;
+		String koName = place.getPlaceTr(LocaleCode.KO).getPlaceName();
+		String koAddr = place.getPlaceTr(LocaleCode.KO).getAddress();
+		if (place.getPlaceTr(locale) == null) {
+			place.upsertTranslation(locale, null, null, null, null);
+		}
+		if (StringUtils.hasText(koName) && !StringUtils.hasText(place.getPlaceTr(locale).getPlaceName())) {
+			String namePhonetic = groqApiClientUtil.requestTransliteration(koName, locale);
+			namePhonetic = groqApiClientUtil.sanitizeForVarchar(namePhonetic, 255);
+			place.getPlaceTr(locale).setPlaceName(namePhonetic);
+		}
+		if (StringUtils.hasText(koAddr) && !StringUtils.hasText(place.getPlaceTr(locale).getAddress())) {
+			String addrPhonetic = groqApiClientUtil.requestTransliteration(koAddr, locale);
+			addrPhonetic = groqApiClientUtil.sanitizeForVarchar(addrPhonetic, 255);
+			place.getPlaceTr(locale).setAddress(addrPhonetic);
+		}
+	}
+
 	public void updatePlace(Place existingPlace, TourApiPlaceResponseDto placeDto) {
 		TourApiPlaceDetailResponseDto detailResponseDto = requestPlaceDetail(existingPlace.getContentId());
 		log.info("updatePlace: 상세정보 응답 성공 (미리보기):  (pretty)\n{}",
 			JsonMapperUtil.pretty(om, detailResponseDto));
-		existingPlace.updateAccommodation(placeDto, detailResponseDto,
-			categoryService.getCategoryByCode(detailResponseDto.getLargeClassificationSystem3()));
+		PlaceLclsCategory category = categoryService.getCategoryByCode(
+			detailResponseDto.getLargeClassificationSystem3());
+		existingPlace.updateAccommodation(placeDto, detailResponseDto, category);
+		if (existingPlace.getAccommodation() != null &&
+			existingPlace.getAccommodation().getAccommodationImages() == null) {
+			existingPlace.updateNullAccommodationDetail(detailResponseDto, category);
+		}
+		for (LocaleCode lc : LocaleCode.values()) {
+			if (lc == LocaleCode.KO)
+				continue;
+			createSummaryTranslation(existingPlace, lc);
+			createInformationTranslation(existingPlace, lc);
+			createTransliterationForNameAndAddress(existingPlace, lc);
+		}
 		accommodationRepository.save(existingPlace);
 		log.info("상세정보 업데이트 완료 : contentId={}, placeId={}, title={}, categoryName={}",
 			existingPlace.getContentId(),
 			existingPlace.getId(),
 			existingPlace.getAccommodation() != null ? existingPlace.getAccommodation().getId() : null,
-			existingPlace.getAccommodation() != null ? existingPlace.getAccommodation().getAccommodationType() : null
+			existingPlace.getAccommodation() != null ? existingPlace.getAccommodation().getPlaceLclsCategory() : null
 		);
 	}
 
@@ -180,20 +301,18 @@ public class AccommodationServiceImpl implements PlaceService {
 		TourApiPlaceDetailResponseDto detailResponseDto = requestPlaceDetail(placeDto.getContentId());
 		log.info("addPlace: 상세정보 응답 성공 (미리보기): (pretty)\n{}",
 			JsonMapperUtil.pretty(om, detailResponseDto));
-		String categoryName = categoryService.getCategoryByCode(detailResponseDto.getLargeClassificationSystem3());
-		Place accommodationPlace = Place.buildAccommodation(placeDto, detailResponseDto, categoryName);
+		PlaceLclsCategory category = categoryService.getCategoryByCode(
+			detailResponseDto.getLargeClassificationSystem3());
+		Place accommodationPlace = Place.buildAccommodation(placeDto, detailResponseDto, category);
+		createShortDescription(accommodationPlace);
+		for (LocaleCode localeCode : LocaleCode.values()) {
+			if (localeCode.equals(LocaleCode.KO))
+				continue;
+			createSummaryTranslation(accommodationPlace, localeCode);
+			createInformationTranslation(accommodationPlace, localeCode);
+			createTransliterationForNameAndAddress(accommodationPlace, localeCode);
+		}
 		accommodationRepository.save(accommodationPlace);
-	}
-
-	private PageResponse<PlaceBriefResponseDto> toPlaceBriefResponseDto(Page<Place> placeList) {
-		if (placeList.getTotalPages() == 0)
-			return PageResponse.empty();
-		Page<PlaceBriefResponseDto> dtoList = placeList.map(
-			e -> PlaceBriefResponseDto.from(e, getType().name(),
-				e.getAccommodation().getImageUrlList().getFirst(),
-				e.getAccommodation().getAccommodationImages().size(),
-				e.getAccommodation().getAccommodationReviews().size()));
-		return PageResponse.fromPage(placeList, dtoList);
 	}
 
 }

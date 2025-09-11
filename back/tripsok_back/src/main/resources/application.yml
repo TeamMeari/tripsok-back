@@ -9,6 +9,7 @@ spring:
       - flyway
       - jwt
       - oauth2
+      - dev
   data:
     redis:
       host: ${REDIS_HOST}
