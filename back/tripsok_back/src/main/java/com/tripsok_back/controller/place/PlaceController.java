@@ -107,7 +107,7 @@ public class PlaceController {
 		if (themeId != null) {
 			body = getService(type).getPlaceListByTheme(pageable, themeId, lc);
 		} else {
-			body = getService(type).getPlaceList(pageable, LocaleCode.from(locale));
+			body = getService(type).getPlaceList(pageable, lc);
 		}
 		return ResponseEntity.ok(body);
 	}

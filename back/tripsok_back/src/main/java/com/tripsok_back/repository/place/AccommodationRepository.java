@@ -1,4 +1,4 @@
-package com.tripsok_back.repository.place.accomodation;
+package com.tripsok_back.repository.place;
 
 import java.util.Optional;
 
@@ -14,7 +14,7 @@ import com.tripsok_back.model.place.Place;
 public interface AccommodationRepository extends JpaRepository<Place, Integer> {
 
 	@Override
-	@EntityGraph(attributePaths = {"placeTrs","accommodation.accommodationImages", "tags", "tags.tag"})
+	@EntityGraph(attributePaths = {"placeTrs", "accommodation.accommodationImages", "tags", "tags.tag"})
 	Optional<Place> findById(Integer id);
 
 	@EntityGraph(attributePaths = {"placeTrs", "accommodation"})
@@ -23,6 +23,6 @@ public interface AccommodationRepository extends JpaRepository<Place, Integer> {
 	@EntityGraph(attributePaths = {"placeTrs", "accommodation.accommodationImages"})
 	Page<Place> findByAccommodationIsNotNull(Pageable pageable);
 
-	@EntityGraph(attributePaths = {"accommodation", "themes", "themes.theme"})
+	@EntityGraph(attributePaths = {"placeTrs", "accommodation", "themes", "themes.theme"})
 	Page<Place> findByAccommodationIsNotNullAndThemes_Theme_Id(Pageable pageable, Integer themeId);
 }

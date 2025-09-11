@@ -24,7 +24,7 @@ import com.tripsok_back.exception.InternalErrorCode;
 import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
-import com.tripsok_back.repository.place.accomodation.AccommodationRepository;
+import com.tripsok_back.repository.place.AccommodationRepository;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
@@ -314,17 +314,5 @@ public class AccommodationServiceImpl implements PlaceService {
 		}
 		accommodationRepository.save(accommodationPlace);
 	}
-	/*
-	private PageResponse<PlaceBriefResponseDto> toPlaceBriefResponseDto(Page<Place> placeList) {
-		if (placeList.getTotalPages() == 0)
-			return PageResponse.empty();
-		Page<PlaceBriefResponseDto> dtoList = placeList.map(
-			e -> PlaceBriefResponseDto.from(e, getType().name(),
-				e.getAccommodation().getImageUrlList().getFirst(),
-				e.getAccommodation().getAccommodationImages().size(),
-				e.getAccommodation().getAccommodationReviews().size()));
-		return PageResponse.fromPage(placeList, dtoList);
-	}
 
-	 */
 }
