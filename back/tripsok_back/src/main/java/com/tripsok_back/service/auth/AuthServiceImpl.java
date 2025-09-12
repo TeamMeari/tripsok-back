@@ -40,7 +40,6 @@ import com.tripsok_back.repository.auth.RedisRefreshTokenRepository;
 import com.tripsok_back.repository.user.UserRepository;
 import com.tripsok_back.security.dto.TripSokUserDto;
 import com.tripsok_back.security.jwt.JwtUtil;
-import com.tripsok_back.service.user.InterestThemeService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +55,6 @@ public class AuthServiceImpl implements AuthService {
 	private final OAuth2Properties oAuth2Properties;
 	private final JwtUtil jwtUtil;
 	private final AuthenticationManager authenticationManager;
-	private final InterestThemeService interestThemeService;
 
 	private final RestClient restClient = RestClient.builder().build();
 

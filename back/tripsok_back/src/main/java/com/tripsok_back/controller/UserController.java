@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tripsok_back.dto.user.request.ChangeContactEmailRequest;
 import com.tripsok_back.dto.user.request.ChangeInterestThemeRequest;
+import com.tripsok_back.dto.user.request.ChangeUserInfoRequest;
 import com.tripsok_back.dto.user.response.UserInfoResponse;
 import com.tripsok_back.service.user.UserService;
 
@@ -40,6 +41,13 @@ public class UserController {
 	public ResponseEntity<Void> changeInterestThemes(@AuthenticationPrincipal Integer userId,
 		@Valid @RequestBody ChangeInterestThemeRequest request) {
 		userService.changeInterestThemes(userId, request.getInterestThemeIds());
+		return ResponseEntity.noContent().build();
+	}
+
+	@PatchMapping("/info")
+	public ResponseEntity<Void> changeUserInfo(@AuthenticationPrincipal Integer userId,
+		@Valid @RequestBody ChangeUserInfoRequest request) {
+		userService.changeUserInfo(userId, request);
 		return ResponseEntity.noContent().build();
 	}
 }
