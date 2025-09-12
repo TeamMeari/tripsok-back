@@ -45,7 +45,7 @@ public class RestaurantServiceImpl extends PlaceService {
 	public RestaurantServiceImpl(PlaceRepository placeRepository,
 		ApiKeyConfig apiKeyConfig, TouristApiClientUtil tourApiClient, CategoryService categoryService,
 		LlmClient groqApiClientUtil, ObjectMapper om, RestaurantRepository restaurantRepository) {
-		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om,placeRepository);
+		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, placeRepository);
 		this.restaurantRepository = restaurantRepository;
 	}
 
