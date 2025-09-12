@@ -39,7 +39,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "PLACE", schema = "TRIPSOK")
+@Table(name = "PLACE")
 public class Place extends BaseModifiableEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PLACE_id_gen")
@@ -370,4 +370,9 @@ public class Place extends BaseModifiableEntity {
 		this.like++;
 	}
 
+	public void decrementLikeCount() {
+		if (this.like > 0) {
+			this.like--;
+		}
+	}
 }

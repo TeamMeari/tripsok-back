@@ -6,6 +6,7 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.tripsok_back.dto.SliceResponse;
 import com.tripsok_back.dto.user.request.ChangeUserInfoRequest;
 import com.tripsok_back.dto.user.response.InterestThemeResponse;
 import com.tripsok_back.dto.user.response.UserInfoResponse;
@@ -14,6 +15,8 @@ import com.tripsok_back.exception.UserException;
 import com.tripsok_back.model.user.TripSokUser;
 import com.tripsok_back.repository.user.UserRepository;
 import com.tripsok_back.security.jwt.JwtUtil;
+import com.tripsok_back.type.LocaleCode;
+import com.tripsok_back.type.PlaceJoinType;
 
 import lombok.RequiredArgsConstructor;
 
@@ -53,6 +56,20 @@ public class UserServiceImpl implements UserService {
 	public void changeUserInfo(Integer userId, ChangeUserInfoRequest request) {
 		TripSokUser user = findUserById(userId);
 		user.changeName(request.getFirstName(), request.getLastName());
+	}
+
+	@Override
+	@Transactional
+	public void likePlace(Integer userId, Integer placeId) {
+		TripSokUser user = findUserById(userId);
+		interestPlaceService.toggleInterestPlaces(user, placeId);
+	}
+
+	@Override
+	public SliceResponse getUserLikedPlaces(Integer userId, Integer size, Integer lastId, PlaceJoinType type,
+		LocaleCode language) {
+		TripSokUser user = findUserById(userId);
+		return interestPlaceService.getUserLikedPlaces(user, size, lastId, type, language);
 	}
 
 	private TripSokUser findUserById(Integer userId) {
