@@ -43,7 +43,7 @@ public class TourServiceImpl extends PlaceService {
 	public TourServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, TourRepository tourRepository, CategoryService categoryService,
 		ObjectMapper om, LlmClient groqApiClientUtil) {
-		super(placeRepository, apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om);
+		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, placeRepository);
 		this.tourRepository = tourRepository;
 	}
 

@@ -24,8 +24,8 @@ import com.tripsok_back.exception.InternalErrorCode;
 import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
+import com.tripsok_back.repository.place.AccommodationRepository;
 import com.tripsok_back.repository.place.PlaceRepository;
-import com.tripsok_back.repository.place.accomodation.AccommodationRepository;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
@@ -45,7 +45,7 @@ public class AccommodationServiceImpl extends PlaceService {
 	public AccommodationServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, CategoryService categoryService,
 		AccommodationRepository accommodationRepository, LlmClient groqApiClientUtil, ObjectMapper om) {
-		super(placeRepository, apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om);
+		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om,placeRepository);
 		this.accommodationRepository = accommodationRepository;
 	}
 
