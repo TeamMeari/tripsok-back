@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class UserServiceImpl implements UserService {
 	private final UserRepository userRepository;
 	private final InterestThemeService interestThemeService;
+	private final InterestPlaceService interestPlaceService;
 	private final JwtUtil jwtUtil;
 
 	@Override
