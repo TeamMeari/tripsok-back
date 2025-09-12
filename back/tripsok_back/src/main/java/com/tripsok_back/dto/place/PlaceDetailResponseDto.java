@@ -7,8 +7,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.tripsok_back.model.place.Place;
-import com.tripsok_back.model.place.PlaceTr;
 import com.tripsok_back.model.place.PlaceTag;
+import com.tripsok_back.model.place.PlaceTr;
 import com.tripsok_back.model.place.accommodation.Accommodation;
 import com.tripsok_back.model.place.restaurant.Restaurant;
 import com.tripsok_back.model.place.tour.Tour;

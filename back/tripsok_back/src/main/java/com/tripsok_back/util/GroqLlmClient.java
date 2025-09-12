@@ -2,8 +2,8 @@ package com.tripsok_back.util;
 
 import java.util.List;
 
-import org.springframework.context.annotation.Primary;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -30,25 +30,23 @@ public class GroqLlmClient implements LlmClient {
 	private final ObjectMapper objectMapper;
 
 	private static final String DEFAULT_MODEL = "llama-3.3-70b-versatile";
-
 	private static final String shortDescriptionPrompt = """
 		ROLE
 		- You are a copywriter for tourist spots.
-
+		
 		TASK
 		- Write exactly ONE Korean sentence about the given place.
-
+		
 		HARD CONSTRAINTS
 		- Only use facts from the input. Do NOT add places, dishes, or claims.
 		- Length: ≤ 15 Korean characters (10~15 권장).
 		- End naturally on a meaningful keyword (no trailing quotes, punctuation, or particles like '이다', '합니다').
 		- Plain Korean text only (no emojis, no English, no commas).
 		- If the input is unrelated to tourist spots OR lacks usable info, output exactly: 해당 없음
-
+		
 		STYLE
 		- Catchy, memorable, SNS-friendly.
 		""";
-
 	private static final String MT_SYSTEM_PROMPT = """
 		You are a machine translation engine.
 		Translate from Korean into {language}.
@@ -59,7 +57,6 @@ public class GroqLlmClient implements LlmClient {
 		- If unsure about a token, copy it verbatim or minimally transliterate into {language}.
 		- Do not explain. Output only the translation in {language}.
 		""";
-
 	private static final String SYSTEM_GUARD = """
 		GENERAL RULES
 		- Deterministic MT: do NOT add, drop, or change facts.
@@ -67,7 +64,6 @@ public class GroqLlmClient implements LlmClient {
 		- No meta text such as: Revised:, SURE, 改正为..., Note:, Explanation:, etc.
 		- Plain text only (no quotes, no markdown fences, no emojis).
 		""";
-
 	private static final String transliterationPrompt =
 		"Transliterate the following Korean text into {language} phonetic form only.\n"
 			+ "- Keep proper nouns recognizable.\n"
@@ -75,21 +71,21 @@ public class GroqLlmClient implements LlmClient {
 			+ "- Output plain text with no quotes or extra comments.";
 
 	@Override
-    public String requestGroqShortDescription(String prompt) {
-        String adjust = shortDescriptionPrompt + prompt;
-        try {
-            ChatCompletionRequest req = ChatCompletionRequest.builder()
-                .model(DEFAULT_MODEL)
-                .messages(List.of(new GroqMessage("user", adjust)))
-                .build();
+	public String requestGroqShortDescription(String prompt) {
+		String adjust = shortDescriptionPrompt + prompt;
+		try {
+			ChatCompletionRequest req = ChatCompletionRequest.builder()
+				.model(DEFAULT_MODEL)
+				.messages(List.of(new GroqMessage("user", adjust)))
+				.build();
 
-            ChatCompletionResponse res = groqApiWebClient.post()
-                .uri("/chat/completions")
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .bodyValue(objectMapper.writeValueAsString(req))
-                .retrieve()
-                .bodyToMono(ChatCompletionResponse.class)
-                .block();
+			ChatCompletionResponse res = groqApiWebClient.post()
+				.uri("/chat/completions")
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+				.bodyValue(objectMapper.writeValueAsString(req))
+				.retrieve()
+				.bodyToMono(ChatCompletionResponse.class)
+				.block();
 
 			if (res != null && res.getChoices() != null && !res.getChoices().isEmpty()) {
 				return sanitizePlainText(res.getChoices().get(0).getMessage().getContent());
@@ -101,26 +97,26 @@ public class GroqLlmClient implements LlmClient {
 	}
 
 	@Override
-    public String requestTranslation(String text, LocaleCode locale) {
-        String base = text == null ? "" : text;
-        var msgs = List.of(
-            new GroqMessage("system", SYSTEM_GUARD),
-            new GroqMessage("system", MT_SYSTEM_PROMPT.replace("{language}", locale.getLanguage())),
-            new GroqMessage("user", base)
-        );
-        try {
-            ChatCompletionRequest req = ChatCompletionRequest.builder()
-                .model(DEFAULT_MODEL)
-                .messages(msgs)
-                .build();
+	public String requestTranslation(String text, LocaleCode locale) {
+		String base = text == null ? "" : text;
+		var msgs = List.of(
+			new GroqMessage("system", SYSTEM_GUARD),
+			new GroqMessage("system", MT_SYSTEM_PROMPT.replace("{language}", locale.getLanguage())),
+			new GroqMessage("user", base)
+		);
+		try {
+			ChatCompletionRequest req = ChatCompletionRequest.builder()
+				.model(DEFAULT_MODEL)
+				.messages(msgs)
+				.build();
 
-            ChatCompletionResponse res = groqApiWebClient.post()
-                .uri("/chat/completions")
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .bodyValue(objectMapper.writeValueAsString(req))
-                .retrieve()
-                .bodyToMono(ChatCompletionResponse.class)
-                .block();
+			ChatCompletionResponse res = groqApiWebClient.post()
+				.uri("/chat/completions")
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+				.bodyValue(objectMapper.writeValueAsString(req))
+				.retrieve()
+				.bodyToMono(ChatCompletionResponse.class)
+				.block();
 
 			String out = (res != null && res.getChoices() != null && !res.getChoices().isEmpty())
 				? sanitizePlainText(res.getChoices().get(0).getMessage().getContent())
@@ -133,23 +129,23 @@ public class GroqLlmClient implements LlmClient {
 	}
 
 	@Override
-    public String requestTransliteration(String text, LocaleCode localeCode) {
-        String base = text == null ? "" : text;
-        String adjustPrompt = transliterationPrompt.replace("{language}", localeCode.getLanguage()) + "\n\n" + base;
+	public String requestTransliteration(String text, LocaleCode localeCode) {
+		String base = text == null ? "" : text;
+		String adjustPrompt = transliterationPrompt.replace("{language}", localeCode.getLanguage()) + "\n\n" + base;
 
-        try {
-            ChatCompletionRequest req = ChatCompletionRequest.builder()
-                .model(DEFAULT_MODEL)
-                .messages(List.of(new GroqMessage("user", adjustPrompt)))
-                .build();
+		try {
+			ChatCompletionRequest req = ChatCompletionRequest.builder()
+				.model(DEFAULT_MODEL)
+				.messages(List.of(new GroqMessage("user", adjustPrompt)))
+				.build();
 
-            ChatCompletionResponse res = groqApiWebClient.post()
-                .uri("/chat/completions")
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .bodyValue(objectMapper.writeValueAsString(req))
-                .retrieve()
-                .bodyToMono(ChatCompletionResponse.class)
-                .block();
+			ChatCompletionResponse res = groqApiWebClient.post()
+				.uri("/chat/completions")
+				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+				.bodyValue(objectMapper.writeValueAsString(req))
+				.retrieve()
+				.bodyToMono(ChatCompletionResponse.class)
+				.block();
 
 			if (res != null && res.getChoices() != null && !res.getChoices().isEmpty()) {
 				return sanitizePlainText(res.getChoices().get(0).getMessage().getContent());
