@@ -9,5 +9,5 @@ public interface InterestPlaceService {
 	void toggleInterestPlaces(TripSokUser user, Integer placeId);
 
 	SliceResponse getUserLikedPlaces(TripSokUser user, Integer size, Integer lastId, PlaceJoinType type,
-		LocaleCode language);
+		LocaleCode locale);
 }

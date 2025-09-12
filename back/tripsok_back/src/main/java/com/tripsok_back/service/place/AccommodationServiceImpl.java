@@ -45,7 +45,7 @@ public class AccommodationServiceImpl extends PlaceService {
 	public AccommodationServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, CategoryService categoryService,
 		AccommodationRepository accommodationRepository, LlmClient groqApiClientUtil, ObjectMapper om) {
-		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om,placeRepository);
+		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, placeRepository);
 		this.accommodationRepository = accommodationRepository;
 	}
 

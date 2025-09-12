@@ -85,8 +85,8 @@ public class UserController {
 		@Parameter(description = "장소 타입")
 		@RequestParam(defaultValue = "TOUR", required = false) PlaceJoinType type,
 		@Parameter(description = "언어 코드")
-		@RequestParam(defaultValue = "EN", required = false) LocaleCode language) {
-		return ResponseEntity.ok(userService.getUserLikedPlaces(userId, size, lastId, type, language));
+		@RequestParam(defaultValue = "EN", required = false) LocaleCode locale) {
+		return ResponseEntity.ok(userService.getUserLikedPlaces(userId, size, lastId, type, locale));
 	}
 
 	@PatchMapping("/info")

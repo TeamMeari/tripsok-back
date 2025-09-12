@@ -47,10 +47,10 @@ public class InterestPlaceServiceImpl implements InterestPlaceService {
 
 	@Override
 	public SliceResponse getUserLikedPlaces(TripSokUser user, Integer size, Integer lastId, PlaceJoinType type,
-		LocaleCode language) {
+		LocaleCode locale) {
 		Pageable pageable = PageRequest.ofSize(size);
 		Slice<InterestPlace> interestPlaces = interestPlaceRepository.findInterestPlacesByUser(user, pageable, lastId,
-			type);
+			type.name());
 
 		List<InterestPlaceResponse> interestPlaceResponses = interestPlaces.stream()
 			.map(ip -> {
@@ -58,8 +58,8 @@ public class InterestPlaceServiceImpl implements InterestPlaceService {
 				return InterestPlaceResponse.builder()
 					.id(ip.getId())
 					.placeId(place.getId())
-					.language(language)
-					.name(place.getPlaceTr(language).getPlaceName())
+					.language(locale)
+					.name(place.getPlaceTr(locale).getPlaceName())
 					.type(type)
 					.thumbnailUrl(getThumbnailUrl(place, type)).build();
 			}).toList();
