@@ -28,8 +28,8 @@ import com.tripsok_back.dto.auth.request.OauthLoginRequest;
 import com.tripsok_back.dto.auth.request.OauthSignUpRequest;
 import com.tripsok_back.dto.auth.response.GoogleTokenResponse;
 import com.tripsok_back.dto.auth.response.TokenResponse;
-import com.tripsok_back.exception.ErrorCode;
 import com.tripsok_back.exception.AuthException;
+import com.tripsok_back.exception.ErrorCode;
 import com.tripsok_back.model.auth.BlackListAccessToken;
 import com.tripsok_back.model.auth.RefreshToken;
 import com.tripsok_back.model.user.Role;
@@ -66,9 +66,8 @@ public class AuthServiceImpl implements AuthService {
 		String email = getEmailFromToken(request.getEmailVerifyToken());
 		String password = request.getPassword();
 		TripSokUser user = TripSokUser.signUpUser(request.getNickname(), SocialType.EMAIL, null, email,
-			passwordEncoder.encode(password), request.getCountryCode());
+			passwordEncoder.encode(password), request.getFirstName(), request.getLastName());
 		validateRegisteredAndSave(user);
-		interestThemeService.saveInterestThemes(user, request.getInterestThemeIds());
 	}
 
 	@Override
@@ -84,7 +83,7 @@ public class AuthServiceImpl implements AuthService {
 				case GOOGLE -> {
 					GoogleUserInfo oauthGoogleUserInfo = getGoogleUserInfo(socialAccessToken);
 					user = TripSokUser.signUpUser(request.getNickname(), GOOGLE, oauthGoogleUserInfo.getSub(),
-						oauthGoogleUserInfo.getEmail(), null, request.getCountryCode());
+						oauthGoogleUserInfo.getEmail(), null, oauthGoogleUserInfo.getGiven_name(), oauthGoogleUserInfo.getFamily_name());
 				}
 				default -> throw new Exception();
 			}
@@ -93,7 +92,6 @@ public class AuthServiceImpl implements AuthService {
 		}
 
 		validateRegisteredAndSave(user);
-		interestThemeService.saveInterestThemes(user, request.getInterestThemeIds());
 
 		return getTokenResponse(user.getId(), getAuthorities(user.getRole()));
 	}
@@ -148,7 +146,7 @@ public class AuthServiceImpl implements AuthService {
 
 	@Override
 	public boolean nicknameDuplicateCheck(String nickname) {
-		return !userRepository.existsByName(nickname);
+		return !userRepository.existsByNickname(nickname);
 	}
 
 	@Override
@@ -252,7 +250,7 @@ public class AuthServiceImpl implements AuthService {
 				throw new AuthException(ErrorCode.REGISTERED_ANOTHER_SOCIAL);
 			}
 		}
-		if (!nicknameDuplicateCheck(user.getName())) {
+		if (!nicknameDuplicateCheck(user.getNickname())) {
 			throw new AuthException(ErrorCode.CONFLICT_NICKNAME);
 		}
 		userRepository.save(user);

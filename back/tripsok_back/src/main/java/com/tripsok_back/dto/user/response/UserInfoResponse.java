@@ -8,8 +8,9 @@ public record UserInfoResponse(
 	String nickname,
 	String email,
 	String contactEmail,
-	String countryCode,
 	SocialType socialType,
-	List<InterestThemeResponse> interestThemes
+	List<InterestThemeResponse> interestThemes,
+	String firstName,
+	String lastName
 ) {
 }
