@@ -19,8 +19,6 @@ import com.tripsok_back.support.BaseModifiableEntity;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.util.TimeUtil;
 
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,7 +27,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
@@ -103,81 +100,6 @@ public class Place extends BaseModifiableEntity {
 	// 자유 태그 2~4개 저장
 	@OneToMany(mappedBy = "place", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<PlaceTag> tags = new HashSet<>();
-
-	public PlaceTr getPlaceTr(String language) {
-		if (language == null)
-			return null;
-		String normalized = language.toLowerCase();
-		for (PlaceTr placeTr : placeTrs) {
-			if (placeTr.getId() != null && normalized.equals(placeTr.getId().getLocale())) {
-				return placeTr;
-			}
-		}
-		return null;
-	}
-
-	public PlaceTr getPlaceTr(LocaleCode localeCode) {
-		if (localeCode == null)
-			return null;
-		for (PlaceTr placeTr : placeTrs) {
-			if (placeTr.getId() != null && localeCode == placeTr.getId().getLocaleCode()) {
-				return placeTr;
-			}
-		}
-		return null;
-	}
-
-	public void initPlaceTrsWithKorean(String name, String address, String information, String summary) {
-		List<LocaleCode> targets = List.of(LocaleCode.KO, LocaleCode.EN, LocaleCode.JA, LocaleCode.CN);
-		for (LocaleCode lc : targets) {
-			PlaceTr tr = getOrCreateTr(lc);
-			if (lc == LocaleCode.KO) {
-				tr.setPlaceName(name);
-				tr.setAddress(address);
-				tr.setInformation(information);
-				tr.setSummary(summary);
-			}
-			//TODO: 업데이트 번역
-		}
-	}
-
-	private PlaceTr getOrCreateTr(LocaleCode lc) {
-		PlaceTr existing = getPlaceTr(lc);
-		if (existing != null)
-			return existing;
-		PlaceTr tr = new PlaceTr();
-		PlaceTrId id = new PlaceTrId();
-		id.setLocaleCode(lc);
-		// Ensure composite key consistency for existing Place
-		if (this.id != null) {
-			id.setPlaceId(this.id);
-		}
-		tr.setId(id);
-		tr.setPlace(this);
-		placeTrs.add(tr);
-		return tr;
-	}
-
-    public void upsertKorean(String name, String address, String information, String summary) {
-        // Non-destructive upsert for KO: only overwrite provided fields
-        PlaceTr tr = getOrCreateTr(LocaleCode.KO);
-        if (name != null) tr.setPlaceName(name);
-        if (address != null) tr.setAddress(address);
-        if (information != null) tr.setInformation(information);
-        if (summary != null) tr.setSummary(summary);
-    }
-
-	public void upsertTranslation(LocaleCode lc, String name, String address, String information, String summary) {
-		if (lc == null || lc == LocaleCode.KO)
-			return;
-		PlaceTr tr = getOrCreateTr(lc);
-		tr.setPlaceName(name);
-		tr.setAddress(address);
-		tr.setInformation(information);
-		tr.setSummary(summary);
-	}
-
-
 
 	public static Place buildAccommodation(TourApiPlaceResponseDto placeDto,
 		TourApiPlaceDetailResponseDto detailResponseDto, PlaceLclsCategory categoryName, String summary) {
@@ -282,6 +204,83 @@ public class Place extends BaseModifiableEntity {
 	public static Place buildRestaurant(TourApiPlaceResponseDto placeDto,
 		TourApiPlaceDetailResponseDto detailResponseDto, PlaceLclsCategory categoryName) {
 		return buildRestaurant(placeDto, detailResponseDto, categoryName, null);
+	}
+
+	public PlaceTr getPlaceTr(String language) {
+		if (language == null)
+			return null;
+		String normalized = language.toLowerCase();
+		for (PlaceTr placeTr : placeTrs) {
+			if (placeTr.getId() != null && normalized.equals(placeTr.getId().getLocale())) {
+				return placeTr;
+			}
+		}
+		return null;
+	}
+
+	public PlaceTr getPlaceTr(LocaleCode localeCode) {
+		if (localeCode == null)
+			return null;
+		for (PlaceTr placeTr : placeTrs) {
+			if (placeTr.getId() != null && localeCode == placeTr.getId().getLocaleCode()) {
+				return placeTr;
+			}
+		}
+		return null;
+	}
+
+	public void initPlaceTrsWithKorean(String name, String address, String information, String summary) {
+		List<LocaleCode> targets = List.of(LocaleCode.KO, LocaleCode.EN, LocaleCode.JA, LocaleCode.CN);
+		for (LocaleCode lc : targets) {
+			PlaceTr tr = getOrCreateTr(lc);
+			if (lc == LocaleCode.KO) {
+				tr.setPlaceName(name);
+				tr.setAddress(address);
+				tr.setInformation(information);
+				tr.setSummary(summary);
+			}
+			//TODO: 업데이트 번역
+		}
+	}
+
+	private PlaceTr getOrCreateTr(LocaleCode lc) {
+		PlaceTr existing = getPlaceTr(lc);
+		if (existing != null)
+			return existing;
+		PlaceTr tr = new PlaceTr();
+		PlaceTrId id = new PlaceTrId();
+		id.setLocaleCode(lc);
+		// Ensure composite key consistency for existing Place
+		if (this.id != null) {
+			id.setPlaceId(this.id);
+		}
+		tr.setId(id);
+		tr.setPlace(this);
+		placeTrs.add(tr);
+		return tr;
+	}
+
+	public void upsertKorean(String name, String address, String information, String summary) {
+		// Non-destructive upsert for KO: only overwrite provided fields
+		PlaceTr tr = getOrCreateTr(LocaleCode.KO);
+		if (name != null)
+			tr.setPlaceName(name);
+		if (address != null)
+			tr.setAddress(address);
+		if (information != null)
+			tr.setInformation(information);
+		if (summary != null)
+			tr.setSummary(summary);
+	}
+
+	public void upsertTranslation(LocaleCode lc, String name, String address, String information, String summary) {
+		if (lc == null || lc == LocaleCode.KO)
+			return;
+		PlaceTr tr = getOrCreateTr(lc);
+		tr.setPlaceName(name);
+		tr.setAddress(address);
+		tr.setInformation(information);
+		tr.setSummary(summary);
 	}
 
 	public void updateAccommodation(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto,

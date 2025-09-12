@@ -11,6 +11,7 @@ public class RegexConstants {
 
 	public static final String NAME_REGEX = "^(?=.{1,20}$)[가-힣a-zA-Z\\u3040-\\u309F\\u30A0-\\u30FF\\u4E00-\\u9FFF]+(?: [가-힣a-zA-Z\\u3040-\\u309F\\u30A0-\\u30FF\\u4E00-\\u9FFF]+)*$";
 	public static final String NAME_MESSAGE = "이름은 1-20자 이하 문자(한글, 영문, 일본어, 중국어)만 가능합니다. 중간 공백은 허용하지만 특수문자와 숫자는 허용되지 않습니다.";
+
 	// 상수 클래스는 인스턴스화 방지
 	private RegexConstants() {
 		throw new IllegalStateException("상수 클래스는 인스턴스화할 수 없습니다");

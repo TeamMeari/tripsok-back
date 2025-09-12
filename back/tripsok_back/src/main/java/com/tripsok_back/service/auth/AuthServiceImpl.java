@@ -81,7 +81,8 @@ public class AuthServiceImpl implements AuthService {
 				case GOOGLE -> {
 					GoogleUserInfo oauthGoogleUserInfo = getGoogleUserInfo(socialAccessToken);
 					user = TripSokUser.signUpUser(request.getNickname(), GOOGLE, oauthGoogleUserInfo.getSub(),
-						oauthGoogleUserInfo.getEmail(), null, oauthGoogleUserInfo.getGiven_name(), oauthGoogleUserInfo.getFamily_name());
+						oauthGoogleUserInfo.getEmail(), null, oauthGoogleUserInfo.getGiven_name(),
+						oauthGoogleUserInfo.getFamily_name());
 				}
 				default -> throw new Exception();
 			}

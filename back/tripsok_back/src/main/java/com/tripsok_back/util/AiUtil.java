@@ -32,9 +32,9 @@ public class AiUtil {
 		//"gpt-5", "gpt-5-mini", "gpt-5-nano"
 		"gpt-4.1-mini", "gpt-4.1-nano"
 	);
-	private final ObjectMapper om;
 	private static final String END_POINT = "https://models.inference.ai.azure.com";
 	private static final String THEME_LIST = "바다, 자연, 힐링여행, 온천, 등산, K-POP, 미술관, 역사유적, 한옥, 축제, 맛집탐방, 전통시장, 카페투어, 쇼핑, 야경";
+	private final ObjectMapper om;
 	private final AiProperties aiProperties;
 	private final String GET_THEME_AND_TAG_PROMPT = String.join("\n",
 		"You are a travel tagging assistant.",

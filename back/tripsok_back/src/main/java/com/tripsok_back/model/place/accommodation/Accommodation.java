@@ -47,8 +47,8 @@ public class Accommodation extends BaseModifiableEntity {
 	@JoinColumn(name = "PLACE_LCLS_CATEGORY_ID", nullable = false)
 	private PlaceLclsCategory placeLclsCategory;
 
-    @OneToMany(mappedBy = "accommodation", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
-    private Set<AccommodationImage> accommodationImages = new LinkedHashSet<>();
+	@OneToMany(mappedBy = "accommodation", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+	private Set<AccommodationImage> accommodationImages = new LinkedHashSet<>();
 
 	@OneToMany(mappedBy = "accommodation")
 	private Set<AccommodationReview> accommodationReviews = new LinkedHashSet<>();

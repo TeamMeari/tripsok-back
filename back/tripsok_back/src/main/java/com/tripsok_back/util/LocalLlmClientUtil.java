@@ -23,37 +23,32 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class LocalLlmClientUtil implements LlmClient {
 
-	private final WebClient ollamaApiWebClient;
-	private final ObjectMapper objectMapper;
-
 	private static final String DEFAULT_MODEL = "qwen2.5:14b-instruct";
-
 	private static final String shortDescriptionPrompt =
 		"""
 			ROLE
 			- You are a copywriter for tourist spots.
-				
+			
 			TASK
 			- Write exactly ONE Korean sentence about the given place.
-				
+			
 			HARD CONSTRAINTS
 			- Only use facts from the input. Do NOT add places, dishes, or claims.
 			- Length: ≤ 15 Korean characters (10~15 권장).
 			- End naturally on a meaningful keyword (no trailing quotes, punctuation, or particles like '이다', '합니다').
 			- Plain Korean text only (no emojis, no English, no commas).
 			- If the input is unrelated to tourist spots OR lacks usable info, output exactly: 해당 없음
-				
+			
 			STYLE
 			- Catchy, memorable, SNS-friendly.
 			""";
-
 	private static final String translationBasePrompt =
 		"""
 			ROLE
 			- Professional travel copy translator to {language}.
-				
+			
 			INPUT IS: Korean accommodation/restaurant description.
-				
+			
 			HARD CONSTRAINTS
 			- Faithfulness > Fluency. Do NOT invent or relocate places/dishes/brands/awards.
 			- Preserve all named entities and addresses. If a common exonym exists, use it; otherwise transliterate minimally for {language}.
@@ -61,23 +56,21 @@ public class LocalLlmClientUtil implements LlmClient {
 			- If a token is unknown, keep it verbatim.
 			- Output: ONE paragraph in {language}, plain text only (no quotes/markdown/emojis).
 			- Geography is Korea unless the input states otherwise.
-				
+			
 			PROTECTED TOKENS (do not alter spelling except script rendering)
 			- {protected_tokens}
-				
+			
 			TERM MAP for {language} (use these exact terms; never substitute others)
 			- {term_map}
-				
+			
 			EXAMPLES OF PROHIBITED CHANGES
 			- Do not change '속초' to '수원' or other cities.
 			""";
-
 	private static final String transliterationPrompt =
 		"Transliterate the following Korean text into {language} phonetic form only.\n"
 			+ "- Keep proper nouns recognizable.\n"
 			+ "- Do NOT translate meanings, only render pronunciation in target script.\n"
 			+ "- Output plain text with no quotes or extra comments.";
-
 	private static final String SYSTEM_GUARD = """
 		GENERAL RULES
 		- Deterministic MT: do NOT add, drop, or change facts.
@@ -85,7 +78,6 @@ public class LocalLlmClientUtil implements LlmClient {
 		- No meta text such as: Revised:, SURE, 改正为..., Note:, Explanation:, etc.
 		- Plain text only (no quotes, no markdown fences, no emojis).
 		""";
-
 	private static final String MT_SYSTEM_PROMPT = """
 		You are a machine translation engine.
 		Translate from Korean into {language}.
@@ -100,6 +92,25 @@ public class LocalLlmClientUtil implements LlmClient {
 		"You MUST output only the target language content with NO notes, NO explanations, "
 			+ "NO parentheses, NO brackets, and NO foreign scripts. Output exactly one line. "
 			+ "If uncertain, output the best-guess final text in the target language without commentary.";
+	private final WebClient ollamaApiWebClient;
+	private final ObjectMapper objectMapper;
+
+	private static boolean isMixedScripts(String s, LocaleCode locale) {
+		if (s == null || s.isBlank())
+			return false;
+
+		String common = "0-9\\s\\p{Punct}";
+		String allowed;
+		switch (locale) {
+			case KO -> allowed = "\\u1100-\\u11FF\\u3130-\\u318F\\uAC00-\\uD7A3";
+			case EN -> allowed = "A-Za-z";
+			case JA -> allowed = "\\u3040-\\u309F\\u30A0-\\u30FF\\u4E00-\\u9FFF\\u30FC\\u3001\\u3002\\u30FB";
+			case CN -> allowed = "\\u4E00-\\u9FFF\\u3001\\u3002";
+			default -> allowed = "";
+		}
+		String pattern = "^[[" + allowed + common + "]]+$";
+		return !s.codePoints().allMatch(cp -> String.valueOf((char)cp).matches(pattern));
+	}
 
 	public String requestGroqShortDescription(String prompt) {
 		String adjustPrompt = shortDescriptionPrompt + prompt;
@@ -171,23 +182,6 @@ public class LocalLlmClientUtil implements LlmClient {
 			log.error("Ollama 번역 실패: {}", e.getMessage(), e);
 			return "응답을 불러올 수 없습니다.";
 		}
-	}
-
-	private static boolean isMixedScripts(String s, LocaleCode locale) {
-		if (s == null || s.isBlank())
-			return false;
-
-		String common = "0-9\\s\\p{Punct}";
-		String allowed;
-		switch (locale) {
-			case KO -> allowed = "\\u1100-\\u11FF\\u3130-\\u318F\\uAC00-\\uD7A3";
-			case EN -> allowed = "A-Za-z";
-			case JA -> allowed = "\\u3040-\\u309F\\u30A0-\\u30FF\\u4E00-\\u9FFF\\u30FC\\u3001\\u3002\\u30FB";
-			case CN -> allowed = "\\u4E00-\\u9FFF\\u3001\\u3002";
-			default -> allowed = "";
-		}
-		String pattern = "^[[" + allowed + common + "]]+$";
-		return !s.codePoints().allMatch(cp -> String.valueOf((char)cp).matches(pattern));
 	}
 
 	private String forceTargetLanguageRewrite(String mixed, LocaleCode locale) {
