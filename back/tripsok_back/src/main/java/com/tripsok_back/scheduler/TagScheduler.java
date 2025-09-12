@@ -24,7 +24,6 @@ import com.tripsok_back.repository.theme.ThemeRepository;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.util.AiUtil;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,7 +40,6 @@ public class TagScheduler {
 	private final PlaceTagRepository placeTagRepository;
 
 	@Scheduled(fixedRateString = "PT48H", initialDelayString = "PT2H")
-	@PostConstruct
 	void runBatchTagRequestApi() {
 		log.info("Place Tag 업데이트 시작");
 		int pageNum = 0;
