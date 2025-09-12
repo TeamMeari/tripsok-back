@@ -1,7 +1,7 @@
 package com.tripsok_back.model.place;
 
-import com.tripsok_back.support.BaseTimeEntity;
 import com.tripsok_back.dto.place.PlaceTagResponseDto;
+import com.tripsok_back.support.BaseTimeEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

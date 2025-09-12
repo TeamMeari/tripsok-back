@@ -26,7 +26,7 @@ public class PlaceDefaultServiceImpl extends PlaceService {
 		ApiKeyConfig apiKeyConfig, TouristApiClientUtil tourApiClient,
 		CategoryService categoryService, LlmClient groqApiClientUtil,
 		ObjectMapper om) {
-		super(placeRepository, apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om);
+		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, placeRepository);
 	}
 
 	@Override
@@ -46,6 +46,12 @@ public class PlaceDefaultServiceImpl extends PlaceService {
 
 	@Override
 	public PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable, LocaleCode locale) {
+		throw new TourApiException(CATEGORY_NOT_FOUND);
+	}
+
+	@Override
+	public PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
+		LocaleCode locale) {
 		throw new TourApiException(CATEGORY_NOT_FOUND);
 	}
 

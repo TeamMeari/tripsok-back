@@ -59,7 +59,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public SliceResponse getUserLikedPlaces(Integer userId, Integer size, Integer lastId, PlaceJoinType type, LocaleCode language) {
+	public SliceResponse getUserLikedPlaces(Integer userId, Integer size, Integer lastId, PlaceJoinType type,
+		LocaleCode language) {
 		TripSokUser user = findUserById(userId);
 		return interestPlaceService.getUserLikedPlaces(user, size, lastId, type, language);
 	}

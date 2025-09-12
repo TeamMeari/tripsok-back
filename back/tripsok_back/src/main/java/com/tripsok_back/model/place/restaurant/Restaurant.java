@@ -53,8 +53,8 @@ public class Restaurant extends BaseModifiableEntity {
 	@OneToOne(mappedBy = "restaurant")
 	private Place place;
 
-    @OneToMany(mappedBy = "restaurant", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
-    private Set<RestaurantImage> restaurantImages = new LinkedHashSet<>();
+	@OneToMany(mappedBy = "restaurant", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+	private Set<RestaurantImage> restaurantImages = new LinkedHashSet<>();
 
 	@OneToMany(mappedBy = "restaurant")
 	private Set<RestaurantReview> restaurantReviews = new LinkedHashSet<>();

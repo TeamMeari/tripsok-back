@@ -26,8 +26,8 @@ import lombok.NoArgsConstructor;
 	@Index(name = "idx_interest_place_user_id", columnList = "user_id"),
 	@Index(name = "idx_interest_place_place_id", columnList = "place_id")
 },
-uniqueConstraints = {
-@UniqueConstraint(name = "uk_interest_place_user_place", columnNames = {"user_id", "place_id"})
+	uniqueConstraints = {
+		@UniqueConstraint(name = "uk_interest_place_user_place", columnNames = {"user_id", "place_id"})
 	})
 public class InterestPlace extends BaseTimeEntity {
 	@Id

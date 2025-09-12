@@ -6,5 +6,6 @@ import com.tripsok_back.type.PlaceJoinType;
 import lombok.Builder;
 
 @Builder
-public record InterestPlaceResponse(Integer id, LocaleCode language, Integer placeId, String name, PlaceJoinType type, String thumbnailUrl) {
+public record InterestPlaceResponse(Integer id, LocaleCode language, Integer placeId, String name, PlaceJoinType type,
+									String thumbnailUrl) {
 }

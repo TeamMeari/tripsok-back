@@ -58,7 +58,7 @@ public record PlaceBriefResponseDto(
 			thumbnailUrl,
 			imageCount != null ? imageCount : 0,
 			p.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant(),
-			p.getThemes().stream().map(it-> it.getTheme().getId()).collect(Collectors.toSet())
+			p.getThemes().stream().map(it -> it.getTheme().getId()).collect(Collectors.toSet())
 		);
 	}
 }

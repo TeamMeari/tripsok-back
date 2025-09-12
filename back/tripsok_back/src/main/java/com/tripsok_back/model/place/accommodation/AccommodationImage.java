@@ -37,10 +37,10 @@ public class AccommodationImage extends BaseModifiableEntity {
 	@JoinColumn(name = "ACCOMMODATION_ID", nullable = false)
 	private Accommodation accommodation;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @OnDelete(action = OnDeleteAction.RESTRICT)
-    @JoinColumn(name = "ROOM_ID", nullable = true)
-    private Room room;
+	@ManyToOne(fetch = FetchType.LAZY, optional = true)
+	@OnDelete(action = OnDeleteAction.RESTRICT)
+	@JoinColumn(name = "ROOM_ID", nullable = true)
+	private Room room;
 
 	@Size(max = 2000)
 	@Column(name = "URL", length = 2000)

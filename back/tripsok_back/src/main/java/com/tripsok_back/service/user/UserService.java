@@ -16,5 +16,6 @@ public interface UserService {
 
 	void likePlace(Integer userId, Integer placeId);
 
-	SliceResponse getUserLikedPlaces(Integer userId, Integer size, Integer lastId, PlaceJoinType type, LocaleCode language);
+	SliceResponse getUserLikedPlaces(Integer userId, Integer size, Integer lastId, PlaceJoinType type,
+		LocaleCode language);
 }

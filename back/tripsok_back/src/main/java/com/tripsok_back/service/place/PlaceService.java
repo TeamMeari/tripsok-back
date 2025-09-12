@@ -25,28 +25,28 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 public abstract class PlaceService {
-	private final PlaceRepository placeRepository;
 	final ApiKeyConfig apiKeyConfig;
 	final TouristApiClientUtil tourApiClient;
 	final CategoryService categoryService;
 	final LlmClient groqApiClientUtil;
 	final ObjectMapper om;
+	private final PlaceRepository placeRepository;
 
 	@Transactional
-	public void addLike(Place place){
+	public void addLike(Place place) {
 		place.incrementLikeCount();
 	}
 
 	@Transactional
-	public void removeLike(Place place){
+	public void removeLike(Place place) {
 		place.decrementLikeCount();
 	}
 
-	public Place findPlaceById(int placeId){
+	public Place findPlaceById(int placeId) {
 		return placeRepository.findById(placeId).orElseThrow(() -> new PlaceException(PLACE_NOT_FOUND));
 	}
 
-	protected void addView(Place place){
+	protected void addView(Place place) {
 		place.incrementViewCount();
 	}
 
@@ -58,7 +58,8 @@ public abstract class PlaceService {
 
 	public abstract PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable, LocaleCode locale);
 
-	public abstract PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId, LocaleCode locale);
+	public abstract PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
+		LocaleCode locale);
 
 	public abstract void addReview(Integer userId, ReviewRequestDto reviewRequestdto);
 }

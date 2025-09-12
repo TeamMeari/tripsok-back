@@ -63,20 +63,21 @@ public class UserController {
 			"""
 	)
 	@PostMapping("/like-place/{placeId}")
-		public ResponseEntity<Void> likePlace(@AuthenticationPrincipal Integer userId, @PathVariable Integer placeId) {
-			userService.likePlace(userId, placeId);
-			return ResponseEntity.ok().build();
-		}
+	public ResponseEntity<Void> likePlace(@AuthenticationPrincipal Integer userId, @PathVariable Integer placeId) {
+		userService.likePlace(userId, placeId);
+		return ResponseEntity.ok().build();
+	}
 
-		@Operation(
-			summary = "유저가 좋아요한 장소 목록 조회",
-			description = """
-				유저가 좋아요한 장소 목록을 조회합니다.
-				결과가 0건이어도 200 OK와 빈 content를 반환합니다.
-				"""
-		)
+	@Operation(
+		summary = "유저가 좋아요한 장소 목록 조회",
+		description = """
+			유저가 좋아요한 장소 목록을 조회합니다.
+			결과가 0건이어도 200 OK와 빈 content를 반환합니다.
+			"""
+	)
 	@GetMapping("/like-places")
-	public ResponseEntity<SliceResponse> getLikedPlaces(@AuthenticationPrincipal Integer userId, @Parameter(description = "가져올 데이터 사이즈", example = "20", schema = @Schema(minimum = "10", maximum = "100"))
+	public ResponseEntity<SliceResponse> getLikedPlaces(@AuthenticationPrincipal Integer userId,
+		@Parameter(description = "가져올 데이터 사이즈", example = "20", schema = @Schema(minimum = "10", maximum = "100"))
 		@RequestParam(defaultValue = "20") @Min(10) @Max(100) int size,
 		@Parameter(description = "마지막으로 조회된 데이터 ID", example = "123")
 		@RequestParam(required = false) Integer lastId,

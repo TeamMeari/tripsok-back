@@ -10,6 +10,6 @@ import com.tripsok_back.model.place.PlaceLclsCategory;
 
 @Repository
 public interface LclsCategoryRepository extends JpaRepository<PlaceLclsCategory, Integer> {
-    @EntityGraph(attributePaths = {"placeLclsCategoryTrs"})
-    Optional<PlaceLclsCategory> findByLclsSystm3Code(String code);
+	@EntityGraph(attributePaths = {"placeLclsCategoryTrs"})
+	Optional<PlaceLclsCategory> findByLclsSystm3Code(String code);
 }

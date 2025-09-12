@@ -37,7 +37,7 @@ public class TouristApiScheduler {
 		runBatchAccommodationRequestApi();
 		runBatchRestaurantRequestApi();
 		runBatchTourRequestApi();
-		
+
 	}
 
 	public void runBatchAccommodationRequestApi() throws JsonProcessingException {

@@ -22,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-public class InterestPlaceServiceImpl implements InterestPlaceService{
+public class InterestPlaceServiceImpl implements InterestPlaceService {
 	private final InterestPlaceRepository interestPlaceRepository;
 	private final PlaceService placeService;
 
@@ -36,7 +36,7 @@ public class InterestPlaceServiceImpl implements InterestPlaceService{
 	public void toggleInterestPlaces(TripSokUser user, Integer placeId) {
 		Place place = placeService.findPlaceById(placeId);
 		InterestPlace interestPlace = interestPlaceRepository.findInterestPlaceByUserAndPlace(user, place);
-		if(interestPlace == null) {
+		if (interestPlace == null) {
 			interestPlaceRepository.save(new InterestPlace(user, place));
 			placeService.addLike(place);
 		} else {
@@ -46,20 +46,22 @@ public class InterestPlaceServiceImpl implements InterestPlaceService{
 	}
 
 	@Override
-	public SliceResponse getUserLikedPlaces(TripSokUser user, Integer size, Integer lastId, PlaceJoinType type, LocaleCode language) {
+	public SliceResponse getUserLikedPlaces(TripSokUser user, Integer size, Integer lastId, PlaceJoinType type,
+		LocaleCode language) {
 		Pageable pageable = PageRequest.ofSize(size);
-		Slice<InterestPlace> interestPlaces = interestPlaceRepository.findInterestPlacesByUser(user, pageable, lastId, type);
+		Slice<InterestPlace> interestPlaces = interestPlaceRepository.findInterestPlacesByUser(user, pageable, lastId,
+			type);
 
 		List<InterestPlaceResponse> interestPlaceResponses = interestPlaces.stream()
 			.map(ip -> {
 				Place place = ip.getPlace();
 				return InterestPlaceResponse.builder()
-				.id(ip.getId())
-				.placeId(place.getId())
-				.language(language)
-				.name(place.getPlaceTr(language).getPlaceName())
-				.type(type)
-				.thumbnailUrl(getThumbnailUrl(place, type)).build();
+					.id(ip.getId())
+					.placeId(place.getId())
+					.language(language)
+					.name(place.getPlaceTr(language).getPlaceName())
+					.type(type)
+					.thumbnailUrl(getThumbnailUrl(place, type)).build();
 			}).toList();
 		return new SliceResponse(interestPlaces.hasNext(), interestPlaceResponses);
 	}
