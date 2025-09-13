@@ -160,6 +160,8 @@ public class TouristApiClientUtil {
 		if (blockedDate == null || !blockedDate.equals(LocalDate.now())) {
 			serviceBlocked = false;
 			blockedDate = null;
+		} else {
+			return false;
 		}
 		throw new ServiceBlockException();
 	}
