@@ -305,20 +305,18 @@ public class PlaceEsService {
 				.cardinality()
 				.value();
 
-			for (TourismType type : TourismType.values()) {
-				Integer accommodationCount = placeRepository.countByAccommodationIsNotNull();
-				Integer tourCount = placeRepository.countByTourIsNotNull();
-				Integer restaurantCount = placeRepository.countByRestaurantIsNotNull();
-				Integer sum = accommodationCount + tourCount + restaurantCount;
-				if (distinctPlaces == sum) {
-					log.info("ES색인 도큐먼트 수 {}, TRs 장소 수 {}[숙소 :{}, 여행 :{}, 식당 :{}", distinctPlaces, sum,
-						accommodationCount, tourCount, restaurantCount);
-					return true;
-				} else {
-					log.info("ES색인 도큐먼트 수 {}, TRs 장소 수 {}[숙소 :{}, 여행 :{}, 식당 :{}", distinctPlaces, sum,
-						accommodationCount, tourCount, restaurantCount);
-					return false;
-				}
+			Integer accommodationCount = placeRepository.countByAccommodationIsNotNull();
+			Integer tourCount = placeRepository.countByTourIsNotNull();
+			Integer restaurantCount = placeRepository.countByRestaurantIsNotNull();
+			Integer sum = accommodationCount + tourCount + restaurantCount;
+			if (distinctPlaces == sum) {
+				log.info("ES색인 도큐먼트 수 {}, TRs 장소 수 {}[숙소 :{}, 여행 :{}, 식당 :{}", distinctPlaces, sum,
+					accommodationCount, tourCount, restaurantCount);
+				return true;
+			} else {
+				log.info("ES색인 도큐먼트 수 {}, TRs 장소 수 {}[숙소 :{}, 여행 :{}, 식당 :{}", distinctPlaces, sum,
+					accommodationCount, tourCount, restaurantCount);
+				return false;
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("ES count 실패", e);
