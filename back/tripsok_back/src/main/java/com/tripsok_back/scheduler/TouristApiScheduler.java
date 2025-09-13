@@ -39,7 +39,7 @@ public class TouristApiScheduler {
 	public void initTourPlaceRequest() throws ServiceBlockException {
 
 		try {
-			//runBatchCategoryRequestApi();
+			runBatchCategoryRequestApi();
 			runBatchAccommodationRequestApi();
 			runBatchRestaurantRequestApi();
 			runBatchTourRequestApi();
@@ -52,19 +52,16 @@ public class TouristApiScheduler {
 	public void runBatchAccommodationRequestApi() throws ServiceBlockException {
 		log.info("***속초 신규 숙소정보 요청 시작***");
 		getService(TourismType.ACCOMMODATION).startPlaceUpdate(NUM_OF_ROW, PAGE_NO);
-		//log.error("신규 관광정보 처리 실패");
 	}
 
 	public void runBatchRestaurantRequestApi() throws ServiceBlockException {
 		log.info("***속초 신규 식당정보 요청 시작***");
 		getService(TourismType.RESTAURANT).startPlaceUpdate(NUM_OF_ROW, PAGE_NO);
-		//log.error("신규 관광정보 처리 실패");
 	}
 
 	public void runBatchTourRequestApi() throws ServiceBlockException {
 		log.info("***속초 신규 투어정보 요청 시작***");
 		getService(TourismType.TOURIST_SPOT).startPlaceUpdate(NUM_OF_ROW, PAGE_NO);
-		//log.error("신규 관광정보 처리 실패");
 	}
 
 	public void runBatchCategoryRequestApi() throws ServiceBlockException {

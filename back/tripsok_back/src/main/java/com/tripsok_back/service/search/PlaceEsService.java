@@ -59,7 +59,7 @@ public class PlaceEsService {
 		for (LocaleCode lc : List.of(LocaleCode.KO, LocaleCode.EN, LocaleCode.JA, LocaleCode.CN)) {
 			try {
 				if (place.getPlaceTr(lc) == null)
-					continue; // index only when translation exists
+					continue;
 				PlaceDocument doc = PlaceDocument.fromEntity(place, lc, type, embeddingUtil);
 				indexPlaceDocument(doc);
 				count++;
@@ -293,7 +293,7 @@ public class PlaceEsService {
 		try {
 			SearchResponse<Map> res = esClient.search(s -> s
 					.index("places")
-					.size(0) // 실제 문서 안 뽑음
+					.size(0)
 					.aggregations("distinct_places", a -> a
 						.cardinality(c -> c.field("placeId.keyword"))
 					),
