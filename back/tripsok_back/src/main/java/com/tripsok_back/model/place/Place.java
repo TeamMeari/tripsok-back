@@ -19,8 +19,6 @@ import com.tripsok_back.support.BaseModifiableEntity;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.util.TimeUtil;
 
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,7 +27,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
@@ -171,13 +168,15 @@ public class Place extends BaseModifiableEntity {
 		if (lc == null || lc == LocaleCode.KO)
 			return;
 		PlaceTr tr = getOrCreateTr(lc);
-		tr.setPlaceName(name);
-		tr.setAddress(address);
-		tr.setInformation(information);
-		tr.setSummary(summary);
+		if (name != null)
+			tr.setPlaceName(name);
+		if (address != null)
+			tr.setAddress(address);
+		if (information != null)
+			tr.setInformation(information);
+		if (summary != null)
+			tr.setSummary(summary);
 	}
-
-
 
 	public static Place buildAccommodation(TourApiPlaceResponseDto placeDto,
 		TourApiPlaceDetailResponseDto detailResponseDto, PlaceLclsCategory categoryName, String summary) {
