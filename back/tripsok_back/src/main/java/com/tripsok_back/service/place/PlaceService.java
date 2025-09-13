@@ -2,6 +2,8 @@ package com.tripsok_back.service.place;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import com.tripsok_back.dto.PageResponse;
@@ -29,4 +31,7 @@ public interface PlaceService {
 	PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId, LocaleCode locale);
 
 	void addReview(Integer userId, ReviewRequestDto reviewRequestdto);
+
+	Page<Place> findAll(PageRequest of);
+
 }
