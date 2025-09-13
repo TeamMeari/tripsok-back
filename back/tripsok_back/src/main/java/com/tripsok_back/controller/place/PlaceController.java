@@ -194,10 +194,14 @@ public class PlaceController {
 			)
 		}
 	)
-	public List<PlaceBriefResponseDto> searchByText(@RequestParam String q) throws IOException {
-		return placeEsService.searchByText(q).stream()
-			.map(PlaceBriefResponseDto::from)
-			.toList();
+	public ResponseEntity<List<PlaceBriefResponseDto>> searchByText(@RequestParam String q) throws IOException {
+		try {
+			return ResponseEntity.ok(placeEsService.searchByText(q).stream()
+				.map(PlaceBriefResponseDto::from)
+				.toList());
+		} catch (Exception e) {
+
+		}
 	}
 
 	@GetMapping("/search/embedding")
@@ -205,9 +209,14 @@ public class PlaceController {
 		summary = "임베딩 기반 검색 (fallback 포함)",
 		description = "임베딩 검색을 우선 수행. 모델 오류 등으로 실패하면 multi_match 텍스트 검색으로 "
 	)
-	public List<PlaceBriefResponseDto> searchByEmbedding(@RequestParam String q) throws IOException {
-		return placeEsService.searchByEmbedding(q).stream()
-			.map(PlaceBriefResponseDto::from)
-			.toList();
+	public ResponseEntity<List<PlaceBriefResponseDto>> searchByEmbedding(@RequestParam String q) throws IOException {
+		try {
+			return ResponseEntity.ok(placeEsService.searchByEmbedding(q).stream()
+				.map(PlaceBriefResponseDto::from)
+				.toList());
+		} catch (IOException e) {
+			log.error("Text search failed for query: {}", q, e);
+			return ResponseEntity.internalServerError().build();
+		}
 	}
 }
