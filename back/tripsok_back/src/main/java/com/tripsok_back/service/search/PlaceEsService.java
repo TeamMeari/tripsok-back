@@ -97,10 +97,6 @@ public class PlaceEsService {
 				pageable.getPageNumber(), pageable.getPageSize());
 
 			String[] fields = fieldsForLocale(lc);
-			Query mustLang = Query.of(b -> b.term(t -> t.field("locale").value(lc.getCode())));
-			Query mustType = type != null
-				? Query.of(b -> b.term(t -> t.field("type").value(type.name())))
-				: null;
 
 			Query text = Query.of(b -> b.multiMatch(mm -> mm
 				.query(q)
