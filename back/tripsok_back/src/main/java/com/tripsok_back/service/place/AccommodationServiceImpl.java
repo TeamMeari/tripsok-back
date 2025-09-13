@@ -26,6 +26,7 @@ import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.repository.place.AccommodationRepository;
+import com.tripsok_back.service.search.PlaceEsService;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
@@ -50,6 +51,7 @@ public class AccommodationServiceImpl implements PlaceService {
 	private final AccommodationRepository accommodationRepository;
 	private final LlmClient groqApiClientUtil;
 	private final GoogleTranslateClient googleTranslateClient;
+	private final PlaceEsService placeEsService;
 	private final ObjectMapper om;
 
 	@Override
@@ -328,6 +330,25 @@ public class AccommodationServiceImpl implements PlaceService {
 			createTransliterationForNameAndAddress(accommodationPlace, localeCode);
 		}
 		accommodationRepository.save(accommodationPlace);
+	}
+
+	@Override
+	public int reindexFullEs() {
+		int page = 0;
+		int size = 500;
+		int placeCount = 0;
+		int docCount = 0;
+		Page<Place> placePage;
+		do {
+			placePage = accommodationRepository.findAllByAccommodationIsNotNullOrderByIdAsc(PageRequest.of(page, size));
+			for (Place e : placePage.getContent()) {
+				docCount += placeEsService.indexPlaceDocuments(e);
+				placeCount++;
+			}
+			page++;
+		} while (!placePage.isEmpty());
+		log.info("AccommodationFullIndex 완료 (places={}, docs={})", placeCount, docCount);
+		return docCount;
 	}
 
 }
