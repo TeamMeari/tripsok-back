@@ -149,7 +149,7 @@ public record PlaceBriefResponseDto(
 			0,
 			d.getThumbnailUrl(),
 			0,
-			d.getUpdatedAt() != null ? java.time.Instant.ofEpochMilli(d.getUpdatedAt()) : java.time.Instant.now(),
+			d.getUpdatedAt() != null ? java.time.Instant.ofEpochMilli(d.getUpdatedAt()) : null,
 			java.util.Collections.emptySet()
 		);
 	}
