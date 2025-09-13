@@ -85,8 +85,15 @@ public class PlaceController {
 		@Parameter(description = "언어(로케일) 코드", example = "ko", schema = @Schema(allowableValues = {"ko", "en", "ja",
 			"cn"}))
 		@RequestParam(name = "locale", defaultValue = "ko") String locale,
-		@Parameter(description = "테마 ID", example = "1")
-		@RequestParam(required = false) Integer themeId
+		@Parameter(description = "테마 ID", example = "")
+		@RequestParam(required = false) Integer themeId,
+		@Parameter(description = "검색 모드(text 멀티 단어 검색|embedding 의미 유사 검색)", example = "text", schema = @Schema(allowableValues = {
+			"embedding", "text"}))
+		@RequestParam(name = "typeSearch", required = false, defaultValue = "text") String typeSearch,
+		@Parameter(description = "검색기능 사용시 카테고리 필터 사용 여부 (false면 전체 카테고리 검색)", example = "false")
+		@RequestParam(name = "categoryFilter", required = false, defaultValue = "true") boolean categoryFilter,
+		@Parameter(description = "통합 검색어(있으면 통합검색 수행)")
+		@RequestParam(required = false) String q
 	) {
 		Sort sort = (sortStyle != null)
 			? sortStyle.toSort()
@@ -94,20 +101,20 @@ public class PlaceController {
 
 		Pageable pageable = PageRequest.of(page, size, sort);
 
-		TourismType type = TourismType.fromOrThrow(category);
-		log.info("{} 항목 리스트 조회 시작", type.name());
-		LocaleCode lc;
+		TourismType categoryType = TourismType.fromOrThrow(category);
+		log.info("{} 항목 리스트 조회 시작", categoryType.name());
+		LocaleCode localeCode;
 		try {
-			lc = LocaleCode.from(locale);
+			localeCode = LocaleCode.from(locale);
 		} catch (IllegalArgumentException ex) {
 			return ResponseEntity.badRequest().build();
 		}
-		PageResponse<PlaceBriefResponseDto> body = getService(type).getPlaceList(pageable, lc);
-		log.info("{} 항목 리스트 조회 시작", type.name());
+
+		PageResponse<PlaceBriefResponseDto> body;
 		if (themeId != null) {
-			body = getService(type).getPlaceListByTheme(pageable, themeId, lc);
+			body = getService(categoryType).getPlaceListByTheme(pageable, themeId, localeCode);
 		} else {
-			body = getService(type).getPlaceList(pageable, lc);
+			body = getService(categoryType).getPlaceList(pageable, localeCode);
 		}
 		return ResponseEntity.ok(body);
 	}
@@ -140,17 +147,18 @@ public class PlaceController {
 			"cn"}))
 		@RequestParam(name = "locale", defaultValue = "ko") String locale
 	) {
-		TourismType type = TourismType.fromOrThrow(category);
-		LocaleCode lc;
+		TourismType categoryType = TourismType.fromOrThrow(category);
+		LocaleCode localeCode;
 		try {
-			lc = LocaleCode.from(locale);
+			localeCode = LocaleCode.from(locale);
 		} catch (IllegalArgumentException ex) {
 			return ResponseEntity.badRequest().build();
 		}
 		try {
-			return ResponseEntity.of(getService(type).getPlaceDetail(id, lc)); // empty → 404
+			return ResponseEntity.of(getService(categoryType).getPlaceDetail(id, localeCode)); // empty → 404
 		} catch (TourApiException e) {
 			return ResponseEntity.notFound().build();
 		}
 	}
+
 }
