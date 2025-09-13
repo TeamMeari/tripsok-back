@@ -19,6 +19,31 @@ services:
       - "443:443"
     volumes:
       - ./infra/nginx/cert:/etc/nginx/ssl
+  elasticsearch:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    ports:
+      - "${ELASTIC_PORT}:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.15.0
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=${ELASTIC_URL}
+      - ELASTICSEARCH_USERNAME=${ELASTIC_USERNAME}
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
+    ports:
+      - "${KIBANA_PORT:-5601}:5601"
+    depends_on:
+      - elasticsearch
 
   redis-service:
     build:
@@ -27,6 +52,7 @@ services:
     image: local/redis-service:${IMAGE_TAG:-local}
     ports:
       - "6379:6379"
+    command: [ "redis-server", "--requirepass", "redisPw" ]
   database-service:
     build:
       context: ./infra/rdbms
@@ -39,3 +65,5 @@ services:
       MYSQL_PASSWORD: tripsokUPW
     ports:
       - "3307:3306"
+volumes:
+  es_data:
