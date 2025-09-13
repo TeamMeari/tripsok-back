@@ -1,8 +1,10 @@
 package com.tripsok_back.controller.place;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -16,14 +18,17 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tripsok_back.dto.PageResponse;
 import com.tripsok_back.dto.place.PlaceBriefResponseDto;
 import com.tripsok_back.dto.place.PlaceDetailResponseDto;
+import com.tripsok_back.dto.place.PlaceDocument;
 import com.tripsok_back.dto.place.PlaceSortStyle;
 import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.service.place.PlaceService;
+import com.tripsok_back.service.search.PlaceEsService;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.TourismType;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -42,6 +47,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PlaceController {
 
 	private final List<PlaceService> placeService;
+	private final PlaceEsService placeEsService;
 
 	private PlaceService getService(TourismType type) {
 		return placeService.stream()
@@ -109,7 +115,19 @@ public class PlaceController {
 		} catch (IllegalArgumentException ex) {
 			return ResponseEntity.badRequest().build();
 		}
-
+		if (q != null && !q.isBlank()) {
+			log.info("통합 검색 요청 카테고리={} 로케일={} 테마ID={} q='{}' 모드={} 페이지={} 크기={}",
+				categoryType.name(), localeCode.getCode(), themeId, q, typeSearch, page, size);
+			Page<PlaceBriefResponseDto> esPage;
+			boolean useEmbedding = "embedding".equalsIgnoreCase(typeSearch) || "semantic".equalsIgnoreCase(typeSearch);
+			TourismType typeFilter = categoryFilter ? categoryType : null;
+			if (useEmbedding) {
+				esPage = placeEsService.unifiedEmbeddingSearch(pageable, localeCode, q, typeFilter, sort);
+			} else {
+				esPage = placeEsService.unifiedSearch(pageable, localeCode, q, typeFilter, sort);
+			}
+			return ResponseEntity.ok(PageResponse.fromPage(esPage));
+		}
 		PageResponse<PlaceBriefResponseDto> body;
 		if (themeId != null) {
 			body = getService(categoryType).getPlaceListByTheme(pageable, themeId, localeCode);
@@ -161,4 +179,35 @@ public class PlaceController {
 		}
 	}
 
+	@GetMapping("/search/text")
+	@Operation(
+		summary = "텍스트 기반 검색",
+		description = "multi_match 쿼리를 사용하여 places 인덱스에서 텍스트 검색을 수행합니다.",
+		parameters = {
+			@Parameter(name = "query", description = "검색어", example = "강남 카페")
+		},
+		responses = {
+			@ApiResponse(
+				responseCode = "200",
+				description = "검색 성공",
+				content = @Content(array = @ArraySchema(schema = @Schema(implementation = PlaceDocument.class)))
+			)
+		}
+	)
+	public List<PlaceBriefResponseDto> searchByText(@RequestParam String query) throws IOException {
+		return placeEsService.searchByText(query).stream()
+			.map(PlaceBriefResponseDto::from)
+			.toList();
+	}
+
+	@GetMapping("/search/embedding")
+	@Operation(
+		summary = "임베딩 기반 검색 (fallback 포함)",
+		description = "임베딩 검색을 우선 수행. 모델 오류 등으로 실패하면 multi_match 텍스트 검색으로 "
+	)
+	public List<PlaceBriefResponseDto> searchByEmbedding(@RequestParam String query) throws IOException {
+		return placeEsService.searchByEmbedding(query).stream()
+			.map(PlaceBriefResponseDto::from)
+			.toList();
+	}
 }
