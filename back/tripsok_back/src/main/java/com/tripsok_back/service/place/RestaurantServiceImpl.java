@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.apache.logging.log4j.util.InternalException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -28,6 +29,7 @@ import com.tripsok_back.repository.place.RestaurantRepository;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
+import com.tripsok_back.util.GoogleTranslateClient;
 import com.tripsok_back.util.JsonMapperUtil;
 import com.tripsok_back.util.TimeUtil;
 import com.tripsok_back.util.TouristApiClientUtil;
@@ -48,6 +50,7 @@ public class RestaurantServiceImpl implements PlaceService {
 	private final CategoryService categoryService;
 	private final ObjectMapper om;
 	private final LlmClient groqApiClientUtil;
+	private final GoogleTranslateClient googleTranslateClient;
 
 	@Override
 	public TourismType getType() {
@@ -138,9 +141,9 @@ public class RestaurantServiceImpl implements PlaceService {
 		Page<Place> placeList = restaurantRepository.findByRestaurantIsNotNullAndThemes_Theme_Id(pageable, themeId);
 		Page<PlaceBriefResponseDto> dtoList = placeList.map(
 			e -> PlaceBriefResponseDto.from(e, getType().name(),
-				e.getAccommodation().getImageUrlList().getFirst(),
-				e.getAccommodation().getAccommodationImages().size(),
-				e.getAccommodation().getAccommodationReviews().size(),
+				e.getRestaurant().getImageUrlList().getFirst(),
+				e.getRestaurant().getRestaurantImages().size(),
+				e.getRestaurant().getRestaurantReviews().size(),
 				locale));
 		return PageResponse.fromPage(placeList, dtoList);
 	}
@@ -148,6 +151,11 @@ public class RestaurantServiceImpl implements PlaceService {
 	@Override
 	public void addReview(Integer userId, ReviewRequestDto reviewRequestdto) {
 
+	}
+
+	@Override
+	public Page<Place> findAll(PageRequest of) {
+		return restaurantRepository.findAllByRestaurantIsNotNull(of);
 	}
 
 	public List<TourApiPlaceResponseDto> requestPlace(int numOfRow, int pageNo) {
@@ -225,6 +233,10 @@ public class RestaurantServiceImpl implements PlaceService {
 	}
 
 	private void createSummaryTranslation(Place place, LocaleCode locale) {
+		if (place.getPlaceTr(locale) != null &&
+			StringUtils.hasText(place.getPlaceTr(locale).getSummary())) {
+			return;
+		}
 		String name = place.getPlaceTr(LocaleCode.KO) != null ? place.getPlaceTr(LocaleCode.KO).getPlaceName() : null;
 		String base = place.getPlaceTr(LocaleCode.KO) != null ? place.getPlaceTr(LocaleCode.KO).getSummary() : null;
 		log.info("createTranslation: placeId={}, contentId={}, locale={}, name='{}'",
@@ -234,7 +246,7 @@ public class RestaurantServiceImpl implements PlaceService {
 				locale != null ? locale.getCode() : null);
 			return;
 		}
-		String translation = groqApiClientUtil.requestTranslation(base, locale);
+		String translation = googleTranslateClient.requestTranslation(base, locale);
 		translation = groqApiClientUtil.sanitizeForVarchar(translation, 255);
 		place.getPlaceTr(locale).setSummary(translation);
 	}
@@ -248,7 +260,7 @@ public class RestaurantServiceImpl implements PlaceService {
 		}
 		if (StringUtils.hasText(place.getPlaceTr(locale).getInformation()))
 			return;
-		String translated = groqApiClientUtil.requestTranslation(info, locale);
+		String translated = googleTranslateClient.requestTranslation(info, locale);
 		place.getPlaceTr(locale).setInformation(translated);
 	}
 
@@ -263,12 +275,12 @@ public class RestaurantServiceImpl implements PlaceService {
 			place.upsertTranslation(locale, null, null, null, null);
 		}
 		if (StringUtils.hasText(koName) && !StringUtils.hasText(place.getPlaceTr(locale).getPlaceName())) {
-			String namePhonetic = groqApiClientUtil.requestTransliteration(koName, locale);
+			String namePhonetic = googleTranslateClient.requestTransliteration(koName, locale);
 			namePhonetic = groqApiClientUtil.sanitizeForVarchar(namePhonetic, 255);
 			place.getPlaceTr(locale).setPlaceName(namePhonetic);
 		}
 		if (StringUtils.hasText(koAddr) && !StringUtils.hasText(place.getPlaceTr(locale).getAddress())) {
-			String addrPhonetic = groqApiClientUtil.requestTransliteration(koAddr, locale);
+			String addrPhonetic = googleTranslateClient.requestTransliteration(koAddr, locale);
 			addrPhonetic = groqApiClientUtil.sanitizeForVarchar(addrPhonetic, 255);
 			place.getPlaceTr(locale).setAddress(addrPhonetic);
 		}
@@ -317,4 +329,5 @@ public class RestaurantServiceImpl implements PlaceService {
 		}
 		restaurantRepository.save(restaurantPlace);
 	}
+
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -27,6 +28,7 @@ import com.tripsok_back.repository.place.TourRepository;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
+import com.tripsok_back.util.GoogleTranslateClient;
 import com.tripsok_back.util.JsonMapperUtil;
 import com.tripsok_back.util.TimeUtil;
 import com.tripsok_back.util.TouristApiClientUtil;
@@ -46,6 +48,7 @@ public class TourServiceImpl implements PlaceService {
 	private final CategoryService categoryService;
 	private final ObjectMapper om;
 	private final LlmClient groqApiClientUtil;
+	private final GoogleTranslateClient googleTranslateClient;
 
 	@Override
 	public TourismType getType() {
@@ -116,7 +119,8 @@ public class TourServiceImpl implements PlaceService {
 				e.getTour().getImageUrlList().getFirst(),
 				e.getTour().getTourImages().size(),
 				e.getTour().getTourReviews().size(),
-				locale));
+				locale)
+		);
 		return PageResponse.fromPage(placeList, dtoList);
 	}
 
@@ -136,6 +140,11 @@ public class TourServiceImpl implements PlaceService {
 	@Override
 	public void addReview(Integer userId, ReviewRequestDto reviewRequestdto) {
 
+	}
+
+	@Override
+	public Page<Place> findAll(PageRequest of) {
+		return tourRepository.findAllByTourIsNotNull(of);
 	}
 
 	public List<TourApiPlaceResponseDto> requestPlace(int numOfRow, int pageNo) {
@@ -209,6 +218,10 @@ public class TourServiceImpl implements PlaceService {
 	private void createSummaryTranslation(Place place, LocaleCode locale) {
 		if (place.getPlaceTr(LocaleCode.KO) == null)
 			return;
+		if (place.getPlaceTr(locale) != null &&
+			org.springframework.util.StringUtils.hasText(place.getPlaceTr(locale).getSummary())) {
+			return;
+		}
 		String name = place.getPlaceTr(LocaleCode.KO).getPlaceName();
 		String base = place.getPlaceTr(LocaleCode.KO).getSummary();
 		log.info("createTranslation: placeId={}, contentId={}, locale={}, name='{}'",
@@ -218,7 +231,7 @@ public class TourServiceImpl implements PlaceService {
 				place.getId(), locale != null ? locale.getCode() : null);
 			return;
 		}
-		String translated = groqApiClientUtil.requestTranslation(base, locale);
+		String translated = googleTranslateClient.requestTranslation(base, locale);
 		translated = groqApiClientUtil.sanitizeForVarchar(translated, 255);
 		if (place.getPlaceTr(locale) == null) {
 			place.upsertTranslation(locale, null, null, null, null);
@@ -237,7 +250,7 @@ public class TourServiceImpl implements PlaceService {
 		}
 		if (org.springframework.util.StringUtils.hasText(place.getPlaceTr(locale).getInformation()))
 			return;
-		String translated = groqApiClientUtil.requestTranslation(info, locale);
+		String translated = googleTranslateClient.requestTranslation(info, locale);
 		place.getPlaceTr(locale).setInformation(translated);
 	}
 
@@ -253,13 +266,13 @@ public class TourServiceImpl implements PlaceService {
 		}
 		if (org.springframework.util.StringUtils.hasText(koName)
 			&& !org.springframework.util.StringUtils.hasText(place.getPlaceTr(locale).getPlaceName())) {
-			String namePhon = groqApiClientUtil.requestTransliteration(koName, locale);
+			String namePhon = googleTranslateClient.requestTransliteration(koName, locale);
 			namePhon = groqApiClientUtil.sanitizeForVarchar(namePhon, 255);
 			place.getPlaceTr(locale).setPlaceName(namePhon);
 		}
 		if (org.springframework.util.StringUtils.hasText(koAddr)
 			&& !org.springframework.util.StringUtils.hasText(place.getPlaceTr(locale).getAddress())) {
-			String addrPhon = groqApiClientUtil.requestTransliteration(koAddr, locale);
+			String addrPhon = googleTranslateClient.requestTransliteration(koAddr, locale);
 			addrPhon = groqApiClientUtil.sanitizeForVarchar(addrPhon, 255);
 			place.getPlaceTr(locale).setAddress(addrPhon);
 		}
