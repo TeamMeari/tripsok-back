@@ -321,7 +321,6 @@ public class PlaceEsService {
 		} catch (Exception e) {
 			throw new RuntimeException("ES count 실패", e);
 		}
-		return false;
 	}
 }
 
