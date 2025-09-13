@@ -200,7 +200,8 @@ public class PlaceController {
 				.map(PlaceBriefResponseDto::from)
 				.toList());
 		} catch (Exception e) {
-
+			log.error("텍스트 검색 실패: {}", q, e);
+			return ResponseEntity.internalServerError().build();
 		}
 	}
 
@@ -215,7 +216,7 @@ public class PlaceController {
 				.map(PlaceBriefResponseDto::from)
 				.toList());
 		} catch (IOException e) {
-			log.error("Text search failed for query: {}", q, e);
+			log.error("의미 유사 검색 실패: {}", q, e);
 			return ResponseEntity.internalServerError().build();
 		}
 	}
