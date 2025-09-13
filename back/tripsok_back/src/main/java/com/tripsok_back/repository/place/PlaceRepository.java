@@ -10,4 +10,10 @@ import com.tripsok_back.model.place.Place;
 @Repository
 public interface PlaceRepository extends JpaRepository<Place, Integer> {
 	Page<Place> findByOrderByCreatedAtDesc(Pageable pageable);
+
+	Integer countByAccommodationIsNotNull();
+
+	Integer countByRestaurantIsNotNull();
+
+	Integer countByTourIsNotNull();
 }
