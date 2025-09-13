@@ -3,6 +3,7 @@ package com.tripsok_back.dto.place;
 import java.util.List;
 
 import com.tripsok_back.model.place.Place;
+import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.model.place.PlaceLclsCategoryTr;
 import com.tripsok_back.model.place.PlaceTr;
 import com.tripsok_back.type.LocaleCode;
@@ -76,56 +77,37 @@ public class PlaceDocument {
 		List<String> themes = List.of();
 		switch (type) {
 			case ACCOMMODATION -> {
-				if (place.getAccommodation() == null)
+				if (place.getAccommodation() == null) {
 					log.info("placeId:{} 의 accommodation이 없습니다", place.getId());
-				categoryName = place.getAccommodation().getPlaceLclsCategory().getPlaceLclsCategoryTrs().stream()
-					.filter(tr -> localeCode.getCode().equals(tr.getId().getLocale()))
-					.map(PlaceLclsCategoryTr::getLclsSystm3Name)
-					.findFirst()
-					.orElse(null);
-				// thumbnail
-				try {
-					java.util.List<String> urls = place.getAccommodation().getImageUrlList();
-					if (urls != null && !urls.isEmpty())
-						thumb = urls.get(0);
-				} catch (Exception ignored) {
+					break;
 				}
+				categoryName = extractCategoryName(
+					place.getAccommodation().getPlaceLclsCategory(), localeCode.getCode());
+				thumb = extractThumbnail(place.getAccommodation().getImageUrlList());
 			}
 			case RESTAURANT -> {
-				if (place.getRestaurant() == null)
+				if (place.getRestaurant() == null) {
 					log.info("placeId:{} 의 restaurant이 없습니다", place.getId());
-				categoryName = place.getRestaurant().getPlaceLclsCategory().getPlaceLclsCategoryTrs().stream()
-					.filter(tr -> localeCode.getCode().equals(tr.getId().getLocale()))
-					.map(PlaceLclsCategoryTr::getLclsSystm3Name)
-					.findFirst()
-					.orElse(null);
-				try {
-					java.util.List<String> urls = place.getRestaurant().getImageUrlList();
-					if (urls != null && !urls.isEmpty())
-						thumb = urls.get(0);
-				} catch (Exception ignored) {
+					break;
 				}
+				categoryName = extractCategoryName(
+					place.getRestaurant().getPlaceLclsCategory(), localeCode.getCode());
+				thumb = extractThumbnail(place.getRestaurant().getImageUrlList());
 			}
 			case TOURIST_SPOT -> {
-				if (place.getTour() == null)
+				if (place.getTour() == null) {
 					log.info("placeId:{} 의 tour이 없습니다", place.getId());
-				categoryName = place.getTour().getPlaceLclsCategory().getPlaceLclsCategoryTrs().stream()
-					.filter(tr -> localeCode.getCode().equals(tr.getId().getLocale()))
-					.map(PlaceLclsCategoryTr::getLclsSystm3Name)
-					.findFirst()
-					.orElse(null);
-				try {
-					java.util.List<String> urls = place.getTour().getImageUrlList();
-					if (urls != null && !urls.isEmpty())
-						thumb = urls.get(0);
-				} catch (Exception ignored) {
+					break;
 				}
+				categoryName = extractCategoryName(
+					place.getTour().getPlaceLclsCategory(), localeCode.getCode());
+				thumb = extractThumbnail(place.getTour().getImageUrlList());
 			}
 		}
 		//TODO 태그랑 테마 추가
 		PlaceDocument doc = PlaceDocument.builder()
 			.id(esId)
-			.placeId(String.valueOf(place.getId()))
+			.placeId(java.lang.String.valueOf(place.getId()))
 			.locale(localeCode.getCode())
 			.categories(categoryName != null ? List.of(categoryName) : List.of())
 			.tags(List.of())
@@ -152,6 +134,21 @@ public class PlaceDocument {
 			doc.setEmbedding(null);
 		}
 		return doc;
+	}
+
+	private static String extractCategoryName(PlaceLclsCategory category, String locale) {
+		return category.getPlaceLclsCategoryTrs().stream()
+			.filter(tr -> locale.equals(tr.getId().getLocale()))
+			.map(PlaceLclsCategoryTr::getLclsSystm3Name)
+			.findFirst()
+			.orElse(null);
+	}
+
+	private static String extractThumbnail(List<String> urls) {
+		if (urls != null && !urls.isEmpty()) {
+			return urls.getFirst();
+		}
+		return null;
 	}
 
 }
