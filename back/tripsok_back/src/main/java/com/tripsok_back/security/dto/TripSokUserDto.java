@@ -16,7 +16,7 @@ import lombok.extern.log4j.Log4j2;
 @Setter
 public class TripSokUserDto extends User {
 	private String userId;
-	private String name;
+	private String nickname;
 	private SocialType socialType;
 
 	public TripSokUserDto(String userId, String password, SocialType socialType,

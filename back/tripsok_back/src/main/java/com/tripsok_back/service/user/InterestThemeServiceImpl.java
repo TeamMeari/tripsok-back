@@ -2,7 +2,6 @@ package com.tripsok_back.service.user;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
@@ -23,17 +22,6 @@ public class InterestThemeServiceImpl implements InterestThemeService {
 
 	private final ThemeRepository themeRepository;
 	private final InterestThemeRepository interestThemeRepository;
-
-	@Override
-	public void saveInterestThemes(TripSokUser user, List<Integer> interestThemeIds) {
-		if (interestThemeIds != null && !interestThemeIds.isEmpty()) {
-			List<Theme> interestThemes = themeRepository.findAllById(interestThemeIds);
-			List<InterestTheme> themesToSave = interestThemes.stream()
-				.map(theme -> new InterestTheme(user, theme))
-				.collect(Collectors.toList());
-			interestThemeRepository.saveAll(themesToSave);
-		}
-	}
 
 	@Override
 	public List<InterestThemeResponse> getInterestThemes(TripSokUser user) {

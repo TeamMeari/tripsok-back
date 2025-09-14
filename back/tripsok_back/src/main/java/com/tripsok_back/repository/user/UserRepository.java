@@ -16,5 +16,5 @@ public interface UserRepository extends JpaRepository<TripSokUser, Integer> {
 
 	TripSokUser findByEmail(String email);
 
-	boolean existsByName(String name);
+	boolean existsByNickname(String nickname);
 }

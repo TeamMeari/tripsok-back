@@ -25,10 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 @Primary
 public class GroqLlmClient implements LlmClient {
 
-    @Qualifier("groqApiWebClient")
-    private final WebClient groqApiWebClient;
-	private final ObjectMapper objectMapper;
-
 	private static final String DEFAULT_MODEL = "llama-3.3-70b-versatile";
 	private static final String shortDescriptionPrompt = """
 		ROLE
@@ -69,6 +65,9 @@ public class GroqLlmClient implements LlmClient {
 			+ "- Keep proper nouns recognizable.\n"
 			+ "- Do NOT translate meanings, only render pronunciation in target script.\n"
 			+ "- Output plain text with no quotes or extra comments.";
+	@Qualifier("groqApiWebClient")
+	private final WebClient groqApiWebClient;
+	private final ObjectMapper objectMapper;
 
 	@Override
 	public String requestGroqShortDescription(String prompt) {

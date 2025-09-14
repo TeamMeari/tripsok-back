@@ -40,7 +40,6 @@ import com.tripsok_back.repository.auth.RedisRefreshTokenRepository;
 import com.tripsok_back.repository.user.UserRepository;
 import com.tripsok_back.security.dto.TripSokUserDto;
 import com.tripsok_back.security.jwt.JwtUtil;
-import com.tripsok_back.service.user.InterestThemeService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +55,6 @@ public class AuthServiceImpl implements AuthService {
 	private final OAuth2Properties oAuth2Properties;
 	private final JwtUtil jwtUtil;
 	private final AuthenticationManager authenticationManager;
-	private final InterestThemeService interestThemeService;
 
 	private final RestClient restClient = RestClient.builder().build();
 
@@ -66,9 +64,8 @@ public class AuthServiceImpl implements AuthService {
 		String email = getEmailFromToken(request.getEmailVerifyToken());
 		String password = request.getPassword();
 		TripSokUser user = TripSokUser.signUpUser(request.getNickname(), SocialType.EMAIL, null, email,
-			passwordEncoder.encode(password), request.getCountryCode());
+			passwordEncoder.encode(password), request.getFirstName(), request.getLastName());
 		validateRegisteredAndSave(user);
-		interestThemeService.saveInterestThemes(user, request.getInterestThemeIds());
 	}
 
 	@Override
@@ -84,7 +81,8 @@ public class AuthServiceImpl implements AuthService {
 				case GOOGLE -> {
 					GoogleUserInfo oauthGoogleUserInfo = getGoogleUserInfo(socialAccessToken);
 					user = TripSokUser.signUpUser(request.getNickname(), GOOGLE, oauthGoogleUserInfo.getSub(),
-						oauthGoogleUserInfo.getEmail(), null, request.getCountryCode());
+						oauthGoogleUserInfo.getEmail(), null, oauthGoogleUserInfo.getGiven_name(),
+						oauthGoogleUserInfo.getFamily_name());
 				}
 				default -> throw new Exception();
 			}
@@ -93,7 +91,6 @@ public class AuthServiceImpl implements AuthService {
 		}
 
 		validateRegisteredAndSave(user);
-		interestThemeService.saveInterestThemes(user, request.getInterestThemeIds());
 
 		return getTokenResponse(user.getId(), getAuthorities(user.getRole()));
 	}
@@ -148,7 +145,7 @@ public class AuthServiceImpl implements AuthService {
 
 	@Override
 	public boolean nicknameDuplicateCheck(String nickname) {
-		return !userRepository.existsByName(nickname);
+		return !userRepository.existsByNickname(nickname);
 	}
 
 	@Override
@@ -252,7 +249,7 @@ public class AuthServiceImpl implements AuthService {
 				throw new AuthException(ErrorCode.REGISTERED_ANOTHER_SOCIAL);
 			}
 		}
-		if (!nicknameDuplicateCheck(user.getName())) {
+		if (!nicknameDuplicateCheck(user.getNickname())) {
 			throw new AuthException(ErrorCode.CONFLICT_NICKNAME);
 		}
 		userRepository.save(user);

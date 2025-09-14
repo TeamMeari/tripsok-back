@@ -23,7 +23,7 @@ public class TripSokUser extends BaseModifiableEntity {
 	private Integer id;
 
 	@Column(nullable = false, length = 100, updatable = false)
-	private String name;
+	private String nickname;
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
@@ -36,7 +36,11 @@ public class TripSokUser extends BaseModifiableEntity {
 
 	private String password;
 
-	private String countryCode;
+	@Column(length = 50)
+	private String firstName;
+
+	@Column(length = 50)
+	private String lastName;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
@@ -46,28 +50,31 @@ public class TripSokUser extends BaseModifiableEntity {
 	private String contactEmail;
 
 	@Builder
-	public TripSokUser(String name, SocialType socialType, String socialId, String email, String password, Role role,
-		String countryCode, String contactEmail) {
-		this.name = name;
+	public TripSokUser(String nickname, SocialType socialType, String socialId, String email, String password,
+		Role role,
+		String firstName, String lastName, String contactEmail) {
+		this.nickname = nickname;
 		this.socialType = socialType;
 		this.socialId = socialId;
 		this.email = email;
 		this.password = password;
 		this.role = role;
-		this.countryCode = countryCode;
+		this.firstName = firstName;
+		this.lastName = lastName;
 		this.contactEmail = contactEmail;
 	}
 
 	public static TripSokUser signUpUser(String nickname, SocialType socialType, String socialId, String email,
-		String password, String countryCode) {
+		String password, String firstName, String lastName) {
 		return TripSokUser.builder()
-			.name(nickname)
+			.nickname(nickname)
 			.socialType(socialType)
 			.socialId(socialId)
 			.email(email)
 			.password(password)
 			.role(Role.USER)
-			.countryCode(countryCode)
+			.firstName(firstName)
+			.lastName(lastName)
 			.contactEmail(email)
 			.build();
 	}
@@ -78,5 +85,10 @@ public class TripSokUser extends BaseModifiableEntity {
 
 	public void changeContactEmail(String contactEmail) {
 		this.contactEmail = contactEmail;
+	}
+
+	public void changeName(String firstName, String lastName) {
+		this.firstName = firstName;
+		this.lastName = lastName;
 	}
 }

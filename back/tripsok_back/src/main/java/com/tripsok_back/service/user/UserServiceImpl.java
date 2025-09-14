@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.tripsok_back.dto.SliceResponse;
+import com.tripsok_back.dto.user.request.ChangeUserInfoRequest;
 import com.tripsok_back.dto.user.response.InterestThemeResponse;
 import com.tripsok_back.dto.user.response.UserInfoResponse;
 import com.tripsok_back.exception.ErrorCode;
@@ -32,8 +33,8 @@ public class UserServiceImpl implements UserService {
 	public UserInfoResponse getUserInfo(Integer userId) {
 		TripSokUser user = findUserById(userId);
 		List<InterestThemeResponse> interestThemes = interestThemeService.getInterestThemes(user);
-		return new UserInfoResponse(user.getName(), user.getEmail(), user.getContactEmail(), user.getCountryCode(),
-			user.getSocialType(), interestThemes);
+		return new UserInfoResponse(user.getNickname(), user.getEmail(), user.getContactEmail(),
+			user.getSocialType(), interestThemes, user.getFirstName(), user.getLastName());
 	}
 
 	@Override
@@ -49,6 +50,13 @@ public class UserServiceImpl implements UserService {
 	public void changeInterestThemes(Integer userId, Set<Integer> interestThemeIds) {
 		TripSokUser user = findUserById(userId);
 		interestThemeService.updateInterestThemes(user, interestThemeIds);
+	}
+
+	@Override
+	@Transactional
+	public void changeUserInfo(Integer userId, ChangeUserInfoRequest request) {
+		TripSokUser user = findUserById(userId);
+		user.changeName(request.getFirstName(), request.getLastName());
 	}
 
 	@Override

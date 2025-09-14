@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tripsok_back.dto.SliceResponse;
 import com.tripsok_back.dto.user.request.ChangeContactEmailRequest;
 import com.tripsok_back.dto.user.request.ChangeInterestThemeRequest;
+import com.tripsok_back.dto.user.request.ChangeUserInfoRequest;
 import com.tripsok_back.dto.user.response.UserInfoResponse;
 import com.tripsok_back.service.user.UserService;
 import com.tripsok_back.type.LocaleCode;
@@ -86,5 +87,12 @@ public class UserController {
 		@Parameter(description = "언어 코드")
 		@RequestParam(defaultValue = "EN", required = false) LocaleCode locale) {
 		return ResponseEntity.ok(userService.getUserLikedPlaces(userId, size, lastId, type, locale));
+	}
+
+	@PatchMapping("/info")
+	public ResponseEntity<Void> changeUserInfo(@AuthenticationPrincipal Integer userId,
+		@Valid @RequestBody ChangeUserInfoRequest request) {
+		userService.changeUserInfo(userId, request);
+		return ResponseEntity.noContent().build();
 	}
 }
