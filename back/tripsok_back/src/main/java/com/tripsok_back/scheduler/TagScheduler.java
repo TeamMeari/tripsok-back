@@ -1,5 +1,6 @@
 package com.tripsok_back.scheduler;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,67 +46,76 @@ public class TagScheduler {
 		int pageNum = 0;
 		while (true) {
 			Pageable pageable = PageRequest.of(pageNum, 10);
-			log.info("pageNum={} 장소 태그 업데이트 시작", pageNum);
-			List<Place> places = placeRepository.findByOrderByCreatedAtDesc(pageable).getContent();
-			if (places.isEmpty()) {
-				log.info("Place Tag 업데이트 종료 - 업데이트할 장소가 없습니다");
-				return;
-			}
-
-			Set<Place> placeList = places.stream()
-				.filter(
-					place -> (!placeThemeRepository.existsByPlace(place)) || (!placeTagRepository.existsByPlace(place)))
-				.collect(
-					Collectors.toSet());
+			Set<Place> placeList=getTargetPlaces(pageable);
 			if (placeList.isEmpty()) {
 				log.info("pageNum={} 태그 완료", pageNum);
 				pageNum++;
 				continue;
 			}
-
-			String placeToString = placeList.stream()
-				.map(place -> place.getContentId() + " : " + place.getPlaceTr(LocaleCode.KO).getInformation())
-				.collect(Collectors.joining("\n\n"));
+			String placeToString = convertPlaceInfoToString(placeList);
 			PlaceThemeAndTagResponse response = aiUtil.getThemeAndTag(placeToString);
-			for (PlaceThemeAndTagResponse.PlaceDto item : response.getPlaces()) {
-				placeList.stream()
-					.filter(place -> place.getContentId().equals(item.getContentId()))
-					.findFirst()
-					.ifPresentOrElse(
-						place -> {
-							if (!placeThemeRepository.existsByPlace(place)) {
-								place.setThemes(themeRepository.findByTypeIn(item.getTheme())
-									.stream()
-									.map(theme -> new PlaceTheme(place, theme))
-									.collect(Collectors.toSet()));
-							}
-							if (!placeTagRepository.existsByPlace(place)) {
-								place.setTags(item.getTag().stream().map(tagDto -> {
-										Tag tag = tagRepository.findByName(tagDto.getKO())
-											.orElseGet(() -> savePlaceTr(tagDto));
-										return new PlaceTag(place, tag);
-									})
-									.collect(Collectors.toSet()));
-							}
-						}, () -> log.error("contentId={}에 해당하는 장소가 DB에 없습니다", item.getContentId())
-					);
-			}
+			updatePlaceThemeAndTag(placeList, response);
 			placeRepository.saveAll(placeList);
 			pageNum++;
 			log.info("pageNum={} 장소 태그 업데이트 완료", pageNum - 1);
 		}
 	}
 
+	private Set<Place> getTargetPlaces(Pageable pageable) {
+		log.info("pageNum={} 장소 태그 업데이트 시작", pageable.getPageNumber());
+		List<Place> places = placeRepository.findByOrderByCreatedAtDesc(pageable).getContent();
+		if (places.isEmpty()) {
+			return Set.of();
+		}
+		return places.stream()
+			.filter(place -> place.getThemes().isEmpty() || place.getTags().isEmpty())
+			.collect(Collectors.toSet());
+	}
+
+	private String convertPlaceInfoToString(Set<Place> placeList) {
+		return placeList.stream()
+			.map(place -> place.getContentId() + " : " + place.getPlaceTr(LocaleCode.KO).getInformation())
+			.collect(Collectors.joining("\n\n"));
+	}
+
+	private void updatePlaceThemeAndTag(Set<Place> placeList, PlaceThemeAndTagResponse response) {
+		for (PlaceThemeAndTagResponse.PlaceDto item : response.getPlaces()) {
+			placeList.stream()
+				.filter(place -> place.getContentId().equals(item.getContentId()))
+				.findFirst()
+				.ifPresentOrElse(
+					place -> {
+						if (!placeThemeRepository.existsByPlace(place)) {
+							place.setThemes(themeRepository.findByTypeIn(item.getTheme())
+								.stream()
+								.map(theme -> new PlaceTheme(place, theme))
+								.collect(Collectors.toSet()));
+						}
+						if (!placeTagRepository.existsByPlace(place)) {
+							place.setTags(item.getTag().stream().map(tagDto -> {
+									Tag tag = tagRepository.findByName(tagDto.getKo())
+										.orElseGet(() -> savePlaceTr(tagDto));
+									return new PlaceTag(place, tag);
+								})
+								.collect(Collectors.toSet()));
+						}
+					}, () -> log.error("contentId={}에 해당하는 장소가 DB에 없습니다", item.getContentId())
+				);
+		}
+	}
+
 	private Tag savePlaceTr(PlaceThemeAndTagResponse.TagDto tags) {
-		Tag tag = tagRepository.save(new Tag(tags.getKO()));
+		Tag tag = tagRepository.save(new Tag(tags.getKo()));
+		Set<TagTr> newTagTrs = new HashSet<>();
 		for (LocaleCode locale : LocaleCode.values()) {
 			if (locale == LocaleCode.KO)
 				continue;
 			String nameByLocale = tags.getNameByLocale(locale);
-			if (nameByLocale == null || nameByLocale.isBlank())
-				continue;
-			tagTrRepository.save(new TagTr(tag, locale, nameByLocale));
+			if (nameByLocale != null && !nameByLocale.isBlank()) {
+				newTagTrs.add(new TagTr(tag, locale, nameByLocale));
+			}
 		}
+		tag.setTagTrs(newTagTrs);
 		return tag;
 	}
 }

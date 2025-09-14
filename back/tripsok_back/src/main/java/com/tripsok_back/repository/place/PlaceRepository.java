@@ -10,6 +10,6 @@ import com.tripsok_back.model.place.Place;
 
 @Repository
 public interface PlaceRepository extends JpaRepository<Place, Integer> {
-	@EntityGraph(attributePaths = {"placeTrs"})
+	@EntityGraph(attributePaths = {"placeTrs", "themes", "tags"})
 	Page<Place> findByOrderByCreatedAtDesc(Pageable pageable);
 }

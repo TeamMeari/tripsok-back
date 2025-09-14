@@ -1,5 +1,6 @@
 package com.tripsok_back.model.place;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import com.tripsok_back.support.BaseTimeEntity;
@@ -37,7 +38,7 @@ public class Tag extends BaseTimeEntity {
 	private String name;
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "tag", cascade = CascadeType.ALL, orphanRemoval = true)
-	private Set<TagTr> tagTrs = Set.of();
+	private Set<TagTr> tagTrs = new HashSet<>();
 
 	public Tag(String name) {
 		this.name = name;

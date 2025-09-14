@@ -5,6 +5,8 @@ import com.tripsok_back.type.LocaleCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,10 +26,10 @@ import lombok.Setter;
 @Entity
 @Table(name = "TAG_TR", indexes = {
 	@Index(name = "idx_tag_tr_tag_and_locale", columnList = "TAG_ID, LOCALE"),
-	@Index(name = "idx_place_tag_name", columnList = "NAME"),
+	@Index(name = "idx_tag_tr_name", columnList = "NAME"),
 },
 	uniqueConstraints = {
-		@UniqueConstraint(name = "uk_place_tag_tag_and_locale", columnNames = {"TAG_ID", "LOCALE"})
+		@UniqueConstraint(name = "uk_tag_tr_tag_and_locale", columnNames = {"TAG_ID", "LOCALE"})
 	})
 @NoArgsConstructor
 public class TagTr extends BaseTimeEntity {
@@ -41,6 +43,7 @@ public class TagTr extends BaseTimeEntity {
 	private Tag tag;
 
 	@NotNull
+	@Enumerated(EnumType.STRING)
 	@Column(name = "LOCALE", nullable = false, length = 20)
 	private LocaleCode locale;
 

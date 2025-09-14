@@ -26,21 +26,21 @@ public class PlaceThemeAndTagResponse {
 	@Getter
 	@Setter
 	public static class TagDto {
-		@JsonProperty("KO")
-		private String KO;
-		@JsonProperty("EN")
-		private String EN;
-		@JsonProperty("JP")
-		private String JP;
-		@JsonProperty("CN")
-		private String CN;
+		@JsonProperty("ko")
+		private String ko;
+		@JsonProperty("en")
+		private String en;
+		@JsonProperty("ja")
+		private String ja;
+		@JsonProperty("cn")
+		private String cn;
 
 		public String getNameByLocale(LocaleCode locale) {
 			return switch (locale) {
-				case KO -> KO;
-				case EN -> EN;
-				case JA -> JP;
-				case CN -> CN;
+				case KO -> ko;
+				case EN -> en;
+				case JA -> ja;
+				case CN -> cn;
 			};
 		}
 	}

@@ -50,7 +50,7 @@ public class AiUtil {
 		"   - \"tag\": an array of 2–4 free-form tags, each a single word with ≤7 characters.",
 		"4. When extracting tags, do not use broad categories such as “restaurant,” “travel,” or “accommodation,” nor brand names, place names, or city names.",
 		"5. \"theme\" values must always be in Korean regardless of the input language.",
-		"6. \"tag\" values must be provided in four languages: KO (Korean), EN (English), JP (Japanese), and CN (Chinese). Each tag must include translations for all four languages.",
+		"6. \"tag\" values must be provided in four languages: ko (Korean), en (English), ja (Japanese), and cn (Chinese). Each tag must include translations for all four languages.",
 		"7. Do not include any text outside the JSON.",
 		"",
 		"Example of the expected format:",
@@ -62,28 +62,28 @@ public class AiUtil {
 			      "theme": ["맛집탐방", "바다"],
 			      "tag": [
 			        {
-			          "KO": "대게",
-			          "EN": "Snow Crab",
-			          "JP": "ズワイガニ",
-			          "CN": "雪蟹"
+			          "ko": "대게",
+			          "en": "Snow Crab",
+			          "ja": "ズワイガニ",
+			          "cn": "雪蟹"
 			        },
 			        {
-			          "KO": "킹크랩",
-			          "EN": "King Crab",
-			          "JP": "キングクラブ",
-			          "CN": "帝王蟹"
+			          "ko": "킹크랩",
+			          "en": "King Crab",
+			          "ja": "キングクラブ",
+			          "cn": "帝王蟹"
 			        },
 			        {
-			          "KO": "수족관",
-			          "EN": "Aquarium",
-			          "JP": "水族館",
-			          "CN": "水族馆"
+			          "ko": "수족관",
+			          "en": "Aquarium",
+			          "ja": "水族館",
+			          "cn": "水族馆"
 			        },
 			        {
-			          "KO": "신선함",
-			          "EN": "Freshness",
-			          "JP": "新鮮さ",
-			          "CN": "新鲜感"
+			          "ko": "신선함",
+			          "en": "Freshness",
+			          "ja": "新鮮さ",
+			          "cn": "新鲜感"
 			        }
 			      ]
 			    }

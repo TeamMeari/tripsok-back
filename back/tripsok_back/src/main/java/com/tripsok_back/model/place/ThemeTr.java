@@ -6,6 +6,8 @@ import com.tripsok_back.type.LocaleCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,7 +26,8 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "THEME_TR", indexes = {
-	@Index(name = "idx_theme_tr_theme_and_locale", columnList = "THEME_ID, LOCALE")
+	@Index(name = "idx_theme_tr_theme_and_locale", columnList = "THEME_ID, LOCALE"),
+	@Index(name = "idx_theme_tr_name", columnList = "NAME"),
 },
 	uniqueConstraints = {
 		@UniqueConstraint(name = "uk_theme_tr_theme_and_locale", columnNames = {"THEME_ID", "LOCALE"})
@@ -41,6 +44,7 @@ public class ThemeTr extends BaseTimeEntity {
 	private Theme theme;
 
 	@NotNull
+	@Enumerated(EnumType.STRING)
 	@Column(name = "LOCALE", nullable = false, length = 20)
 	private LocaleCode locale;
 
