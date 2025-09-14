@@ -40,13 +40,13 @@ public class TagScheduler {
 	private final PlaceThemeRepository placeThemeRepository;
 	private final PlaceTagRepository placeTagRepository;
 
-	@Scheduled(fixedRateString = "PT48H", initialDelayString = "PT2H")
+	@Scheduled(fixedRateString = "PT48H", initialDelayString = "PT1H")
 	void runBatchTagRequestApi() {
 		log.info("Place Tag 업데이트 시작");
 		int pageNum = 0;
 		while (true) {
 			Pageable pageable = PageRequest.of(pageNum, 10);
-			Set<Place> placeList=getTargetPlaces(pageable);
+			Set<Place> placeList = getTargetPlaces(pageable);
 			if (placeList.isEmpty()) {
 				log.info("pageNum={} 태그 완료", pageNum);
 				pageNum++;
@@ -115,7 +115,7 @@ public class TagScheduler {
 				newTagTrs.add(new TagTr(tag, locale, nameByLocale));
 			}
 		}
-		tag.setTagTrs(newTagTrs);
+		tagTrRepository.saveAll(newTagTrs);
 		return tag;
 	}
 }
