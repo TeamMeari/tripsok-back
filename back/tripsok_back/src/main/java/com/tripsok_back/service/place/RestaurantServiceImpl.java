@@ -26,6 +26,7 @@ import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.repository.place.RestaurantRepository;
+import com.tripsok_back.service.search.PlaceEsService;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
@@ -51,6 +52,7 @@ public class RestaurantServiceImpl implements PlaceService {
 	private final ObjectMapper om;
 	private final LlmClient groqApiClientUtil;
 	private final GoogleTranslateClient googleTranslateClient;
+	private final PlaceEsService placeEsService;
 
 	@Override
 	public TourismType getType() {
@@ -330,4 +332,22 @@ public class RestaurantServiceImpl implements PlaceService {
 		restaurantRepository.save(restaurantPlace);
 	}
 
+	@Override
+	public int reindexFullEs() {
+		int page = 0;
+		int size = 500;
+		int placeCount = 0;
+		int docCount = 0;
+		Page<Place> placePage;
+		do {
+			placePage = restaurantRepository.findAllByRestaurantIsNotNullOrderByIdAsc(PageRequest.of(page, size));
+			for (Place e : placePage.getContent()) {
+				docCount += placeEsService.indexPlaceDocuments(e);
+				placeCount++;
+			}
+			page++;
+		} while (!placePage.isEmpty());
+		log.info("RestaurantFullIndex 완료 (places={}, docs={})", placeCount, docCount);
+		return docCount;
+	}
 }

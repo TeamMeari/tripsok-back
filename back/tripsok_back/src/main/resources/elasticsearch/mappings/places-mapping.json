@@ -1,0 +1,157 @@
+{
+  "settings": {
+    "index": {
+      "number_of_shards": 1,
+      "number_of_replicas": 1
+    },
+    "analysis": {
+      "analyzer": {
+        "korean_analyzer": {
+          "type": "custom",
+          "tokenizer": "nori_tokenizer",
+          "filter": [
+            "lowercase",
+            "nori_part_of_speech"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "placeId": {
+        "type": "keyword"
+      },
+      "locale": {
+        "type": "keyword"
+      },
+      "categories": {
+        "type": "keyword"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "themes": {
+        "type": "keyword"
+      },
+      "title": {
+        "type": "text",
+        "fields": {
+          "ko": {
+            "type": "text",
+            "analyzer": "korean_analyzer"
+          },
+          "en": {
+            "type": "text",
+            "analyzer": "standard"
+          },
+          "ja": {
+            "type": "text",
+            "analyzer": "kuromoji"
+          },
+          "zh": {
+            "type": "text",
+            "analyzer": "smartcn"
+          }
+        }
+      },
+      "address": {
+        "type": "text",
+        "fields": {
+          "ko": {
+            "type": "text",
+            "analyzer": "korean_analyzer"
+          },
+          "en": {
+            "type": "text",
+            "analyzer": "standard"
+          },
+          "ja": {
+            "type": "text",
+            "analyzer": "kuromoji"
+          },
+          "zh": {
+            "type": "text",
+            "analyzer": "smartcn"
+          }
+        }
+      },
+      "summary": {
+        "type": "text",
+        "fields": {
+          "ko": {
+            "type": "text",
+            "analyzer": "korean_analyzer"
+          },
+          "en": {
+            "type": "text",
+            "analyzer": "standard"
+          },
+          "ja": {
+            "type": "text",
+            "analyzer": "kuromoji"
+          },
+          "cn": {
+            "type": "text",
+            "analyzer": "smartcn"
+          }
+        }
+      },
+      "information": {
+        "type": "text",
+        "fields": {
+          "ko": {
+            "type": "text",
+            "analyzer": "korean_analyzer"
+          },
+          "en": {
+            "type": "text",
+            "analyzer": "standard"
+          },
+          "ja": {
+            "type": "text",
+            "analyzer": "kuromoji"
+          },
+          "cn": {
+            "type": "text",
+            "analyzer": "smartcn"
+          }
+        }
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "thumbnailUrl": {
+        "type": "keyword"
+      },
+      "lat": {
+        "type": "double"
+      },
+      "lng": {
+        "type": "double"
+      },
+      "location": {
+        "type": "geo_point"
+      },
+      "like": {
+        "type": "integer"
+      },
+      "view": {
+        "type": "integer"
+      },
+      "updatedAt": {
+        "type": "date",
+        "format": "strict_date_optional_time||epoch_millis"
+      },
+      "embedding": {
+        "type": "dense_vector",
+        "dims": 384,
+        "index": true,
+        "similarity": "cosine"
+      }
+    }
+  }
+}

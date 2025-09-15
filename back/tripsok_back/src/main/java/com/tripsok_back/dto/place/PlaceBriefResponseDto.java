@@ -125,4 +125,32 @@ public record PlaceBriefResponseDto(
 			p.getThemes().stream().map(it -> it.getTheme().getId()).collect(Collectors.toSet())
 		);
 	}
+
+	public static PlaceBriefResponseDto from(PlaceDocument d) {
+		if (d == null)
+			return null;
+		Integer id = null;
+		try {
+			id = Integer.valueOf(d.getPlaceId());
+		} catch (Exception ignored) {
+		}
+		return new PlaceBriefResponseDto(
+			id,
+			d.getLocale(),
+			d.getTitle(),
+			d.getAddress(),
+			d.getSummary(),
+			d.getInformation(),
+			d.getType(),
+			d.getLat() != null ? java.math.BigDecimal.valueOf(d.getLat()) : null,
+			d.getLng() != null ? java.math.BigDecimal.valueOf(d.getLng()) : null,
+			d.getLike() != null ? d.getLike() : 0,
+			d.getView() != null ? d.getView() : 0,
+			0,
+			d.getThumbnailUrl(),
+			0,
+			d.getUpdatedAt() != null ? java.time.Instant.ofEpochMilli(d.getUpdatedAt()) : null,
+			java.util.Collections.emptySet()
+		);
+	}
 }

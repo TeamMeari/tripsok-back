@@ -34,4 +34,5 @@ public interface PlaceService {
 
 	Page<Place> findAll(PageRequest of);
 
+	int reindexFullEs();
 }
