@@ -28,12 +28,9 @@ import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.repository.place.AccommodationRepository;
 import com.tripsok_back.repository.place.PlaceRepository;
 import com.tripsok_back.service.search.PlaceEsService;
-import com.tripsok_back.repository.place.PlaceRepository;
-import com.tripsok_back.repository.place.TourRepository;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
-import com.tripsok_back.util.GoogleTranslateClient;
 import com.tripsok_back.util.GoogleTranslateClient;
 import com.tripsok_back.util.JsonMapperUtil;
 import com.tripsok_back.util.TimeUtil;
@@ -49,9 +46,12 @@ public class AccommodationServiceImpl extends PlaceService {
 	private final AccommodationRepository accommodationRepository;
 
 	public AccommodationServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
-		TouristApiClientUtil tourApiClient, TourRepository tourRepository, CategoryService categoryService,
-		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient) {
-		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient, placeRepository);
+		TouristApiClientUtil tourApiClient, AccommodationRepository accommodationRepository,
+		CategoryService categoryService,
+		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
+		PlaceEsService placeEsService) {
+		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
+			placeEsService, placeRepository);
 		this.accommodationRepository = accommodationRepository;
 	}
 
