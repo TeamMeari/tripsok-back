@@ -119,7 +119,7 @@ public class PlaceController {
 			log.info("통합 검색 요청 카테고리={} 로케일={} 테마ID={} q='{}' 모드={} 페이지={} 크기={}",
 				categoryType.name(), localeCode.getCode(), themeId, q, typeSearch, page, size);
 			Page<PlaceBriefResponseDto> esPage;
-			boolean useEmbedding = "embedding".equalsIgnoreCase(typeSearch) || "semantic".equalsIgnoreCase(typeSearch);
+			boolean useEmbedding = "embedding".equalsIgnoreCase(typeSearch);
 			TourismType typeFilter = categoryFilter ? categoryType : null;
 			if (useEmbedding) {
 				esPage = placeEsService.unifiedEmbeddingSearch(pageable, localeCode, q, typeFilter, sort);
