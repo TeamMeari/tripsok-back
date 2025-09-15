@@ -4,6 +4,8 @@ import static com.tripsok_back.exception.ErrorCode.*;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,8 +18,10 @@ import com.tripsok_back.dto.place.ReviewRequestDto;
 import com.tripsok_back.exception.PlaceException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.repository.place.PlaceRepository;
+import com.tripsok_back.service.search.PlaceEsService;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.TourismType;
+import com.tripsok_back.util.GoogleTranslateClient;
 import com.tripsok_back.util.TouristApiClientUtil;
 import com.tripsok_back.util.llm.LlmClient;
 
@@ -30,6 +34,8 @@ public abstract class PlaceService {
 	final CategoryService categoryService;
 	final LlmClient groqApiClientUtil;
 	final ObjectMapper om;
+	final GoogleTranslateClient googleTranslateClient;
+	final PlaceEsService placeEsService;
 	private final PlaceRepository placeRepository;
 
 	@Transactional
@@ -62,4 +68,12 @@ public abstract class PlaceService {
 		LocaleCode locale);
 
 	public abstract void addReview(Integer userId, ReviewRequestDto reviewRequestdto);
+
+	public Page<Place> findAll(PageRequest of) {
+		return findAll(of);
+	}
+
+	;
+
+	public abstract int reindexFullEs();
 }

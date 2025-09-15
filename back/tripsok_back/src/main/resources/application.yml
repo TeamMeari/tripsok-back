@@ -9,6 +9,7 @@ spring:
       - flyway
       - jwt
       - oauth2
+      - googleTranslate
       - dev
   data:
     redis:

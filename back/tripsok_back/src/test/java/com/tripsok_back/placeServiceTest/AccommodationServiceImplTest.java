@@ -302,5 +302,4 @@ class AccommodationServiceImplTest {
 	// TODO : 수정하기
 }
 
-
 	 */

@@ -24,6 +24,24 @@ public class PageResponse<E> {
 		);
 	}
 
+	public static <E> PageResponse<E> fromPage(Page<E> dtoPage) {
+		return new PageResponse<>(
+			dtoPage.getNumber(),
+			dtoPage.getTotalPages(),
+			dtoPage.getTotalElements(),
+			dtoPage.getContent()
+		);
+	}
+
+	public static <E> PageResponse<E> from(Page<?> page, List<E> items) {
+		return new PageResponse<>(
+			page.getNumber(),
+			page.getTotalPages(),
+			page.getTotalElements(),
+			items
+		);
+	}
+
 	public static <E> PageResponse<E> empty() {
 		return new PageResponse<>(0, 0, 0L, List.of());
 	}

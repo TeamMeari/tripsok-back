@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.logging.log4j.util.InternalException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -21,14 +21,17 @@ import com.tripsok_back.dto.tourApi.TourApiPlaceDetailResponseDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
 import com.tripsok_back.exception.InternalErrorCode;
+import com.tripsok_back.exception.ServiceBlockException;
 import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.repository.place.AccommodationRepository;
 import com.tripsok_back.repository.place.PlaceRepository;
+import com.tripsok_back.service.search.PlaceEsService;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
+import com.tripsok_back.util.GoogleTranslateClient;
 import com.tripsok_back.util.JsonMapperUtil;
 import com.tripsok_back.util.TimeUtil;
 import com.tripsok_back.util.TouristApiClientUtil;
@@ -43,9 +46,12 @@ public class AccommodationServiceImpl extends PlaceService {
 	private final AccommodationRepository accommodationRepository;
 
 	public AccommodationServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
-		TouristApiClientUtil tourApiClient, CategoryService categoryService,
-		AccommodationRepository accommodationRepository, LlmClient groqApiClientUtil, ObjectMapper om) {
-		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, placeRepository);
+		TouristApiClientUtil tourApiClient, AccommodationRepository accommodationRepository,
+		CategoryService categoryService,
+		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
+		PlaceEsService placeEsService) {
+		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
+			placeEsService, placeRepository);
 		this.accommodationRepository = accommodationRepository;
 	}
 
@@ -56,15 +62,18 @@ public class AccommodationServiceImpl extends PlaceService {
 
 	@Override
 	public void startPlaceUpdate(int numOfRow, int pageNo) {
+		try {
+			List<TourApiPlaceResponseDto> responseDtoList = requestPlace(numOfRow, pageNo);
 
-		List<TourApiPlaceResponseDto> responseDtoList = requestPlace(numOfRow, pageNo);
-
-		if (responseDtoList.isEmpty()) {
-			log.info("응답받은 API 값이 없습니다");
-			return;
-		}
-		for (TourApiPlaceResponseDto responseDto : responseDtoList) {
-			checkAndUpdatePlace(responseDto);
+			if (responseDtoList.isEmpty()) {
+				log.info("응답받은 API 값이 없습니다");
+				return;
+			}
+			for (TourApiPlaceResponseDto responseDto : responseDtoList) {
+				checkAndUpdatePlace(responseDto);
+			}
+		} catch (ServiceBlockException e) {
+			log.warn(e.getMessage());
 		}
 	}
 
@@ -135,7 +144,12 @@ public class AccommodationServiceImpl extends PlaceService {
 
 	}
 
-	public List<TourApiPlaceResponseDto> requestPlace(int numOfRow, int pageNo) {
+	@Override
+	public Page<Place> findAll(PageRequest of) {
+		return accommodationRepository.findAllByAccommodationIsNotNull(of);
+	}
+
+	public List<TourApiPlaceResponseDto> requestPlace(int numOfRow, int pageNo) throws ServiceBlockException {
 		TourApiPlaceRequestDto accommodationRequestDto = TourApiPlaceRequestDto.builder()
 			.numOfRows(numOfRow)
 			.pageNo(pageNo)
@@ -156,7 +170,7 @@ public class AccommodationServiceImpl extends PlaceService {
 	}
 
 	public TourApiPlaceDetailResponseDto requestPlaceDetail(Integer contentId) throws
-		InternalException {
+		ServiceBlockException {
 		TourApiPlaceDetailRequestDto accommodationRequestDto = TourApiPlaceDetailRequestDto.builder()
 			.mobileOS("ETC")
 			.mobileApp("tripsok-batch")
@@ -211,6 +225,10 @@ public class AccommodationServiceImpl extends PlaceService {
 	}
 
 	public void createSummaryTranslation(Place place, LocaleCode locale) {
+		if (place.getPlaceTr(locale) != null &&
+			StringUtils.hasText(place.getPlaceTr(locale).getSummary())) {
+			return;
+		}
 		String name = place.getPlaceTr(LocaleCode.KO) != null ? place.getPlaceTr(LocaleCode.KO).getPlaceName() : null;
 		String base = place.getPlaceTr(LocaleCode.KO) != null ? place.getPlaceTr(LocaleCode.KO).getSummary() : null;
 		log.info("createTranslation: placeId={}, contentId={}, locale={}, name='{}'",
@@ -220,7 +238,7 @@ public class AccommodationServiceImpl extends PlaceService {
 				locale != null ? locale.getCode() : null);
 			return;
 		}
-		String translation = groqApiClientUtil.requestTranslation(base, locale);
+		String translation = googleTranslateClient.requestTranslation(base, locale);
 		translation = groqApiClientUtil.sanitizeForVarchar(translation, 255);
 		place.getPlaceTr(locale).setSummary(translation);
 	}
@@ -234,7 +252,7 @@ public class AccommodationServiceImpl extends PlaceService {
 		}
 		if (StringUtils.hasText(place.getPlaceTr(locale).getInformation()))
 			return;
-		String translated = groqApiClientUtil.requestTranslation(info, locale);
+		String translated = googleTranslateClient.requestTranslation(info, locale);
 		place.getPlaceTr(locale).setInformation(translated);
 	}
 
@@ -249,12 +267,12 @@ public class AccommodationServiceImpl extends PlaceService {
 			place.upsertTranslation(locale, null, null, null, null);
 		}
 		if (StringUtils.hasText(koName) && !StringUtils.hasText(place.getPlaceTr(locale).getPlaceName())) {
-			String namePhonetic = groqApiClientUtil.requestTransliteration(koName, locale);
+			String namePhonetic = googleTranslateClient.requestTransliteration(koName, locale);
 			namePhonetic = groqApiClientUtil.sanitizeForVarchar(namePhonetic, 255);
 			place.getPlaceTr(locale).setPlaceName(namePhonetic);
 		}
 		if (StringUtils.hasText(koAddr) && !StringUtils.hasText(place.getPlaceTr(locale).getAddress())) {
-			String addrPhonetic = groqApiClientUtil.requestTransliteration(koAddr, locale);
+			String addrPhonetic = googleTranslateClient.requestTransliteration(koAddr, locale);
 			addrPhonetic = groqApiClientUtil.sanitizeForVarchar(addrPhonetic, 255);
 			place.getPlaceTr(locale).setAddress(addrPhonetic);
 		}
@@ -304,4 +322,24 @@ public class AccommodationServiceImpl extends PlaceService {
 		}
 		accommodationRepository.save(accommodationPlace);
 	}
+
+	@Override
+	public int reindexFullEs() {
+		int page = 0;
+		int size = 500;
+		int placeCount = 0;
+		int docCount = 0;
+		Page<Place> placePage;
+		do {
+			placePage = accommodationRepository.findAllByAccommodationIsNotNullOrderByIdAsc(PageRequest.of(page, size));
+			for (Place e : placePage.getContent()) {
+				docCount += placeEsService.indexPlaceDocuments(e);
+				placeCount++;
+			}
+			page++;
+		} while (!placePage.isEmpty());
+		log.info("AccommodationFullIndex 완료 (places={}, docs={})", placeCount, docCount);
+		return docCount;
+	}
+
 }
