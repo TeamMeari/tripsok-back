@@ -26,10 +26,14 @@ import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.repository.place.AccommodationRepository;
+import com.tripsok_back.repository.place.PlaceRepository;
 import com.tripsok_back.service.search.PlaceEsService;
+import com.tripsok_back.repository.place.PlaceRepository;
+import com.tripsok_back.repository.place.TourRepository;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 import com.tripsok_back.type.TourismType;
+import com.tripsok_back.util.GoogleTranslateClient;
 import com.tripsok_back.util.GoogleTranslateClient;
 import com.tripsok_back.util.JsonMapperUtil;
 import com.tripsok_back.util.TimeUtil;
@@ -37,22 +41,19 @@ import com.tripsok_back.util.TouristApiClientUtil;
 import com.tripsok_back.util.llm.LlmClient;
 
 import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
-public class AccommodationServiceImpl implements PlaceService {
-
-	private final ApiKeyConfig apiKeyConfig;
-	private final TouristApiClientUtil tourApiClient;
-	private final CategoryService categoryService;
+public class AccommodationServiceImpl extends PlaceService {
 	private final AccommodationRepository accommodationRepository;
-	private final LlmClient groqApiClientUtil;
-	private final GoogleTranslateClient googleTranslateClient;
-	private final PlaceEsService placeEsService;
-	private final ObjectMapper om;
+
+	public AccommodationServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
+		TouristApiClientUtil tourApiClient, TourRepository tourRepository, CategoryService categoryService,
+		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient) {
+		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient, placeRepository);
+		this.accommodationRepository = accommodationRepository;
+	}
 
 	@Override
 	public TourismType getType() {
@@ -108,16 +109,6 @@ public class AccommodationServiceImpl implements PlaceService {
 			placeAccommodation.getAccommodation().getPlaceLclsCategory().getLclsSystm3Name());
 		addView(placeAccommodation);
 		return Optional.of(PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION, locale));
-	}
-
-	@Override
-	public void addView(Place place) {
-		place.incrementViewCount();
-	}
-
-	@Override
-	public void addLike(Place place) {
-		place.incrementLikeCount();
 	}
 
 	@Override

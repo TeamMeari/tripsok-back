@@ -54,8 +54,8 @@ public class Tour extends BaseModifiableEntity {
 	@OneToOne(mappedBy = "tour")
 	private Place place;
 
-    @OneToMany(mappedBy = "tour", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
-    private Set<TourImage> tourImages = new LinkedHashSet<>();
+	@OneToMany(mappedBy = "tour", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+	private Set<TourImage> tourImages = new LinkedHashSet<>();
 
 	@OneToMany(mappedBy = "tour")
 	private Set<TourReview> tourReviews = new LinkedHashSet<>();

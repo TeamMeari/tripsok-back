@@ -10,4 +10,6 @@ import lombok.Setter;
 public class GoogleUserInfo {
 	private String sub;
 	private String email;
+	private String given_name;
+	private String family_name;
 }

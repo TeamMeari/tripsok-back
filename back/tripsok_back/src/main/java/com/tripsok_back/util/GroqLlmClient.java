@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripsok_back.dto.groq.ChatCompletionRequest;
 import com.tripsok_back.dto.groq.ChatCompletionResponse;
 import com.tripsok_back.dto.groq.GroqMessage;
+import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.util.llm.LlmClient;
 
 import lombok.RequiredArgsConstructor;

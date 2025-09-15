@@ -39,7 +39,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "PLACE", schema = "TRIPSOK")
+@Table(name = "PLACE")
 public class Place extends BaseModifiableEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "PLACE_id_gen")
@@ -145,7 +145,6 @@ public class Place extends BaseModifiableEntity {
 		PlaceTr tr = new PlaceTr();
 		PlaceTrId id = new PlaceTrId();
 		id.setLocaleCode(lc);
-		// Ensure composite key consistency for existing Place
 		if (this.id != null) {
 			id.setPlaceId(this.id);
 		}
@@ -156,7 +155,6 @@ public class Place extends BaseModifiableEntity {
 	}
 
     public void upsertKorean(String name, String address, String information, String summary) {
-        // Non-destructive upsert for KO: only overwrite provided fields
         PlaceTr tr = getOrCreateTr(LocaleCode.KO);
         if (name != null) tr.setPlaceName(name);
         if (address != null) tr.setAddress(address);
@@ -370,4 +368,9 @@ public class Place extends BaseModifiableEntity {
 		this.like++;
 	}
 
+	public void decrementLikeCount() {
+		if (this.like > 0) {
+			this.like--;
+		}
+	}
 }

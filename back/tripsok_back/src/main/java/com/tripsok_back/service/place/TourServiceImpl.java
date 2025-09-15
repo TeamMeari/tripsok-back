@@ -24,6 +24,8 @@ import com.tripsok_back.exception.InternalErrorCode;
 import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
+import com.tripsok_back.repository.place.PlaceRepository;
+import com.tripsok_back.repository.place.PlaceRepository;
 import com.tripsok_back.repository.place.TourRepository;
 import com.tripsok_back.service.search.PlaceEsService;
 import com.tripsok_back.type.LocaleCode;
@@ -40,17 +42,15 @@ import lombok.extern.slf4j.Slf4j;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
-public class TourServiceImpl implements PlaceService {
-
-	private final ApiKeyConfig apiKeyConfig;
-	private final TouristApiClientUtil tourApiClient;
+public class TourServiceImpl extends PlaceService {
 	private final TourRepository tourRepository;
-	private final CategoryService categoryService;
-	private final ObjectMapper om;
-	private final LlmClient groqApiClientUtil;
-	private final GoogleTranslateClient googleTranslateClient;
-	private final PlaceEsService placeEsService;
+
+	public TourServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
+		TouristApiClientUtil tourApiClient, TourRepository tourRepository, CategoryService categoryService,
+		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient) {
+		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient, placeRepository);
+		this.tourRepository = tourRepository;
+	}
 
 	@Override
 	public TourismType getType() {
