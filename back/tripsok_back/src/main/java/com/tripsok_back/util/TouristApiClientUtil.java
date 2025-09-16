@@ -42,7 +42,7 @@ public class TouristApiClientUtil {
 	private final WebClient touristApiWebClient;
 	private final ObjectMapper objectMapper;
 	private volatile boolean serviceBlocked = false;
-	private volatile LocalDate blockedDate = null;
+	private volatile LocalDate blockedDate = LocalDate.now().minusDays(1);
 
 	public List<TourApiPlaceResponseDto> fetchPlaceData(TourApiPlaceRequestDto dto) throws ServiceBlockException {
 		isServiceBlocked();
@@ -70,7 +70,8 @@ public class TouristApiClientUtil {
 		return result;
 	}
 
-	public TourApiPlaceDetailResponseDto fetchPlaceDataDetail(TourApiPlaceDetailRequestDto dto) {
+	public TourApiPlaceDetailResponseDto fetchPlaceDataDetail(TourApiPlaceDetailRequestDto dto) throws
+		ServiceBlockException {
 		isServiceBlocked();
 		URI uri = UriComponentsBuilder
 			.fromHttpUrl("https://apis.data.go.kr/B551011/KorService2/detailCommon2")
@@ -82,9 +83,12 @@ public class TouristApiClientUtil {
 			.build(true).toUri();
 
 		log.info("관광 API 상세정보 요청 URI: {}", uri);
-
-		String body = fetchBodyWithRetry(uri);
-
+		String body = null;
+		try {
+			body = fetchBodyWithRetry(uri);
+		} catch (ServiceBlockException e) {
+			throw e;
+		}
 		JsonNode itemNode;
 		try {
 			itemNode = resolvePath(objectMapper.readTree(body), "response.body.items.item");
@@ -157,13 +161,14 @@ public class TouristApiClientUtil {
 	}
 
 	public boolean isServiceBlocked() {
-		if (blockedDate == null || !blockedDate.equals(LocalDate.now())) {
+		if (serviceBlocked && blockedDate.equals(LocalDate.now())) {
+			throw new ServiceBlockException();
+		} else {
 			serviceBlocked = false;
 			blockedDate = null;
-		} else {
 			return false;
 		}
-		throw new ServiceBlockException();
+
 	}
 
 	private void blockServiceForToday() {
@@ -190,8 +195,9 @@ public class TouristApiClientUtil {
 			.onErrorResume(e -> {
 				if (e instanceof TourApiException tae
 					&& tae.getErrorCode() == InternalErrorCode.SERVICE_REQUEST_LIMIT_EXCEEDED) {
-					log.error("Tourist API 요청 제한 초과 → 빈 응답 반환");
-					return Mono.just("{}");
+					log.error("Tourist API 요청 제한 초과 → 서비스 차단 및 예외 전파");
+					blockServiceForToday();
+					return Mono.error(new ServiceBlockException());
 				}
 				if (e instanceof RetryableExternalException) {
 					log.warn("Tourist API 재시도 실패, 일시적 오류 처리: {}", e.getMessage());
@@ -226,7 +232,7 @@ public class TouristApiClientUtil {
 			if ("22".equals(rc)) {
 				log.warn("Tourist API XML 오류 (요청 제한 초과) → 오늘 차단");
 				blockServiceForToday();
-				return Mono.error(new TourApiException(InternalErrorCode.SERVICE_REQUEST_LIMIT_EXCEEDED));
+				throw new TourApiException(InternalErrorCode.SERVICE_REQUEST_LIMIT_EXCEEDED);
 			}
 			if ("04".equals(rc)) {
 				return Mono.error(new RetryableExternalException(InternalErrorCode.RETRYABLE_EXTERNAL_ERROR));

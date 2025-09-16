@@ -61,21 +61,17 @@ public class AccommodationServiceImpl extends PlaceService {
 	}
 
 	@Override
-	public void startPlaceUpdate(int numOfRow, int pageNo) {
-		try {
-			List<TourApiPlaceResponseDto> responseDtoList = requestPlace(numOfRow, pageNo);
+    public void startPlaceUpdate(int numOfRow, int pageNo) throws ServiceBlockException {
+        List<TourApiPlaceResponseDto> responseDtoList = requestPlace(numOfRow, pageNo);
 
-			if (responseDtoList.isEmpty()) {
-				log.info("응답받은 API 값이 없습니다");
-				return;
-			}
-			for (TourApiPlaceResponseDto responseDto : responseDtoList) {
-				checkAndUpdatePlace(responseDto);
-			}
-		} catch (ServiceBlockException e) {
-			log.warn(e.getMessage());
-		}
-	}
+        if (responseDtoList.isEmpty()) {
+            log.info("응답받은 API 값이 없습니다");
+            return;
+        }
+        for (TourApiPlaceResponseDto responseDto : responseDtoList) {
+            checkAndUpdatePlace(responseDto);
+        }
+    }
 
 	@Override
 	@Transactional
@@ -278,7 +274,7 @@ public class AccommodationServiceImpl extends PlaceService {
 		}
 	}
 
-	public void updatePlace(Place existingPlace, TourApiPlaceResponseDto placeDto) {
+	public void updatePlace(Place existingPlace, TourApiPlaceResponseDto placeDto) throws ServiceBlockException {
 		TourApiPlaceDetailResponseDto detailResponseDto = requestPlaceDetail(existingPlace.getContentId());
 		log.info("updatePlace: 상세정보 응답 성공 (미리보기):  (pretty)\n{}",
 			JsonMapperUtil.pretty(om, detailResponseDto));

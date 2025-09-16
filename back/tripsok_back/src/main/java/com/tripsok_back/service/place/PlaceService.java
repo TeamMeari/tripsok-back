@@ -16,6 +16,7 @@ import com.tripsok_back.dto.place.PlaceBriefResponseDto;
 import com.tripsok_back.dto.place.PlaceDetailResponseDto;
 import com.tripsok_back.dto.place.ReviewRequestDto;
 import com.tripsok_back.exception.PlaceException;
+import com.tripsok_back.exception.ServiceBlockException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.repository.place.PlaceRepository;
 import com.tripsok_back.service.search.PlaceEsService;
@@ -58,7 +59,7 @@ public abstract class PlaceService {
 
 	public abstract TourismType getType();
 
-	public abstract void startPlaceUpdate(int numOfRow, int pageNo);
+	public abstract void startPlaceUpdate(int numOfRow, int pageNo) throws ServiceBlockException;
 
 	public abstract Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale);
 

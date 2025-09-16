@@ -70,6 +70,7 @@ public class TouristApiScheduler {
 	}
 
 	public void runFullEsIndexUpdate() {
+		placeEsService.createIndexIfMissing();
 		if (placeEsService.checkIfReindexNeeds()) {
 			log.info("재색인이 필요하지 않습니다");
 			return;
