@@ -18,7 +18,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
-@Table(name = "PLACE_LCLS_CATEGORY_TR", schema = "TRIPSOK")
+@Table(name = "PLACE_LCLS_CATEGORY_TR")
 public class PlaceLclsCategoryTr {
 	@EmbeddedId
 	private PlaceLclsCategoryTrId id;
