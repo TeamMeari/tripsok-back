@@ -182,6 +182,11 @@ public class AuthServiceImpl implements AuthService {
 		user.changePassword(passwordEncoder.encode(newPassword));
 	}
 
+	@Override
+	public String getUserAccessToken(Integer userId) {
+		return jwtUtil.generateAccessToken(userId, getAuthorities(Role.USER));
+	}
+
 	private TokenResponse getTokenResponse(Integer userId, Collection<GrantedAuthority> authorities) {
 		String accessToken = jwtUtil.generateAccessToken(userId, authorities);
 		String refreshToken = jwtUtil.generateRefreshToken(userId);

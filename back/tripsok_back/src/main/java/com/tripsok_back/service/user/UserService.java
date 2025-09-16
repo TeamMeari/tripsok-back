@@ -1,10 +1,12 @@
 package com.tripsok_back.service.user;
 
+import java.util.List;
 import java.util.Set;
 
 import com.tripsok_back.dto.SliceResponse;
 import com.tripsok_back.dto.user.request.ChangeUserInfoRequest;
 import com.tripsok_back.dto.user.response.UserInfoResponse;
+import com.tripsok_back.model.user.TripSokUser;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 
@@ -21,4 +23,8 @@ public interface UserService {
 
 	SliceResponse getUserLikedPlaces(Integer userId, Integer size, Integer lastId, PlaceJoinType type,
 		LocaleCode locale);
+
+	TripSokUser findUserById(Integer userId);
+
+	List<TripSokUser> findAllUser();
 }

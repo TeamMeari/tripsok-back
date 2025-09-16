@@ -23,4 +23,6 @@ public interface AuthService {
 	void logout(String accessToken);
 
 	void resetPassword(String emailVerifyToken, String newPassword);
+
+	String getUserAccessToken(Integer userId);
 }
