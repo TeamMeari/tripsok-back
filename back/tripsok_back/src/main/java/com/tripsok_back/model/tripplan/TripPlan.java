@@ -2,7 +2,7 @@ package com.tripsok_back.model.tripplan;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.tripsok_back.dto.tripplan.request.UpdateTripPlanRequest;
@@ -66,7 +66,7 @@ public class TripPlan extends BaseModifiableEntity {
 	private Integer expectedVersion;        // 낙관적 락(자동 임시저장 충돌 방지)
 
 	@OneToMany(mappedBy = "tripPlan", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	private Set<VisitSpot> visitSpotSet = Collections.emptySet();
+	private Set<VisitSpot> visitSpotSet = new HashSet<>();
 
 	public TripPlan(TripSokUser user) {
 		this.user = user;

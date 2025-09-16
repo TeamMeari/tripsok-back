@@ -8,10 +8,12 @@ import com.tripsok_back.model.tripplan.TripPlan;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class TripPlanCommonDto {
 
 	@Schema(description = "여행 시작 날짜", example = "2025-12-25")
