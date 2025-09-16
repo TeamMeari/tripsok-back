@@ -21,14 +21,16 @@ public record VisitSpotResponse(
 	@Schema(description = "위도", example = "37.5759")
 	BigDecimal latitude,
 	@Schema(description = "방문 순서", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
-Integer orderIndex
-){
+	Integer orderIndex
+) {
 	public VisitSpotResponse(VisitSpot visitSpot, LocaleCode locale) {
 		this(
 			visitSpot.getPlace().getId(),
-			visitSpot.getPlace().getPlaceTr(locale) != null ? visitSpot.getPlace().getPlaceTr(locale).getPlaceName() : null,
+			visitSpot.getPlace().getPlaceTr(locale) != null ? visitSpot.getPlace().getPlaceTr(locale).getPlaceName() :
+				null,
 			visitSpot.getMemo(),
-			visitSpot.getPlace().getPlaceTr(locale) != null ? visitSpot.getPlace().getPlaceTr(locale).getAddress() : null,
+			visitSpot.getPlace().getPlaceTr(locale) != null ? visitSpot.getPlace().getPlaceTr(locale).getAddress() :
+				null,
 			visitSpot.getPlace().getMapX(),
 			visitSpot.getPlace().getMapY(),
 			visitSpot.getOrderIndex()

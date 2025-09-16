@@ -5,7 +5,7 @@ import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
-public record UpdateVisitSpotRequest (
+public record UpdateVisitSpotRequest(
 	@Schema(description = "방문할 장소 ID", example = "1", requiredMode = REQUIRED)
 	@NotNull
 	Integer placeId,
@@ -13,4 +13,5 @@ public record UpdateVisitSpotRequest (
 	String memo,
 	@Schema(description = "방문할 순서", example = "1", requiredMode = REQUIRED)
 	@NotNull
-	Integer order){}
+	Integer order) {
+}

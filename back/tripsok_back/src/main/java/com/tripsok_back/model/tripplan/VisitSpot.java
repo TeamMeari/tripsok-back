@@ -37,7 +37,7 @@ public class VisitSpot {
 	private TripPlan tripPlan;
 
 	@Column(name = "ORDER_INDEX", nullable = false)
-	Integer orderIndex;
+	private Integer orderIndex;
 
 	@ManyToOne
 	@OnDelete(action = OnDeleteAction.CASCADE)
@@ -47,7 +47,7 @@ public class VisitSpot {
 	@Column(name = "MEMO", length = 160)
 	private String memo;
 
-	public VisitSpot (Place place, String memo, Integer orderIndex, TripPlan tripPlan) {
+	public VisitSpot(Place place, String memo, Integer orderIndex, TripPlan tripPlan) {
 		this.tripPlan = tripPlan;
 		this.place = place;
 		this.memo = memo;

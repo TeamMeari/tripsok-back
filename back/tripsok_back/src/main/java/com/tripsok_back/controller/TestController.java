@@ -19,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 public class TestController {
 	private final AuthService authService;
 	private final UserService userService;
+
 	@GetMapping("/user/{userId}")
 	public String getUserAccessToken(
 		@PathVariable Integer userId

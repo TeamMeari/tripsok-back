@@ -28,20 +28,23 @@ import lombok.extern.slf4j.Slf4j;
 @Validated
 public class TripPlanController {
 	private final TripPlanService tripPlanService;
+
 	@PostMapping
 	public ResponseEntity<TripPlanResponse> createTrip(
 		@RequestBody
 		@Valid UpdateTripPlanRequest request,
 		@AuthenticationPrincipal Integer userId,
-		@Parameter(description = "언어(로케일) 코드", example = "KO", schema = @Schema(type = "string", allowableValues = {"KO", "EN", "JA", "CN"}))
+		@Parameter(description = "언어(로케일) 코드", example = "KO", schema = @Schema(type = "string", allowableValues = {
+			"KO", "EN", "JA", "CN"}))
 		@RequestParam(name = "locale", defaultValue = "KO") LocaleCode locale) {
 		return ResponseEntity.ok(tripPlanService.creatOrUpdateTripPlan(userId, request, locale));
 	}
 
 	@GetMapping
 	public ResponseEntity<TripPlanResponse> getTrip(@AuthenticationPrincipal Integer userId,
-		@Parameter(description = "언어(로케일) 코드", example = "KO", schema = @Schema(type = "string", allowableValues = {"KO", "EN", "JA", "CN"}))
-	@RequestParam(name = "locale", defaultValue = "KO") LocaleCode locale) {
+		@Parameter(description = "언어(로케일) 코드", example = "KO", schema = @Schema(type = "string", allowableValues = {
+			"KO", "EN", "JA", "CN"}))
+		@RequestParam(name = "locale", defaultValue = "KO") LocaleCode locale) {
 		return ResponseEntity.ok(tripPlanService.getTripPlan(userId, locale));
 	}
 }

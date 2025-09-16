@@ -68,9 +68,7 @@ public class TripPlan extends BaseModifiableEntity {
 	@OneToMany(mappedBy = "tripPlan", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private Set<VisitSpot> VisitSpotSet = Collections.emptySet();
 
-	public enum PlanStatus { DRAFT, COMPLETED}
-
-	public TripPlan(TripSokUser user){
+	public TripPlan(TripSokUser user) {
 		this.user = user;
 		this.status = PlanStatus.DRAFT;
 		this.expectedVersion = 0;
@@ -83,5 +81,7 @@ public class TripPlan extends BaseModifiableEntity {
 		this.VisitSpotSet.clear();
 		this.VisitSpotSet.addAll(visitSpotSet);
 	}
+
+	public enum PlanStatus {DRAFT, COMPLETED}
 
 }
