@@ -24,7 +24,10 @@ import com.tripsok_back.service.place.PlaceService;
 import com.tripsok_back.service.user.UserService;
 import com.tripsok_back.type.LocaleCode;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Service
+@Slf4j
 public class TripPlanServiceImpl implements TripPlanService {
 	private final TripPlanRepository tripPlanRepository;
 	private final UserService userService;
@@ -39,7 +42,7 @@ public class TripPlanServiceImpl implements TripPlanService {
 
 	@Override
 	@Transactional
-	public TripPlanResponse creatOrUpdateTripPlan(Integer userId, UpdateTripPlanRequest request, LocaleCode locale) {
+	public TripPlanResponse createOrUpdateTripPlan(Integer userId, UpdateTripPlanRequest request, LocaleCode locale) {
 		TripSokUser user = userService.findUserById(userId);
 		TripPlan tripPlan = tripPlanRepository.findByUserId(userId).orElse(new TripPlan(user));
 		Set<VisitSpot> existingVisitSpots = getVisitSpotSet(request.visitSpotSet(), tripPlan);
@@ -60,8 +63,9 @@ public class TripPlanServiceImpl implements TripPlanService {
 			.map(visitSpot -> {
 				try {
 					Place place = placeService.findPlaceById(visitSpot.placeId());
-					return new VisitSpot(place, visitSpot.memo(), visitSpot.order(), tripPlan);
+					return new VisitSpot(place, visitSpot.memo(), visitSpot.orderIndex(), tripPlan);
 				} catch (Exception e) {
+					log.warn("VisitSpot을 가져오는 중 존재하지 않는 장소를 참조하여 무시합니다. placeId: {}", visitSpot.placeId());
 					return null;
 				}
 			})

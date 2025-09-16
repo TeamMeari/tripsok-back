@@ -66,7 +66,7 @@ public class TripPlan extends BaseModifiableEntity {
 	private Integer expectedVersion;        // 낙관적 락(자동 임시저장 충돌 방지)
 
 	@OneToMany(mappedBy = "tripPlan", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-	private Set<VisitSpot> VisitSpotSet = Collections.emptySet();
+	private Set<VisitSpot> visitSpotSet = Collections.emptySet();
 
 	public TripPlan(TripSokUser user) {
 		this.user = user;
@@ -78,8 +78,8 @@ public class TripPlan extends BaseModifiableEntity {
 		this.tripDate = request.tripPlan().getTripDate();
 		this.startTime = request.tripPlan().getStartTime();
 		this.numberOfPeople = request.tripPlan().getNumberOfPeople();
-		this.VisitSpotSet.clear();
-		this.VisitSpotSet.addAll(visitSpotSet);
+		this.visitSpotSet.clear();
+		this.visitSpotSet.addAll(visitSpotSet);
 	}
 
 	public enum PlanStatus {DRAFT, COMPLETED}

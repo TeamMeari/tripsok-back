@@ -13,5 +13,5 @@ public record UpdateVisitSpotRequest(
 	String memo,
 	@Schema(description = "방문할 순서", example = "1", requiredMode = REQUIRED)
 	@NotNull
-	Integer order) {
+	Integer orderIndex) {
 }

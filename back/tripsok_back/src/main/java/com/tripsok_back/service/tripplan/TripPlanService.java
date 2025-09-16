@@ -5,7 +5,7 @@ import com.tripsok_back.dto.tripplan.response.TripPlanResponse;
 import com.tripsok_back.type.LocaleCode;
 
 public interface TripPlanService {
-	TripPlanResponse creatOrUpdateTripPlan(Integer userId, UpdateTripPlanRequest request, LocaleCode locale);
+	TripPlanResponse createOrUpdateTripPlan(Integer userId, UpdateTripPlanRequest request, LocaleCode locale);
 
 	TripPlanResponse getTripPlan(Integer userId, LocaleCode locale);
 

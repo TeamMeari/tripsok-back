@@ -37,7 +37,7 @@ public class TripPlanController {
 		@Parameter(description = "언어(로케일) 코드", example = "KO", schema = @Schema(type = "string", allowableValues = {
 			"KO", "EN", "JA", "CN"}))
 		@RequestParam(name = "locale", defaultValue = "KO") LocaleCode locale) {
-		return ResponseEntity.ok(tripPlanService.creatOrUpdateTripPlan(userId, request, locale));
+		return ResponseEntity.ok(tripPlanService.createOrUpdateTripPlan(userId, request, locale));
 	}
 
 	@GetMapping
