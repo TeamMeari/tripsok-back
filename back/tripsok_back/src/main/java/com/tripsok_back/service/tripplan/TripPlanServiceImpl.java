@@ -26,18 +26,19 @@ import com.tripsok_back.type.LocaleCode;
 
 @Service
 public class TripPlanServiceImpl implements TripPlanService {
-private final TripPlanRepository tripPlanRepository;
-private final UserService userService;
-private final PlaceService placeService;
+	private final TripPlanRepository tripPlanRepository;
+	private final UserService userService;
+	private final PlaceService placeService;
 
-public TripPlanServiceImpl(TripPlanRepository tripPlanRepository, UserService userService, @Qualifier("placeDefaultServiceImpl") PlaceService placeService) {
-	this.tripPlanRepository = tripPlanRepository;
-	this.userService = userService;
-	this.placeService = placeService;
-}
+	public TripPlanServiceImpl(TripPlanRepository tripPlanRepository, UserService userService,
+		@Qualifier("placeDefaultServiceImpl") PlaceService placeService) {
+		this.tripPlanRepository = tripPlanRepository;
+		this.userService = userService;
+		this.placeService = placeService;
+	}
 
 	@Override
-@Transactional
+	@Transactional
 	public TripPlanResponse creatOrUpdateTripPlan(Integer userId, UpdateTripPlanRequest request, LocaleCode locale) {
 		TripSokUser user = userService.findUserById(userId);
 		TripPlan tripPlan = tripPlanRepository.findByUserId(userId).orElse(new TripPlan(user));
@@ -72,7 +73,9 @@ public TripPlanServiceImpl(TripPlanRepository tripPlanRepository, UserService us
 		Set<VisitSpot> sortedVisitSpots = tripPlan.getVisitSpotSet().stream()
 			.sorted(Comparator.comparingInt(VisitSpot::getOrderIndex))
 			.collect(Collectors.toCollection(LinkedHashSet::new));
-		Set<VisitSpotResponse> visitSpotResponses = sortedVisitSpots.stream().map(it-> new VisitSpotResponse(it,locale)).collect(Collectors.toCollection(LinkedHashSet::new));
-		return new TripPlanResponse(new TripPlanCommonDto(tripPlan),visitSpotResponses);
+		Set<VisitSpotResponse> visitSpotResponses = sortedVisitSpots.stream()
+			.map(it -> new VisitSpotResponse(it, locale))
+			.collect(Collectors.toCollection(LinkedHashSet::new));
+		return new TripPlanResponse(new TripPlanCommonDto(tripPlan), visitSpotResponses);
 	}
 }

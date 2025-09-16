@@ -74,7 +74,5 @@ public abstract class PlaceService {
 		return findAll(of);
 	}
 
-	;
-
 	public abstract int reindexFullEs();
 }

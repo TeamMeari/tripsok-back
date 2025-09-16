@@ -2,6 +2,8 @@ package com.tripsok_back.scheduler;
 
 import java.util.List;
 
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +34,8 @@ public class TouristApiScheduler {
 			.orElseThrow(() -> new IllegalArgumentException("No processor found for type: " + type));
 	}
 
-	@Scheduled(fixedRateString = "PT48H", initialDelayString = "PT1M")
+	@Scheduled(cron = "0 0 1 * * *")
+	@EventListener(ApplicationReadyEvent.class)
 	public void initTourPlaceRequest() throws ServiceBlockException {
 
 		try {

@@ -11,5 +11,5 @@ public record TripPlanResponse(
 	TripPlanCommonDto tripPlan,
 	@Schema(description = "방문지점 리스트 순서대로", requiredMode = Schema.RequiredMode.REQUIRED)
 	Set<VisitSpotResponse> visitSpotSet
-	) {
+) {
 }

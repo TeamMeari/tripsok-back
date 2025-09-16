@@ -13,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripsok_back.dto.groq.ChatCompletionRequest;
 import com.tripsok_back.dto.groq.ChatCompletionResponse;
 import com.tripsok_back.dto.groq.GroqMessage;
-import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.util.llm.LlmClient;
 
 import lombok.RequiredArgsConstructor;
@@ -31,7 +30,6 @@ public class GroqLlmClient implements LlmClient {
 	private final TokenBucketRateLimiter tokenBucketRateLimiter;
 
 	private static final String DEFAULT_MODEL = "llama-3.3-70b-versatile";
-
 	private static final String shortDescriptionPrompt = """
 		ROLE
 		- You are a copywriter for tourist spots.
