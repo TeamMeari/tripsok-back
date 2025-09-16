@@ -46,9 +46,9 @@ public class SecurityConfig {
 			.authorizeHttpRequests(auth -> {
 				auth.requestMatchers("/api/v1/auth/**", "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
 						"/health", "/ready",
-						"/api/v1/places/**", "/api/v1/theme/**")
+						"/api/v1/places/**", "/api/v1/theme/**", "/api/v1/test/**")
 					.permitAll()
-					.requestMatchers("/api/v1/user/**")
+					.requestMatchers("/api/v1/user/**", "/api/v1/trip/**")
 					.hasAnyAuthority(Role.USER.getAuthority().getFirst(), Role.ADMIN.getAuthority().getFirst())
 					.requestMatchers("/api/v1/admin/**")
 					.hasAuthority(Role.ADMIN.getAuthority().getFirst());

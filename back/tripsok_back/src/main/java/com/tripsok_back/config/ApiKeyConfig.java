@@ -33,13 +33,16 @@ public class ApiKeyConfig {
 	@Value("${GOOGLE_LOCATION:global}")
 	private String googleLocation;
 
+	@Value("${GOOGLE_KEY_JSON}")
+	private String googleKeyJson;
+
 	@PostConstruct
 	void resolveProjectIdFromKeyIfMissing() {
 		if (googleProjectId != null && !googleProjectId.isBlank()) {
 			return;
 		}
 		try {
-			ClassPathResource keyRes = new ClassPathResource("googleTranslate/translate-key.json");
+			ClassPathResource keyRes = new ClassPathResource(googleKeyJson);
 			if (!keyRes.exists()) {
 				return;
 			}
@@ -56,4 +59,3 @@ public class ApiKeyConfig {
 		}
 	}
 }
-
