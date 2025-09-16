@@ -3,6 +3,7 @@ package com.tripsok_back.repository.place;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,4 +26,11 @@ public interface AccommodationRepository extends JpaRepository<Place, Integer> {
 
 	@EntityGraph(attributePaths = {"placeTrs", "accommodation", "themes", "themes.theme"})
 	Page<Place> findByAccommodationIsNotNullAndThemes_Theme_Id(Pageable pageable, Integer themeId);
+
+	@EntityGraph(attributePaths = {"placeTrs", "accommodation.accommodationImages"})
+	Page<Place> findAllByAccommodationIsNotNull(PageRequest of);
+
+	@EntityGraph(attributePaths = {"placeTrs", "accommodation.accommodationImages",
+		"accommodation.placeLclsCategory.placeLclsCategoryTrs", "themes", "themes.theme"})
+	Page<Place> findAllByAccommodationIsNotNullOrderByIdAsc(PageRequest of);
 }

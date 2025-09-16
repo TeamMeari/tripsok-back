@@ -57,7 +57,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'org.projectlombok:lombok'
     testImplementation 'io.projectreactor:reactor-test'
     testImplementation 'org.testcontainers:junit-jupiter'
@@ -65,6 +64,18 @@ dependencies {
     testImplementation 'org.testcontainers:oracle-xe'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+
+    // Elasticsearch Client
+    implementation "co.elastic.clients:elasticsearch-java:8.15.0"
+    implementation "org.elasticsearch.client:elasticsearch-rest-client:8.15.0"
+    implementation "ai.djl:api:0.34.0"
+    implementation "ai.djl.pytorch:pytorch-engine:0.34.0"
+    implementation "ai.djl.huggingface:tokenizers:0.34.0"
+    // Google Cloud Translation (official client)
+    implementation platform('com.google.cloud:libraries-bom:26.38.0')
+    implementation 'com.google.cloud:google-cloud-translate'
+    // Google Auth (to call v3 with OAuth2 Service Account / ADC)
+    implementation 'com.google.auth:google-auth-library-oauth2-http:1.23.0'
 
     // JWT 의존성
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
@@ -100,6 +111,12 @@ dependencies {
 
     // Azure
     implementation 'com.azure:azure-ai-inference:1.0.0-beta.5'
+
+    // WebFlux (WebClient usage)
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    // ICU4J for robust transliteration (Any-Latin, Any-Katakana, etc.)
+    implementation 'com.ibm.icu:icu4j:74.2'
 }
 
 flyway {

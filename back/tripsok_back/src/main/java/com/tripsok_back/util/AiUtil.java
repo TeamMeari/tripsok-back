@@ -50,24 +50,45 @@ public class AiUtil {
 		"   - \"tag\": an array of 2–4 free-form tags, each a single word with ≤7 characters.",
 		"4. When extracting tags, do not use broad categories such as “restaurant,” “travel,” or “accommodation,” nor brand names, place names, or city names.",
 		"5. \"theme\" values must always be in Korean regardless of the input language.",
-		"6. \"tag\" values must follow the input language (if input is English, tags must be English).",
+		"6. \"tag\" values must be provided in four languages: ko (Korean), en (English), ja (Japanese), and cn (Chinese). Each tag must include translations for all four languages.",
 		"7. Do not include any text outside the JSON.",
 		"",
 		"Example of the expected format:",
-		"{",
-		"  \"places\": [",
-		"    {",
-		"      \"contentId\": \"2913235\",",
-		"      \"theme\": [\"맛집탐방\", \"바다\"],",
-		"      \"tag\": [\"대게\", \"킹크랩\", \"수족관\", \"신선함\"]",
-		"    },",
-		"    {",
-		"      \"contentId\": \"2913433\",",
-		"      \"theme\": [\"카페투어\", \"자연\", \"힐링여행\"],",
-		"      \"tag\": [\"호수뷰\", \"테라스\", \"베이커리\", \"반려견\"]",
-		"    }",
-		"  ]",
-		"}"
+		"""
+			{
+			  "places": [
+			    {
+			      "contentId": "2913235",
+			      "theme": ["맛집탐방", "바다"],
+			      "tag": [
+			        {
+			          "ko": "대게",
+			          "en": "Snow Crab",
+			          "ja": "ズワイガニ",
+			          "cn": "雪蟹"
+			        },
+			        {
+			          "ko": "킹크랩",
+			          "en": "King Crab",
+			          "ja": "キングクラブ",
+			          "cn": "帝王蟹"
+			        },
+			        {
+			          "ko": "수족관",
+			          "en": "Aquarium",
+			          "ja": "水族館",
+			          "cn": "水族馆"
+			        },
+			        {
+			          "ko": "신선함",
+			          "en": "Freshness",
+			          "ja": "新鮮さ",
+			          "cn": "新鲜感"
+			        }
+			      ]
+			    }
+			  ]
+			}"""
 	);
 
 	public PlaceThemeAndTagResponse getThemeAndTag(String question) {

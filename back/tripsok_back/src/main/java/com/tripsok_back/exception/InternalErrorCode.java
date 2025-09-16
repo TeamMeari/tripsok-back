@@ -9,7 +9,9 @@ public enum InternalErrorCode {
 	PLACE_DETAIL_NOT_FOUND("장소의 세부 정보가 TOUR API에 존재하지 않습니다"),
 	JSON_PARSE_ERROR("JSON 변환 중 오류가 발생했습니다"),
 	INTERNAL_SERVER_ERROR("알수 없는 오류가 발생했습니다"),
-	RETRIES_EXCEEDED_ERROR("외부 API 호출 재시도 횟수 초과");
+	RETRIES_EXCEEDED_ERROR("외부 API 호출 재시도 횟수 초과"),
+	SERVICE_REQUEST_LIMIT_EXCEEDED("서비스요청제한횟수초과에러"),
+	RETRYABLE_EXTERNAL_ERROR("외부 API 일시적 오류");
 	private final String errorMessage;
 
 	InternalErrorCode(String errorMessage) {
