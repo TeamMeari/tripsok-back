@@ -1,11 +1,13 @@
 package com.tripsok_back.service.search;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,8 @@ import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
+import co.elastic.clients.elasticsearch.indices.ExistsRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -41,6 +45,7 @@ public class PlaceEsService {
 	private final ElasticsearchClient esClient;
 	private final EmbeddingUtil embeddingUtil;
 	private final PlaceRepository placeRepository;
+	private static final String MAPPING_PATH = "elasticsearch/mappings/places-mapping.json";
 
 	public String indexPlaceDocument(PlaceDocument doc) throws Exception {
 		IndexResponse res = esClient.index(i -> i
@@ -117,13 +122,13 @@ public class PlaceEsService {
 				.query(qb -> qb.bool(b -> {
 					if (lc != null) {
 						b.must(m -> m.term(t ->
-							t.field("locale.keyword").value(lc.getCode())
+							t.field("locale").value(lc.getCode())
 						));
 					}
 					b.must(text);
 					if (type != null) {
 						b.must(m -> m.term(t ->
-							t.field("type.keyword").value(type.name())
+							t.field("type").value(type.name())
 						));
 					}
 					return b;
@@ -175,12 +180,12 @@ public class PlaceEsService {
 					.filter(f -> f.bool(b -> {
 						if (lc != null) {
 							b.must(m -> m.term(t ->
-								t.field("locale.keyword").value(lc.getCode())
+								t.field("locale").value(lc.getCode())
 							));
 						}
 						if (type != null) {
 							b.must(m -> m.term(t ->
-								t.field("type.keyword").value(type.name())
+								t.field("type").value(type.name())
 							));
 						}
 						return b;
@@ -306,16 +311,40 @@ public class PlaceEsService {
 			Integer restaurantCount = placeRepository.countByRestaurantIsNotNull();
 			Integer sum = accommodationCount + tourCount + restaurantCount;
 			if (distinctPlaces == sum) {
-				log.info("ES색인 도큐먼트 수 {}, TRs 장소 수 {}[숙소 :{}, 여행 :{}, 식당 :{}", distinctPlaces, sum,
+				log.info("ES색인 도큐먼트 수 {}, TRs 장소 수 {}[숙소 :{}, 여행 :{}, 식당 :{}]", distinctPlaces, sum,
 					accommodationCount, tourCount, restaurantCount);
 				return true;
 			} else {
-				log.info("ES색인 도큐먼트 수 {}, TRs 장소 수 {}[숙소 :{}, 여행 :{}, 식당 :{}", distinctPlaces, sum,
+				log.info("ES색인 도큐먼트 수 {}, TRs 장소 수 {}[숙소 :{}, 여행 :{}, 식당 :{}]", distinctPlaces, sum,
 					accommodationCount, tourCount, restaurantCount);
 				return false;
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("ES count 실패", e);
+		}
+	}
+
+	public void createIndexIfMissing() {
+		try {
+			boolean exists = esClient.indices()
+				.exists(ExistsRequest.of(b -> b.index(INDEX)))
+				.value();
+			if (exists)
+				return;
+
+			ClassPathResource mapping = new ClassPathResource(MAPPING_PATH);
+			if (!mapping.exists()) {
+				throw new IllegalStateException(
+					"매핑 파일이 없습니다: classpath:" + MAPPING_PATH
+				);
+			}
+
+			try (InputStream json = mapping.getInputStream()) {
+				CreateIndexResponse cir = esClient.indices().create(c -> c.index(INDEX).withJson(json));
+				log.info("ES index '{}' 생성됨 {} (ack={})", INDEX, MAPPING_PATH, cir.acknowledged());
+			}
+		} catch (Exception e) {
+			throw new RuntimeException("ES 인덱스 생성 실패", e);
 		}
 	}
 }
