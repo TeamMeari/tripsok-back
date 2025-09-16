@@ -184,7 +184,7 @@ public class PlaceController {
 		summary = "텍스트 기반 검색",
 		description = "multi_match 쿼리를 사용하여 places 인덱스에서 텍스트 검색을 수행합니다.",
 		parameters = {
-			@Parameter(name = "query", description = "검색어", example = "강남 카페")
+			@Parameter(name = "q", description = "검색어", example = "강남 카페")
 		},
 		responses = {
 			@ApiResponse(
