@@ -186,7 +186,7 @@ public class AuthServiceImpl implements AuthService {
 		return jwtUtil.generateAccessToken(userId, getAuthorities(Role.USER));
 	}
 
-	private TokenResponse getTokenResponse(Integer userId, Collection<GrantedAuthority> authorities) {
+	private TokenResponse getTokenResponse(Integer userId, Collection<GrantedAuthority> authorities, String nickname) {
 		String accessToken = jwtUtil.generateAccessToken(userId, authorities);
 		String refreshToken = jwtUtil.generateRefreshToken(userId);
 		RefreshToken existingRefreshToken = refreshTokenRepository.findByUserId(userId);
