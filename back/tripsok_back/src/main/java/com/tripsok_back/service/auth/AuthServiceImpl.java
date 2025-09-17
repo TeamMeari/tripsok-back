@@ -92,7 +92,7 @@ public class AuthServiceImpl implements AuthService {
 
 		validateRegisteredAndSave(user);
 
-		return getTokenResponse(user.getId(), getAuthorities(user.getRole()));
+		return getTokenResponse(user.getId(), getAuthorities(user.getRole()), user.getNickname());
 	}
 
 	@Override
@@ -105,12 +105,12 @@ public class AuthServiceImpl implements AuthService {
 				GoogleUserInfo googleUserInfo = getGoogleUserInfo(tokenResponse.getIdToken());
 				user = userRepository.findBySocialIdAndSocialType(googleUserInfo.getSub(), GOOGLE);
 				if (user == null) {
-					return new TokenResponse(jwtUtil.generateOAuth2Token(tokenResponse.getIdToken(), GOOGLE), null);
+					return new TokenResponse(jwtUtil.generateOAuth2Token(tokenResponse.getIdToken(), GOOGLE), null, null);
 				}
 			}
 			default -> throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
 		}
-		return getTokenResponse(user.getId(), getAuthorities(user.getRole()));
+		return getTokenResponse(user.getId(), getAuthorities(user.getRole()), user.getNickname());
 	}
 
 	@Override
@@ -120,8 +120,7 @@ public class AuthServiceImpl implements AuthService {
 			Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(email, password));
 			TripSokUserDto userDetails = (TripSokUserDto)authentication.getPrincipal();
-
-			return getTokenResponse(Integer.parseInt(userDetails.getUserId()), userDetails.getAuthorities());
+			return getTokenResponse(Integer.parseInt(userDetails.getUserId()), userDetails.getAuthorities(), userDetails.getNickname());
 		} catch (Exception e) {
 			throw new AuthException(ErrorCode.INVALID_CREDENTIALS, e.getMessage());
 		}
@@ -140,7 +139,7 @@ public class AuthServiceImpl implements AuthService {
 		TripSokUser user = userRepository.findById(userId)
 			.orElseThrow(() -> new AuthException(ErrorCode.USER_NOT_FOUND));
 
-		return getTokenResponse(user.getId(), getAuthorities(user.getRole()));
+		return getTokenResponse(user.getId(), getAuthorities(user.getRole()), user.getNickname());
 	}
 
 	@Override
@@ -195,7 +194,7 @@ public class AuthServiceImpl implements AuthService {
 			refreshTokenRepository.delete(existingRefreshToken);
 		}
 		refreshTokenRepository.save(new RefreshToken(userId, refreshToken, jwtUtil.getRefreshTokenExpirationTime()));
-		return new TokenResponse(accessToken, refreshToken);
+		return new TokenResponse(accessToken, refreshToken, nickname);
 	}
 
 	private List<GrantedAuthority> getAuthorities(Role role) {

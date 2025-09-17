@@ -30,7 +30,7 @@ public class TripSokUserDetailsService implements UserDetailsService {
 			.orElseThrow(() -> new AuthException(ErrorCode.USER_NOT_FOUND));
 		log.info("사용자 정보 조회 성공(Id): {}", user.getId());
 		return new TripSokUserDto(
-			user.getId().toString(), user.getPassword(), user.getSocialType(),
+			user.getId().toString(), user.getPassword(), user.getSocialType(), user.getNickname(),
 			user.getRole().getAuthority().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet())
 		);
 	}

@@ -53,7 +53,7 @@ public class TouristApiClientUtil {
 			.queryParam("pageNo", dto.getPageNo())
 			.queryParam("MobileOS", dto.getMobileOS())
 			.queryParam("MobileApp", dto.getMobileApp())
-			.queryParam("_type", dto.getType())
+			.queryParam("_type", dto.getResponseType())
 			.queryParam("arrange", dto.getArrange())
 			.queryParam("areaCode", dto.getAreaCode())
 			.queryParam("contentTypeId", dto.getContentTypeId())
@@ -70,8 +70,7 @@ public class TouristApiClientUtil {
 		return result;
 	}
 
-	public TourApiPlaceDetailResponseDto fetchPlaceDataDetail(TourApiPlaceDetailRequestDto dto) throws
-		ServiceBlockException {
+	public TourApiPlaceDetailResponseDto fetchPlaceDataDetail(TourApiPlaceDetailRequestDto dto) throws ServiceBlockException {
 		isServiceBlocked();
 		URI uri = UriComponentsBuilder
 			.fromHttpUrl("https://apis.data.go.kr/B551011/KorService2/detailCommon2")
@@ -83,12 +82,9 @@ public class TouristApiClientUtil {
 			.build(true).toUri();
 
 		log.info("관광 API 상세정보 요청 URI: {}", uri);
-		String body = null;
-		try {
-			body = fetchBodyWithRetry(uri);
-		} catch (ServiceBlockException e) {
-			throw e;
-		}
+
+		String body = fetchBodyWithRetry(uri);
+
 		JsonNode itemNode;
 		try {
 			itemNode = resolvePath(objectMapper.readTree(body), "response.body.items.item");
@@ -110,6 +106,7 @@ public class TouristApiClientUtil {
 
 	public Map<String, LclsCategoryItemResponseDto> fetchCategories(LclsSystmCodeRequestDto dto,
 		LocaleCode locale) throws ServiceBlockException {
+		log.info("카테고리 {}언어 요청", locale.getCode());
 		isServiceBlocked();
 
 		String url = "https://apis.data.go.kr/B551011/{path}/lclsSystmCode2"
@@ -122,7 +119,7 @@ public class TouristApiClientUtil {
 			.queryParam("MobileOS", dto.getMobileOS())
 			.queryParam("pageNo", dto.getPageNo())
 			.queryParam("numOfRows", dto.getNumOfRows())
-			.queryParam("_type", dto.get_type())
+			.queryParam("_type", dto.getResponseType())
 			.queryParam("lclsSystm1", dto.getLclsSystm1())
 			.queryParam("lclsSystm2", dto.getLclsSystm2())
 			.queryParam("lclsSystm3", dto.getLclsSystm3())
@@ -195,8 +192,7 @@ public class TouristApiClientUtil {
 			.onErrorResume(e -> {
 				if (e instanceof TourApiException tae
 					&& tae.getErrorCode() == InternalErrorCode.SERVICE_REQUEST_LIMIT_EXCEEDED) {
-					log.error("Tourist API 요청 제한 초과 → 서비스 차단 및 예외 전파");
-					blockServiceForToday();
+					log.error("Tourist API 요청 제한 초과 → 빈 응답 반환");
 					return Mono.error(new ServiceBlockException());
 				}
 				if (e instanceof RetryableExternalException) {
@@ -222,6 +218,11 @@ public class TouristApiClientUtil {
 				return Mono.error(new TourApiException(InternalErrorCode.SERVICE_REQUEST_LIMIT_EXCEEDED));
 			}
 			if ("04".equals(resultCode)) {
+				log.warn("에러 내용(resultCode=04) : {}", body);
+				return Mono.error(new RetryableExternalException(InternalErrorCode.RETRYABLE_EXTERNAL_ERROR));
+			}
+			if ("01".equals(resultCode)) {
+				log.warn("에러 내용(resultCode=01 APPLICATION 에러) : {}", body);
 				return Mono.error(new RetryableExternalException(InternalErrorCode.RETRYABLE_EXTERNAL_ERROR));
 			}
 			return Mono.just(body);
@@ -232,12 +233,16 @@ public class TouristApiClientUtil {
 			if ("22".equals(rc)) {
 				log.warn("Tourist API XML 오류 (요청 제한 초과) → 오늘 차단");
 				blockServiceForToday();
-				throw new TourApiException(InternalErrorCode.SERVICE_REQUEST_LIMIT_EXCEEDED);
+				return Mono.error(new TourApiException(InternalErrorCode.SERVICE_REQUEST_LIMIT_EXCEEDED));
 			}
 			if ("04".equals(rc)) {
 				return Mono.error(new RetryableExternalException(InternalErrorCode.RETRYABLE_EXTERNAL_ERROR));
 			}
-
+			if ("01".equals(rc)) {
+				log.warn("에러 내용(resultCode=01 APPLICATION 에러) : {}", body);
+				return Mono.error(new RetryableExternalException(InternalErrorCode.RETRYABLE_EXTERNAL_ERROR));
+			}
+			log.warn("에러 내용(알 수 없는 코드) : {}", body);
 			return Mono.error(new RetryableExternalException(InternalErrorCode.INTERNAL_SERVER_ERROR));
 		}
 	}
@@ -249,6 +254,8 @@ public class TouristApiClientUtil {
 			return "22";
 		if (body.contains("<resultCode>04</") || body.contains("<returnReasonCode>04</"))
 			return "04";
+		if (body.contains("<resultCode>01</") || body.contains("<returnReasonCode>01</"))
+			return "01";
 		return null;
 	}
 }

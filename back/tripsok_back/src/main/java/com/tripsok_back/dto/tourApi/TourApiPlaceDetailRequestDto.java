@@ -5,17 +5,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class TourApiPlaceDetailRequestDto {
+@SuperBuilder
+public class TourApiPlaceDetailRequestDto extends TourApiPlaceRequiredDto{
 
-	private String mobileOS;
-	private String mobileApp;
-	private String responseType;
 	private Integer contentId;
-	private String serviceKey;
 }
