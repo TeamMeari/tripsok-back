@@ -37,8 +37,12 @@ public class UserController {
 	private final UserService userService;
 
 	@GetMapping("/info")
-	public ResponseEntity<UserInfoResponse> getUserInfo(@AuthenticationPrincipal Integer userId) {
-		return ResponseEntity.ok().body(userService.getUserInfo(userId));
+	public ResponseEntity<UserInfoResponse> getUserInfo(@AuthenticationPrincipal Integer userId,
+		@Parameter(description = "언어(로케일) 코드", example = "KO", schema = @Schema(type = "string", allowableValues = {
+			"KO", "EN", "JA", "CN"}))
+		@RequestParam(name = "locale", defaultValue = "KO") LocaleCode locale
+	) {
+		return ResponseEntity.ok().body(userService.getUserInfo(userId, locale));
 	}
 
 	@PatchMapping("/contact-email")

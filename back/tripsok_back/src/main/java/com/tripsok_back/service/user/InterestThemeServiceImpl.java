@@ -10,7 +10,9 @@ import com.tripsok_back.model.theme.Theme;
 import com.tripsok_back.model.user.InterestTheme;
 import com.tripsok_back.model.user.TripSokUser;
 import com.tripsok_back.repository.theme.ThemeRepository;
+import com.tripsok_back.repository.theme.ThemeTrRepository;
 import com.tripsok_back.repository.user.InterestThemeRepository;
+import com.tripsok_back.type.LocaleCode;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,14 +23,14 @@ import lombok.extern.slf4j.Slf4j;
 public class InterestThemeServiceImpl implements InterestThemeService {
 
 	private final ThemeRepository themeRepository;
+	private final ThemeTrRepository themeTrRepository;
 	private final InterestThemeRepository interestThemeRepository;
 
 	@Override
-	public List<InterestThemeResponse> getInterestThemes(TripSokUser user) {
-		return interestThemeRepository.findByUser(user)
-			.stream()
-			.map(it -> new InterestThemeResponse(it.getTheme().getId(), it.getTheme().getType()))
-			.toList();
+	public List<InterestThemeResponse> getInterestThemes(TripSokUser user, LocaleCode locale) {
+		List<Theme> themeList = interestThemeRepository.findByUser(user).stream().map(InterestTheme::getTheme).toList();
+		return themeTrRepository.findAllByThemeInAndLocaleOrderByThemeIdAsc(themeList, locale).stream()
+			.map(it -> new InterestThemeResponse(it.getTheme().getId(), it.getName())).toList();
 	}
 
 	@Override
