@@ -3,8 +3,8 @@ package com.tripsok_back.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.tripsok_back.dto.google.RomanizationResult;
 import com.ibm.icu.text.Transliterator;
+import com.tripsok_back.dto.google.RomanizationResult;
 import com.tripsok_back.type.LocaleCode;
 
 public final class TransliterationUtil {

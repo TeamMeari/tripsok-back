@@ -73,8 +73,14 @@ public class UserServiceImpl implements UserService {
 		return interestPlaceService.getUserLikedPlaces(user, size, lastId, type, locale);
 	}
 
-	private TripSokUser findUserById(Integer userId) {
+	@Override
+	public TripSokUser findUserById(Integer userId) {
 		return userRepository.findById(userId)
 			.orElseThrow(() -> new UserException(ErrorCode.USER_NOT_FOUND));
+	}
+
+	@Override
+	public List<TripSokUser> findAllUser() {
+		return userRepository.findAll();
 	}
 }

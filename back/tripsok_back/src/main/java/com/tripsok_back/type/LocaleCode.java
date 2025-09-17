@@ -23,10 +23,6 @@ public enum LocaleCode {
 		this.gcpLang = gcpLang;
 	}
 
-	public String toGcpLang() {
-		return gcpLang;
-	}
-
 	public static LocaleCode from(String code) {
 		if (code == null)
 			return null;
@@ -37,6 +33,10 @@ public enum LocaleCode {
 			}
 		}
 		throw new IllegalArgumentException("Unsupported locale code: " + code);
+	}
+
+	public String toGcpLang() {
+		return gcpLang;
 	}
 
 	public String esNameAddrSuffix() {
