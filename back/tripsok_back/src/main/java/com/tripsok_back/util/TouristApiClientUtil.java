@@ -42,7 +42,7 @@ public class TouristApiClientUtil {
 	private final WebClient touristApiWebClient;
 	private final ObjectMapper objectMapper;
 	private volatile boolean serviceBlocked = false;
-	private volatile LocalDate blockedDate = null;
+	private volatile LocalDate blockedDate = LocalDate.now().minusDays(1);
 
 	public List<TourApiPlaceResponseDto> fetchPlaceData(TourApiPlaceRequestDto dto) throws ServiceBlockException {
 		isServiceBlocked();
@@ -108,6 +108,7 @@ public class TouristApiClientUtil {
 		LocaleCode locale) throws ServiceBlockException {
 		log.info("카테고리 {}언어 요청", locale.getCode());
 		isServiceBlocked();
+
 		String url = "https://apis.data.go.kr/B551011/{path}/lclsSystmCode2"
 			.replace("{path}", locale.getUrlPath());
 
@@ -118,7 +119,7 @@ public class TouristApiClientUtil {
 			.queryParam("MobileOS", dto.getMobileOS())
 			.queryParam("pageNo", dto.getPageNo())
 			.queryParam("numOfRows", dto.getNumOfRows())
-			.queryParam("_type", dto.getResponseType())
+			.queryParam("_type", dto.get_type())
 			.queryParam("lclsSystm1", dto.getLclsSystm1())
 			.queryParam("lclsSystm2", dto.getLclsSystm2())
 			.queryParam("lclsSystm3", dto.getLclsSystm3())
@@ -157,13 +158,14 @@ public class TouristApiClientUtil {
 	}
 
 	public boolean isServiceBlocked() {
-		if (blockedDate == null || !blockedDate.equals(LocalDate.now())) {
+		if (serviceBlocked && blockedDate.equals(LocalDate.now())) {
+			throw new ServiceBlockException();
+		} else {
 			serviceBlocked = false;
 			blockedDate = null;
 			return false;
-		} else {
-			throw new ServiceBlockException();
 		}
+
 	}
 
 	private void blockServiceForToday() {
