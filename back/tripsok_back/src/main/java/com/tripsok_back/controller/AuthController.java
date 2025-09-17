@@ -49,18 +49,18 @@ public class AuthController {
 		TokenResponse tokenResponse = authService.signUpOAuth(request);
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
-			.body(new LoginResponse(tokenResponse.accessToken()));
+			.body(new LoginResponse(tokenResponse.accessToken(), tokenResponse.nickname()));
 	}
 
 	@PostMapping("/login/oauth2")
 	public ResponseEntity<LoginResponse> loginWithOAuth2(@Valid @RequestBody OauthLoginRequest request) {
 		TokenResponse tokenResponse = authService.loginWithOauth2(request);
 		if (tokenResponse.refreshToken() == null) {
-			return ResponseEntity.status(HttpStatus.SEE_OTHER).body(new LoginResponse(tokenResponse.accessToken()));
+			return ResponseEntity.status(HttpStatus.SEE_OTHER).body(new LoginResponse(tokenResponse.accessToken(), null));
 		}
 		return ResponseEntity.status(HttpStatus.OK)
 			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
-			.body(new LoginResponse(tokenResponse.accessToken()));
+			.body(new LoginResponse(tokenResponse.accessToken(), tokenResponse.nickname()));
 	}
 
 	@PostMapping("/login/email")
@@ -68,7 +68,7 @@ public class AuthController {
 		TokenResponse tokenResponse = authService.loginWithEmail(request.getEmail(), request.getPassword());
 		return ResponseEntity.status(HttpStatus.OK)
 			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
-			.body(new LoginResponse(tokenResponse.accessToken()));
+			.body(new LoginResponse(tokenResponse.accessToken(),tokenResponse.nickname()));
 	}
 
 	@PostMapping("/refresh")
@@ -76,7 +76,7 @@ public class AuthController {
 		TokenResponse tokenResponse = authService.refresh(refreshToken);
 		return ResponseEntity.status(HttpStatus.OK)
 			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
-			.body(new LoginResponse(tokenResponse.accessToken()));
+			.body(new LoginResponse(tokenResponse.accessToken(),tokenResponse.nickname()));
 	}
 
 	// 닉네임 중복 확인

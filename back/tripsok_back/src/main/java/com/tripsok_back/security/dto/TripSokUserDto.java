@@ -19,11 +19,12 @@ public class TripSokUserDto extends User {
 	private String nickname;
 	private SocialType socialType;
 
-	public TripSokUserDto(String userId, String password, SocialType socialType,
+	public TripSokUserDto(String userId, String password, SocialType socialType, String nickname,
 		Collection<GrantedAuthority> authorities) {
 		super(userId, password, authorities);
 		this.userId = userId;
 		this.socialType = socialType;
+		this.nickname = nickname;
 		log.info("TripSokUserDto created: {}", this);
 	}
 }
