@@ -119,7 +119,7 @@ public class TouristApiClientUtil {
 			.queryParam("MobileOS", dto.getMobileOS())
 			.queryParam("pageNo", dto.getPageNo())
 			.queryParam("numOfRows", dto.getNumOfRows())
-			.queryParam("_type", dto.get_type())
+			.queryParam("_type", dto.getResponseType())
 			.queryParam("lclsSystm1", dto.getLclsSystm1())
 			.queryParam("lclsSystm2", dto.getLclsSystm2())
 			.queryParam("lclsSystm3", dto.getLclsSystm3())
