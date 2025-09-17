@@ -106,8 +106,8 @@ public class TouristApiClientUtil {
 
 	public Map<String, LclsCategoryItemResponseDto> fetchCategories(LclsSystmCodeRequestDto dto,
 		LocaleCode locale) throws ServiceBlockException {
+		log.info("카테고리 {}언어 요청", locale.getCode());
 		isServiceBlocked();
-
 		String url = "https://apis.data.go.kr/B551011/{path}/lclsSystmCode2"
 			.replace("{path}", locale.getUrlPath());
 
@@ -160,10 +160,10 @@ public class TouristApiClientUtil {
 		if (blockedDate == null || !blockedDate.equals(LocalDate.now())) {
 			serviceBlocked = false;
 			blockedDate = null;
-		} else {
 			return false;
+		} else {
+			throw new ServiceBlockException();
 		}
-		throw new ServiceBlockException();
 	}
 
 	private void blockServiceForToday() {

@@ -15,14 +15,20 @@ import lombok.Setter;
 public class LclsSystmCodeRequestDto {
 	@NotBlank
 	private String serviceKey;
+	@Builder.Default
 	private String MobileOS = "ETC";
-	private String MobileApp = "AppTest";
+	@Builder.Default
+	private String MobileApp = "Tourang";
+	@Builder.Default
 	private Integer numOfRows = 300;
+	@Builder.Default
 	private Integer pageNo = 1;
+	@Builder.Default
 	private String _type = "json";
 	private String lclsSystm1;
 	private String lclsSystm2;
 	private String lclsSystm3;
+	@Builder.Default
 	private String lclsSystmListYn = "Y";
 
 }
