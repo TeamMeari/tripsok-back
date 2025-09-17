@@ -34,6 +34,7 @@ public enum ErrorCode {
 	INVALID_SOCIAL_CODE(HttpStatus.BAD_REQUEST, -11014, "유효하지 않은 소셜 코드입니다."),
 	INVALID_NICKNAME_FORMAT(HttpStatus.BAD_REQUEST, -11015, NICKNAME_MESSAGE),
 	FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, -11016, "접근이 금지된 사용자입니다."),
+	FAILED_DELETE_USER(HttpStatus.INTERNAL_SERVER_ERROR, -11017, "사용자 탈퇴에 실패했습니다."),
 
 	// Email-verification API error 12000대
 	EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, -12000, "이메일 전송에 실패했습니다."),
