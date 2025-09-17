@@ -153,9 +153,6 @@ public class AccommodationServiceImpl extends PlaceService {
 		TourApiPlaceRequestDto accommodationRequestDto = TourApiPlaceRequestDto.builder()
 			.numOfRows(numOfRow)
 			.pageNo(pageNo)
-			.mobileOS("ETC")
-			.mobileApp("tripsok-batch")
-			.type("json")
 			.arrange("R")
 			.areaCode("32")
 			.contentTypeId(this.getType().getId())
@@ -172,9 +169,6 @@ public class AccommodationServiceImpl extends PlaceService {
 	public TourApiPlaceDetailResponseDto requestPlaceDetail(Integer contentId) throws
 		ServiceBlockException {
 		TourApiPlaceDetailRequestDto accommodationRequestDto = TourApiPlaceDetailRequestDto.builder()
-			.mobileOS("ETC")
-			.mobileApp("tripsok-batch")
-			.responseType("json")
 			.contentId(contentId)
 			.serviceKey(apiKeyConfig.getTourApiKey())
 			.build();

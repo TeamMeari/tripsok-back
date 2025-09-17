@@ -153,9 +153,6 @@ public class TourServiceImpl extends PlaceService {
 		TourApiPlaceRequestDto TourRequestDto = TourApiPlaceRequestDto.builder()
 			.numOfRows(numOfRow)
 			.pageNo(pageNo)
-			.mobileOS("ETC")
-			.mobileApp("tripsok-batch")
-			.type("json")
 			.arrange("R")
 			.areaCode("32")
 			.contentTypeId(this.getType().getId())
@@ -168,9 +165,6 @@ public class TourServiceImpl extends PlaceService {
 
 	public TourApiPlaceDetailResponseDto requestPlaceDetail(Integer contentId) {
 		TourApiPlaceDetailRequestDto TourRequestDto = TourApiPlaceDetailRequestDto.builder()
-			.mobileOS("ETC")
-			.mobileApp("tripsok-batch")
-			.responseType("json")
 			.contentId(contentId)
 			.serviceKey(apiKeyConfig.getTourApiKey())
 			.build();

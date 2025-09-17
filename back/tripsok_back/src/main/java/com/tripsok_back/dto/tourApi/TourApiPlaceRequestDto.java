@@ -2,17 +2,16 @@ package com.tripsok_back.dto.tourApi;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Data
-@Builder
-public class TourApiPlaceRequestDto {
+@SuperBuilder
+public class TourApiPlaceRequestDto extends TourApiPlaceRequiredDto {
 	private Integer numOfRows;
 	private Integer pageNo;
-	private String mobileOS;
-	private String mobileApp;
-	private String type;
 	private Integer contentTypeId;
 	private String arrange;
 	private String areaCode;
-	private String serviceKey;
 }
