@@ -48,7 +48,7 @@ public class SecurityConfig {
 						"/health", "/ready",
 						"/api/v1/places/**", "/api/v1/theme/**", "/api/v1/test/**")
 					.permitAll()
-					.requestMatchers("/api/v1/user/**", "/api/v1/trip/**")
+					.requestMatchers("/api/v1/user/**", "/api/v1/trip-plan/**")
 					.hasAnyAuthority(Role.USER.getAuthority().getFirst(), Role.ADMIN.getAuthority().getFirst())
 					.requestMatchers("/api/v1/admin/**")
 					.hasAuthority(Role.ADMIN.getAuthority().getFirst());

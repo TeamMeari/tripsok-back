@@ -1,20 +1,18 @@
 package com.tripsok_back.service.tripplan;
 
-import java.util.Comparator;
-import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tripsok_back.dto.tripplan.TripPlanCommonDto;
 import com.tripsok_back.dto.tripplan.request.UpdateTripPlanRequest;
 import com.tripsok_back.dto.tripplan.request.UpdateVisitSpotRequest;
 import com.tripsok_back.dto.tripplan.response.TripPlanResponse;
-import com.tripsok_back.dto.tripplan.response.VisitSpotResponse;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.tripplan.TripPlan;
 import com.tripsok_back.model.tripplan.VisitSpot;
@@ -47,7 +45,7 @@ public class TripPlanServiceImpl implements TripPlanService {
 		TripPlan tripPlan = findTripPlanByUserId(user);
 		Set<VisitSpot> existingVisitSpots = getVisitSpotSet(request.visitSpotSet(), tripPlan);
 		tripPlan.updateTripPlan(request, existingVisitSpots);
-		return convertToTripPlanResponse(tripPlan, locale);
+		return new TripPlanResponse(tripPlan, locale);
 	}
 
 	@Override
@@ -55,32 +53,27 @@ public class TripPlanServiceImpl implements TripPlanService {
 	public TripPlanResponse getTripPlan(Integer userId, LocaleCode locale) {
 		TripSokUser user = userService.findUserById(userId);
 		TripPlan tripPlan = findTripPlanByUserId(user);
-		return convertToTripPlanResponse(tripPlan, locale);
+		return new TripPlanResponse(tripPlan, locale);
 	}
 
 	private Set<VisitSpot> getVisitSpotSet(Set<UpdateVisitSpotRequest> visitSpots, TripPlan tripPlan) {
+		Set<Integer> placeIds = visitSpots.stream()
+			.map(UpdateVisitSpotRequest::placeId).collect(Collectors.toSet());
+
+		Map<Integer, Place> placeMap = placeService.findPlacesByIds(placeIds).stream()
+			.collect(Collectors.toMap(Place::getId, Function.identity()));
+
 		return visitSpots.stream()
 			.map(visitSpot -> {
-				try {
-					Place place = placeService.findPlaceById(visitSpot.placeId());
-					return new VisitSpot(place, visitSpot.memo(), visitSpot.orderIndex(), tripPlan);
-				} catch (Exception e) {
+				Place place = placeMap.get(visitSpot.placeId());
+				if (place == null) {
 					log.warn("VisitSpot을 가져오는 중 존재하지 않는 장소를 참조하여 무시합니다. placeId: {}", visitSpot.placeId());
 					return null;
 				}
+				return new VisitSpot(place, visitSpot.memo(), visitSpot.orderIndex(), tripPlan);
 			})
 			.filter(Objects::nonNull)
 			.collect(Collectors.toSet());
-	}
-
-	private TripPlanResponse convertToTripPlanResponse(TripPlan tripPlan, LocaleCode locale) {
-		Set<VisitSpot> sortedVisitSpots = tripPlan.getVisitSpotSet().stream()
-			.sorted(Comparator.comparingInt(VisitSpot::getOrderIndex))
-			.collect(Collectors.toCollection(LinkedHashSet::new));
-		Set<VisitSpotResponse> visitSpotResponses = sortedVisitSpots.stream()
-			.map(it -> new VisitSpotResponse(it, locale))
-			.collect(Collectors.toCollection(LinkedHashSet::new));
-		return new TripPlanResponse(new TripPlanCommonDto(tripPlan), visitSpotResponses);
 	}
 
 	private TripPlan findTripPlanByUserId(TripSokUser user) {

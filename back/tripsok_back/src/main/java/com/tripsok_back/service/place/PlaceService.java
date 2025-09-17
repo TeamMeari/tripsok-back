@@ -3,6 +3,7 @@ package com.tripsok_back.service.place;
 import static com.tripsok_back.exception.ErrorCode.*;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -51,6 +52,10 @@ public abstract class PlaceService {
 
 	public Place findPlaceById(int placeId) {
 		return placeRepository.findById(placeId).orElseThrow(() -> new PlaceException(PLACE_NOT_FOUND));
+	}
+
+	public Set<Place> findPlacesByIds(Set<Integer> placeIds) {
+		return placeRepository.findByIdIn(placeIds);
 	}
 
 	protected void addView(Place place) {

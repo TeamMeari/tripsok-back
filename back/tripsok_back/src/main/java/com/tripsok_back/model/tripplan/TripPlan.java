@@ -20,8 +20,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
@@ -57,7 +57,7 @@ public class TripPlan extends BaseModifiableEntity {
 	@Enumerated(EnumType.STRING) // DRAFT(임시저장) COMPLETED(결제완료)
 	private PlanStatus status;
 
-	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@OneToOne
 	@JoinColumn(name = "user_id")
 	private TripSokUser user;
 
