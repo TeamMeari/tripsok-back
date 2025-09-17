@@ -6,25 +6,17 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class LclsSystmCodeRequestDto {
-	@NotBlank
-	private String serviceKey;
-	@Builder.Default
-	private String MobileOS = "ETC";
-	@Builder.Default
-	private String MobileApp = "AppTest";
+@SuperBuilder
+public class LclsSystmCodeRequestDto extends TourApiPlaceRequiredDto{
+
 	@Builder.Default
 	private Integer numOfRows = 300;
 	@Builder.Default
 	private Integer pageNo = 1;
-	@Builder.Default
-	private String _type = "json";
 	private String lclsSystm1;
 	private String lclsSystm2;
 	private String lclsSystm3;

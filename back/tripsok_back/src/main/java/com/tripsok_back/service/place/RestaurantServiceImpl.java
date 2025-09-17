@@ -150,9 +150,6 @@ public class RestaurantServiceImpl extends PlaceService {
 		TourApiPlaceRequestDto restaurantRequestDto = TourApiPlaceRequestDto.builder()
 			.numOfRows(numOfRow)
 			.pageNo(pageNo)
-			.mobileOS("ETC")
-			.mobileApp("tripsok-batch")
-			.type("json")
 			.arrange("R")
 			.areaCode("32")
 			.contentTypeId(this.getType().getId())
@@ -168,9 +165,6 @@ public class RestaurantServiceImpl extends PlaceService {
 
 	public TourApiPlaceDetailResponseDto requestPlaceDetail(Integer contentId) throws InternalException {
 		TourApiPlaceDetailRequestDto restaurantRequestDto = TourApiPlaceDetailRequestDto.builder()
-			.mobileOS("ETC")
-			.mobileApp("tripsok-batch")
-			.responseType("json")
 			.contentId(contentId)
 			.serviceKey(apiKeyConfig.getTourApiKey())
 			.build();
