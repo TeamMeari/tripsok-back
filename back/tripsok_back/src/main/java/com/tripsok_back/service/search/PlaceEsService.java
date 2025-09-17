@@ -42,10 +42,21 @@ import lombok.extern.slf4j.Slf4j;
 public class PlaceEsService {
 
 	private static final String INDEX = "places";
+	private static final String MAPPING_PATH = "elasticsearch/mappings/places-mapping.json";
 	private final ElasticsearchClient esClient;
 	private final EmbeddingUtil embeddingUtil;
 	private final PlaceRepository placeRepository;
-	private static final String MAPPING_PATH = "elasticsearch/mappings/places-mapping.json";
+
+	private static List<SortOptions> convertSort(Sort sort) {
+		List<SortOptions> list = new ArrayList<>();
+		for (Sort.Order order : sort) {
+			SortOrder esOrder = order.isAscending() ? SortOrder.Asc : SortOrder.Desc;
+			list.add(SortOptions.of(so -> so
+				.field(f -> f.field(order.getProperty()).order(esOrder))
+			));
+		}
+		return list;
+	}
 
 	public String indexPlaceDocument(PlaceDocument doc) throws Exception {
 		IndexResponse res = esClient.index(i -> i
@@ -279,17 +290,6 @@ public class PlaceEsService {
 		};
 	}
 
-	private static List<SortOptions> convertSort(Sort sort) {
-		List<SortOptions> list = new ArrayList<>();
-		for (Sort.Order order : sort) {
-			SortOrder esOrder = order.isAscending() ? SortOrder.Asc : SortOrder.Desc;
-			list.add(SortOptions.of(so -> so
-				.field(f -> f.field(order.getProperty()).order(esOrder))
-			));
-		}
-		return list;
-	}
-
 	public boolean checkIfReindexNeeds() {
 		try {
 			SearchResponse<Map> res = esClient.search(s -> s
@@ -348,5 +348,3 @@ public class PlaceEsService {
 		}
 	}
 }
-
-

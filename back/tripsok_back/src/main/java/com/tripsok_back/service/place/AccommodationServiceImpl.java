@@ -61,17 +61,17 @@ public class AccommodationServiceImpl extends PlaceService {
 	}
 
 	@Override
-    public void startPlaceUpdate(int numOfRow, int pageNo) throws ServiceBlockException {
-        List<TourApiPlaceResponseDto> responseDtoList = requestPlace(numOfRow, pageNo);
+	public void startPlaceUpdate(int numOfRow, int pageNo) throws ServiceBlockException {
+		List<TourApiPlaceResponseDto> responseDtoList = requestPlace(numOfRow, pageNo);
 
-        if (responseDtoList.isEmpty()) {
-            log.info("응답받은 API 값이 없습니다");
-            return;
-        }
-        for (TourApiPlaceResponseDto responseDto : responseDtoList) {
-            checkAndUpdatePlace(responseDto);
-        }
-    }
+		if (responseDtoList.isEmpty()) {
+			log.info("응답받은 API 값이 없습니다");
+			return;
+		}
+		for (TourApiPlaceResponseDto responseDto : responseDtoList) {
+			checkAndUpdatePlace(responseDto);
+		}
+	}
 
 	@Override
 	@Transactional

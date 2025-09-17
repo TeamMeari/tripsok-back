@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RomanizationResult {
-    private String romanizedText;
-    private String detectedLanguageCode;
+	private String romanizedText;
+	private String detectedLanguageCode;
 }
-
