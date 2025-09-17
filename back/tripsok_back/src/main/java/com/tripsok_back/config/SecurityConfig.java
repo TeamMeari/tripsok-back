@@ -64,7 +64,7 @@ public class SecurityConfig {
 		CorsConfiguration corsConfig = new CorsConfiguration();
 		corsConfig.setAllowedOriginPatterns(
 			List.of("http://localhost:8080", "http://localhost:5173", "http://localhost:3000",
-				"http://localhost:4173", "https://trip-sok.jayden-bin.cc"));
+				"http://localhost:4173", "https://trip-sok.jayden-bin.cc", "https://www.tourang.site", "www.tourang.site", "https://tripsok-front.vercel.app"));
 		corsConfig.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"));
 		corsConfig.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 		corsConfig.setAllowCredentials(true);
