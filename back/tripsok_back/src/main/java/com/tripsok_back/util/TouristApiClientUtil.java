@@ -70,7 +70,7 @@ public class TouristApiClientUtil {
 		return result;
 	}
 
-	public TourApiPlaceDetailResponseDto fetchPlaceDataDetail(TourApiPlaceDetailRequestDto dto) {
+	public TourApiPlaceDetailResponseDto fetchPlaceDataDetail(TourApiPlaceDetailRequestDto dto) throws ServiceBlockException {
 		isServiceBlocked();
 		URI uri = UriComponentsBuilder
 			.fromHttpUrl("https://apis.data.go.kr/B551011/KorService2/detailCommon2")
@@ -191,7 +191,7 @@ public class TouristApiClientUtil {
 				if (e instanceof TourApiException tae
 					&& tae.getErrorCode() == InternalErrorCode.SERVICE_REQUEST_LIMIT_EXCEEDED) {
 					log.error("Tourist API 요청 제한 초과 → 빈 응답 반환");
-					return Mono.just("{}");
+					return Mono.error(new ServiceBlockException());
 				}
 				if (e instanceof RetryableExternalException) {
 					log.warn("Tourist API 재시도 실패, 일시적 오류 처리: {}", e.getMessage());
@@ -216,6 +216,11 @@ public class TouristApiClientUtil {
 				return Mono.error(new TourApiException(InternalErrorCode.SERVICE_REQUEST_LIMIT_EXCEEDED));
 			}
 			if ("04".equals(resultCode)) {
+				log.warn("에러 내용(resultCode=04) : {}", body);
+				return Mono.error(new RetryableExternalException(InternalErrorCode.RETRYABLE_EXTERNAL_ERROR));
+			}
+			if ("01".equals(resultCode)) {
+				log.warn("에러 내용(resultCode=01 APPLICATION 에러) : {}", body);
 				return Mono.error(new RetryableExternalException(InternalErrorCode.RETRYABLE_EXTERNAL_ERROR));
 			}
 			return Mono.just(body);
@@ -231,7 +236,11 @@ public class TouristApiClientUtil {
 			if ("04".equals(rc)) {
 				return Mono.error(new RetryableExternalException(InternalErrorCode.RETRYABLE_EXTERNAL_ERROR));
 			}
-
+			if ("01".equals(rc)) {
+				log.warn("에러 내용(resultCode=01 APPLICATION 에러) : {}", body);
+				return Mono.error(new RetryableExternalException(InternalErrorCode.RETRYABLE_EXTERNAL_ERROR));
+			}
+			log.warn("에러 내용(알 수 없는 코드) : {}", body);
 			return Mono.error(new RetryableExternalException(InternalErrorCode.INTERNAL_SERVER_ERROR));
 		}
 	}
@@ -243,6 +252,8 @@ public class TouristApiClientUtil {
 			return "22";
 		if (body.contains("<resultCode>04</") || body.contains("<returnReasonCode>04</"))
 			return "04";
+		if (body.contains("<resultCode>01</") || body.contains("<returnReasonCode>01</"))
+			return "01";
 		return null;
 	}
 }
