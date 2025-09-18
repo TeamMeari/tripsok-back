@@ -11,7 +11,7 @@ import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 
 public interface UserService {
-	UserInfoResponse getUserInfo(Integer userId);
+	UserInfoResponse getUserInfo(Integer userId, LocaleCode locale);
 
 	void changeContactEmail(Integer userId, String emailVerificationToken);
 

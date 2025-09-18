@@ -1,6 +1,5 @@
-package com.tripsok_back.model.place;
+package com.tripsok_back.model.theme;
 
-import com.tripsok_back.model.theme.Theme;
 import com.tripsok_back.support.BaseTimeEntity;
 import com.tripsok_back.type.LocaleCode;
 
@@ -28,6 +27,7 @@ import lombok.Setter;
 @Table(name = "THEME_TR", indexes = {
 	@Index(name = "idx_theme_tr_theme_and_locale", columnList = "THEME_ID, LOCALE"),
 	@Index(name = "idx_theme_tr_name", columnList = "NAME"),
+	@Index(name = "idx_theme_tr_locale", columnList = "LOCALE")
 },
 	uniqueConstraints = {
 		@UniqueConstraint(name = "uk_theme_tr_theme_and_locale", columnNames = {"THEME_ID", "LOCALE"})

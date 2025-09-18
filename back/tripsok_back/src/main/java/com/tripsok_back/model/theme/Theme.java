@@ -23,4 +23,8 @@ public class Theme extends BaseTimeEntity {
 
 	@Column(nullable = false, unique = true, length = 100)
 	private String type;
+
+	public Theme(String type) {
+		this.type = type;
+	}
 }

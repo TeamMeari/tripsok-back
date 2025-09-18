@@ -30,9 +30,9 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public UserInfoResponse getUserInfo(Integer userId) {
+	public UserInfoResponse getUserInfo(Integer userId, LocaleCode locale) {
 		TripSokUser user = findUserById(userId);
-		List<InterestThemeResponse> interestThemes = interestThemeService.getInterestThemes(user);
+		List<InterestThemeResponse> interestThemes = interestThemeService.getInterestThemes(user, locale);
 		return new UserInfoResponse(user.getNickname(), user.getEmail(), user.getContactEmail(),
 			user.getSocialType(), interestThemes, user.getFirstName(), user.getLastName());
 	}
