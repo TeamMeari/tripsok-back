@@ -14,7 +14,7 @@ public class PlaceSortStyle {
 	@Schema(
 		description = "정렬 기준 컬럼명",
 		example = "updatedAt",
-		allowableValues = {"updatedAt", "view", "like"},
+		allowableValues = {"updatedAt", "view", "like","name"},
 		defaultValue = "updatedAt"
 	)
 	private String sortKey = "updatedAt";
@@ -29,7 +29,7 @@ public class PlaceSortStyle {
 
 	public Sort toSort() {
 		String safeKey = switch (sortKey) {
-			case "updatedAt", "view", "like" -> sortKey;
+			case "updatedAt", "view", "like","name" -> sortKey;
 			default -> "updatedAt";
 		};
 

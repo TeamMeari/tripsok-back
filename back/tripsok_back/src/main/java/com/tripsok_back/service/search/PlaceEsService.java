@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
@@ -47,16 +50,7 @@ public class PlaceEsService {
 	private final EmbeddingUtil embeddingUtil;
 	private final PlaceRepository placeRepository;
 
-	private static List<SortOptions> convertSort(Sort sort) {
-		List<SortOptions> list = new ArrayList<>();
-		for (Sort.Order order : sort) {
-			SortOrder esOrder = order.isAscending() ? SortOrder.Asc : SortOrder.Desc;
-			list.add(SortOptions.of(so -> so
-				.field(f -> f.field(order.getProperty()).order(esOrder))
-			));
-		}
-		return list;
-	}
+
 
 	public String indexPlaceDocument(PlaceDocument doc) throws Exception {
 		IndexResponse res = esClient.index(i -> i
@@ -123,13 +117,11 @@ public class PlaceEsService {
 			Sort effectiveSort = (sort != null && sort.isSorted())
 				? sort
 				: Sort.by(Sort.Order.desc("updatedAt"));
-			List<SortOptions> sortOptions = convertSort(effectiveSort);
 
 			SearchRequest req = SearchRequest.of(s -> s
 				.index(INDEX)
 				.from((int)pageable.getOffset())
 				.size(pageable.getPageSize())
-				.sort(sortOptions)
 				.query(qb -> qb.bool(b -> {
 					if (lc != null) {
 						b.must(m -> m.term(t ->
@@ -152,7 +144,7 @@ public class PlaceEsService {
 				if (h.source() != null)
 					items.add(PlaceBriefResponseDto.from(h.source()));
 			});
-
+			sort(items, sort);
 			long total = res.hits().total() != null ? res.hits().total().value() : items.size();
 			log.info("ES 통합 검색 완료 조회수={} 전체={} 소요={}ms", items.size(), total,
 				(System.currentTimeMillis() - start));
@@ -176,13 +168,11 @@ public class PlaceEsService {
 			Sort effectiveSort = (sort != null && sort.isSorted())
 				? sort
 				: Sort.by(Sort.Order.desc("updatedAt"));
-			List<SortOptions> sortOptions = convertSort(effectiveSort);
 
 			SearchRequest req = SearchRequest.of(s -> s
 				.index(INDEX)
 				.from((int)pageable.getOffset())
 				.size(pageable.getPageSize())
-				.sort(sortOptions)
 				.knn(knn -> knn
 					.field("embedding")
 					.queryVector(vector)
@@ -209,7 +199,7 @@ public class PlaceEsService {
 				if (h.source() != null)
 					items.add(PlaceBriefResponseDto.from(h.source()));
 			});
-
+			sort(items, sort);
 			long total = res.hits().total() != null ? res.hits().total().value() : items.size();
 			log.info("ES 임베딩 통합 검색 완료 조회수={} 전체={} 소요={}ms", items.size(), total,
 				(System.currentTimeMillis() - start));
@@ -346,5 +336,44 @@ public class PlaceEsService {
 		} catch (Exception e) {
 			throw new RuntimeException("ES 인덱스 생성 실패", e);
 		}
+	}
+
+	private void sort(List<PlaceBriefResponseDto> placeBriefResponseDtos, Sort sort) {
+
+
+		Comparator<PlaceBriefResponseDto> comparator = null;
+
+		for (Sort.Order order : sort) {
+			Comparator<PlaceBriefResponseDto> fieldComparator;
+			log.info("정렬 시작 방식:{},{}",order.getProperty(), order.getDirection());
+			switch (order.getProperty()) {
+				case "updatedAt" -> fieldComparator =
+					Comparator.comparing(PlaceBriefResponseDto::updatedAt, Comparator.nullsLast(Comparator.naturalOrder()));
+				case "view", "viewCount" -> fieldComparator =
+					Comparator.comparing(PlaceBriefResponseDto::viewCount, Comparator.nullsLast(Comparator.naturalOrder()));
+				case "like", "likeCount" -> fieldComparator =
+					Comparator.comparing(PlaceBriefResponseDto::likeCount, Comparator.nullsLast(Comparator.naturalOrder()));
+				case "name" -> fieldComparator =
+					Comparator.comparing(PlaceBriefResponseDto::name, Comparator.nullsLast(Comparator.naturalOrder()));
+				default -> {
+					continue;
+				}
+			}
+
+			if (order.isDescending()) {
+				fieldComparator = fieldComparator.reversed();
+			}
+
+			comparator = (comparator == null)
+				? fieldComparator
+				: comparator.thenComparing(fieldComparator);
+		}
+
+		if (comparator != null) {
+			placeBriefResponseDtos.sort(comparator);
+		}
+		log.info("정렬 완료 결과: {}",placeBriefResponseDtos.stream()
+			.map(PlaceBriefResponseDto::name)
+			.collect(Collectors.joining(", ")));
 	}
 }
