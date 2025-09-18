@@ -27,4 +27,6 @@ public interface UserService {
 	TripSokUser findUserById(Integer userId);
 
 	List<TripSokUser> findAllUser();
+
+	void deleteUser(Integer userId);
 }

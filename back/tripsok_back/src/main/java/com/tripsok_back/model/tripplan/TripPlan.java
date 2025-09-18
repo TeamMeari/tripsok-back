@@ -57,7 +57,7 @@ public class TripPlan extends BaseModifiableEntity {
 	@Enumerated(EnumType.STRING) // DRAFT(임시저장) COMPLETED(결제완료)
 	private PlanStatus status;
 
-	@OneToOne
+	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "user_id")
 	private TripSokUser user;
 
