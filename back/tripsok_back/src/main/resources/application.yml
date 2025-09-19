@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  jackson:
+    time-zone: Asia/Seoul
   config:
     import: optional:classpath:.env
   profiles:
