@@ -48,9 +48,9 @@ public class RestaurantServiceImpl extends PlaceService {
 	public RestaurantServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, RestaurantRepository restaurantRepository, CategoryService categoryService,
 		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
-		PlaceEsService placeEsService) {
+		PlaceEsService placeEsService, TagService tagService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
-			placeEsService, placeRepository);
+			placeEsService, placeRepository, tagService);
 		this.restaurantRepository = restaurantRepository;
 	}
 
@@ -105,7 +105,8 @@ public class RestaurantServiceImpl extends PlaceService {
 			placeRestaurant.updateNullRestaurantDetail(tourApiPlaceDetailResponseDto, category);
 		}
 		addView(placeRestaurant);
-		return Optional.of(PlaceDetailResponseDto.from(placeRestaurant, PlaceJoinType.RESTAURANT, locale));
+		return Optional.of(PlaceDetailResponseDto.from(placeRestaurant, PlaceJoinType.RESTAURANT, locale,
+			getPlaceTags(placeRestaurant, locale)));
 	}
 
 	@Override
