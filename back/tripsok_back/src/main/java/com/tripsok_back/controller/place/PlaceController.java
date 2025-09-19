@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -86,7 +87,7 @@ public class PlaceController {
 
 		@Parameter(description = "정렬 스타일(쿼리 파라미터 집합)")
 		@ParameterObject
-		@RequestParam(required = false) PlaceSortStyle sortStyle,
+		@ModelAttribute PlaceSortStyle sortStyle,
 
 		@Parameter(description = "언어(로케일) 코드", example = "ko", schema = @Schema(allowableValues = {"ko", "en", "ja",
 			"cn"}))
@@ -104,7 +105,7 @@ public class PlaceController {
 		Sort sort = (sortStyle != null)
 			? sortStyle.toSort()
 			: Sort.by(Sort.Order.desc("updatedAt"));
-
+		log.info(String.valueOf(sort));
 		Pageable pageable = PageRequest.of(page, size, sort);
 
 		TourismType categoryType = TourismType.fromOrThrow(category);
