@@ -1,5 +1,6 @@
 package com.tripsok_back.dto.tripplan.response;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -16,7 +17,9 @@ public record TripPlanResponse(
 	@Schema(description = "여행 일정", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
 	TripPlanCommonDto tripPlan,
 	@Schema(description = "방문지점 리스트 순서대로", requiredMode = Schema.RequiredMode.REQUIRED)
-	Set<VisitSpotResponse> visitSpotSet
+	Set<VisitSpotResponse> visitSpotSet,
+	@Schema(description = "수정된 시간", requiredMode = Schema.RequiredMode.REQUIRED)
+	LocalDateTime updatedAt
 ) {
 	public TripPlanResponse(TripPlan tripPlan, LocaleCode locale) {
 		this(
@@ -24,7 +27,7 @@ public record TripPlanResponse(
 			tripPlan.getVisitSpotSet().stream()
 				.sorted(Comparator.comparingInt(VisitSpot::getOrderIndex))
 				.map(it -> new VisitSpotResponse(it, locale))
-				.collect(Collectors.toCollection(LinkedHashSet::new))
+				.collect(Collectors.toCollection(LinkedHashSet::new)), tripPlan.getUpdatedAt()
 		);
 	}
 }
