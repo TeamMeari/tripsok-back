@@ -119,6 +119,8 @@ public class AccommodationServiceImpl extends PlaceService {
 				e.getAccommodation().getAccommodationImages().size(),
 				e.getAccommodation().getAccommodationReviews().size(),
 				locale));
+
+
 		return PageResponse.fromPage(placeList, dtoList);
 	}
 

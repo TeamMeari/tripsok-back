@@ -39,14 +39,15 @@ public class TouristApiScheduler {
 	public void initTourPlaceRequest() throws ServiceBlockException {
 
 		try {
-			runBatchCategoryRequestApi();
-			runBatchAccommodationRequestApi();
-			runBatchRestaurantRequestApi();
-			runBatchTourRequestApi();
+
+			//runBatchCategoryRequestApi();
+			//runBatchAccommodationRequestApi();
+			//runBatchRestaurantRequestApi();
+			//runBatchTourRequestApi();
 		} catch (ServiceBlockException e) {
 			log.error(e.getMessage());
 		}
-		runFullEsIndexUpdate();
+		//runFullEsIndexUpdate();
 	}
 
 	public void runBatchAccommodationRequestApi() throws ServiceBlockException {

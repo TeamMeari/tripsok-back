@@ -102,11 +102,14 @@ public class PlaceController {
 		@Parameter(description = "통합 검색어(있으면 통합검색 수행)")
 		@RequestParam(required = false) String q
 	) {
-		Sort sort = (sortStyle != null)
-			? sortStyle.toSort()
+		Sort sortEs = (sortStyle != null)
+			? sortStyle.toSortEs()
 			: Sort.by(Sort.Order.desc("updatedAt"));
-		log.info(String.valueOf(sort));
-		Pageable pageable = PageRequest.of(page, size, sort);
+		Sort sortJpa = (sortStyle != null)
+			? sortStyle.toSortJpa()
+			: Sort.by(Sort.Order.desc("updatedAt"));
+		log.info(String.valueOf(sortEs));
+		Pageable pageable = PageRequest.of(page, size, sortJpa);
 
 		TourismType categoryType = TourismType.fromOrThrow(category);
 		log.info("{} 항목 리스트 조회 시작", categoryType.name());
@@ -123,9 +126,9 @@ public class PlaceController {
 			boolean useEmbedding = "embedding".equalsIgnoreCase(typeSearch);
 			TourismType typeFilter = categoryFilter ? categoryType : null;
 			if (useEmbedding) {
-				esPage = placeEsService.unifiedEmbeddingSearch(pageable, localeCode, q, typeFilter, sort);
+				esPage = placeEsService.unifiedEmbeddingSearch(pageable, localeCode, q, typeFilter, sortEs);
 			} else {
-				esPage = placeEsService.unifiedSearch(pageable, localeCode, q, typeFilter, sort);
+				esPage = placeEsService.unifiedSearch(pageable, localeCode, q, typeFilter, sortEs);
 			}
 			return ResponseEntity.ok(PageResponse.fromPage(esPage));
 		}
