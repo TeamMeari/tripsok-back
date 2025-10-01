@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.tripsok_back.dto.place.PlaceThemeAndTagResponse;
@@ -39,8 +40,7 @@ public class TagScheduler {
 	private final PlaceThemeRepository placeThemeRepository;
 	private final PlaceTagRepository placeTagRepository;
 
-	//@Scheduled(fixedRateString = "PT48H", initialDelayString = "PT1H")
-	//@PostConstruct
+	@Scheduled(fixedRateString = "PT48H", initialDelayString = "PT1H")
 	void runBatchTagRequestApi() {
 		log.info("Place Tag 업데이트 시작");
 		int pageNum = 0;
