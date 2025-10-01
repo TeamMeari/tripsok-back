@@ -6,6 +6,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -91,6 +92,7 @@ public class Place extends BaseModifiableEntity {
 	private BigDecimal mapY;
 
 	@OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
+	@BatchSize(size = 100)
 	private Set<PlaceTr> placeTrs = new LinkedHashSet<>();
 
 	// 정해진 테마 1~3개 저장
@@ -154,13 +156,17 @@ public class Place extends BaseModifiableEntity {
 		return tr;
 	}
 
-    public void upsertKorean(String name, String address, String information, String summary) {
-        PlaceTr tr = getOrCreateTr(LocaleCode.KO);
-        if (name != null) tr.setPlaceName(name);
-        if (address != null) tr.setAddress(address);
-        if (information != null) tr.setInformation(information);
-        if (summary != null) tr.setSummary(summary);
-    }
+	public void upsertKorean(String name, String address, String information, String summary) {
+		PlaceTr tr = getOrCreateTr(LocaleCode.KO);
+		if (name != null)
+			tr.setPlaceName(name);
+		if (address != null)
+			tr.setAddress(address);
+		if (information != null)
+			tr.setInformation(information);
+		if (summary != null)
+			tr.setSummary(summary);
+	}
 
 	public void upsertTranslation(LocaleCode lc, String name, String address, String information, String summary) {
 		if (lc == null || lc == LocaleCode.KO)
