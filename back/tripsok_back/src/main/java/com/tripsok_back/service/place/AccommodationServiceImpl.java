@@ -13,7 +13,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripsok_back.config.ApiKeyConfig;
 import com.tripsok_back.dto.PageResponse;
-import com.tripsok_back.dto.place.PlaceBriefResponseDto;
+import com.tripsok_back.dto.place.PlaceBriefSlimResponseDto;
 import com.tripsok_back.dto.place.PlaceDetailResponseDto;
 import com.tripsok_back.dto.place.ReviewRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceDetailRequestDto;
@@ -108,28 +108,34 @@ public class AccommodationServiceImpl extends PlaceService {
 	}
 
 	@Override
-	public PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable,
+	public PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable,
 		LocaleCode locale) throws TourApiException {
-		Page<Place> placeList = accommodationRepository.findByAccommodationIsNotNull(pageable);
-		if (placeList.getTotalPages() == 0)
+
+		Page<Place> placePage = accommodationRepository.findByAccommodationIsNotNullAndPlaceTrs_Id_Locale(locale.getCode(), pageable);
+		if (placePage.isEmpty()) return PageResponse.empty();
+
+		Place first = placePage.getContent().get(0);
+		int trSize = first.getPlaceTrs() != null ? first.getPlaceTrs().size() : 0;
+		log.info("getPlaceList: {}, {}, {}", placePage.getNumberOfElements(), trSize, first.getId());
+		if (placePage.getTotalPages() == 0)
 			return PageResponse.empty();
-		Page<PlaceBriefResponseDto> dtoList = placeList.map(
-			e -> PlaceBriefResponseDto.from(e, getType().name(),
+		Page<PlaceBriefSlimResponseDto> dtoList = placePage.map(
+			e -> PlaceBriefSlimResponseDto.from(e, getType().name(),
 				e.getAccommodation().getImageUrlList().getFirst(),
 				e.getAccommodation().getAccommodationImages().size(),
 				e.getAccommodation().getAccommodationReviews().size(),
 				locale));
 
 
-		return PageResponse.fromPage(placeList, dtoList);
+		return PageResponse.fromPage(placePage, dtoList);
 	}
 
-	public PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
+	public PageResponse<PlaceBriefSlimResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
 		LocaleCode locale) {
 		Page<Place> placeList = accommodationRepository.findByAccommodationIsNotNullAndThemes_Theme_Id(pageable,
 			themeId);
-		Page<PlaceBriefResponseDto> dtoList = placeList.map(
-			e -> PlaceBriefResponseDto.from(e, getType().name(),
+		Page<PlaceBriefSlimResponseDto> dtoList = placeList.map(
+			e -> PlaceBriefSlimResponseDto.from(e, getType().name(),
 				e.getAccommodation().getImageUrlList().getFirst(),
 				e.getAccommodation().getAccommodationImages().size(),
 				e.getAccommodation().getAccommodationReviews().size(),
