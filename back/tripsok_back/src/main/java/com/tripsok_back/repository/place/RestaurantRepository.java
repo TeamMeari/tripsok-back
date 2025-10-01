@@ -21,8 +21,10 @@ public interface RestaurantRepository extends JpaRepository<Place, Integer> {
 	@EntityGraph(attributePaths = {"placeTrs", "restaurant"})
 	Optional<Place> findByContentId(Integer contentId);
 
-	@EntityGraph(attributePaths = {"placeTrs", "restaurant.restaurantImages"})
-	Page<Place> findByRestaurantIsNotNull(Pageable pageable);
+	@EntityGraph(attributePaths = {"restaurant"})
+	Page<Place> findByRestaurantIsNotNullAndPlaceTrs_Id_Locale(
+		String locale, Pageable pageable
+	);
 
 	@EntityGraph(attributePaths = {"placeTrs", "restaurant", "themes", "themes.theme"})
 	Page<Place> findByRestaurantIsNotNullAndThemes_Theme_Id(Pageable pageable, Integer themeId);

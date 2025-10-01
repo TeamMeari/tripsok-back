@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.tripsok_back.model.place.Place;
+import com.tripsok_back.type.LocaleCode;
 
 @Repository
 public interface AccommodationRepository extends JpaRepository<Place, Integer> {
@@ -21,8 +22,10 @@ public interface AccommodationRepository extends JpaRepository<Place, Integer> {
 	@EntityGraph(attributePaths = {"placeTrs", "accommodation"})
 	Optional<Place> findByContentId(Integer contentId);
 
-	@EntityGraph(attributePaths = {"placeTrs", "accommodation.accommodationImages"})
-	Page<Place> findByAccommodationIsNotNull(Pageable pageable);
+	@EntityGraph(attributePaths = {"accommodation"})
+	Page<Place> findByAccommodationIsNotNullAndPlaceTrs_Id_Locale(
+		String locale, Pageable pageable
+	);
 
 	@EntityGraph(attributePaths = {"placeTrs", "accommodation", "themes", "themes.theme"})
 	Page<Place> findByAccommodationIsNotNullAndThemes_Theme_Id(Pageable pageable, Integer themeId);
