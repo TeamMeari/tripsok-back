@@ -4,11 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
@@ -17,7 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
-import com.tripsok_back.dto.place.PlaceBriefResponseDto;
+import com.tripsok_back.dto.place.PlaceBriefSlimResponseDto;
 import com.tripsok_back.dto.place.PlaceDocument;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.repository.place.PlaceRepository;
@@ -26,7 +23,9 @@ import com.tripsok_back.type.TourismType;
 import com.tripsok_back.util.EmbeddingUtil;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.SortOptions;
+import co.elastic.clients.elasticsearch._types.DistanceUnit;
+import co.elastic.clients.elasticsearch._types.GeoLocation;
+import co.elastic.clients.elasticsearch._types.LatLonGeoLocation;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
@@ -49,8 +48,6 @@ public class PlaceEsService {
 	private final ElasticsearchClient esClient;
 	private final EmbeddingUtil embeddingUtil;
 	private final PlaceRepository placeRepository;
-
-
 
 	public String indexPlaceDocument(PlaceDocument doc) throws Exception {
 		IndexResponse res = esClient.index(i -> i
@@ -89,121 +86,165 @@ public class PlaceEsService {
 		return TourismType.ACCOMMODATION;
 	}
 
-	public long count(String index) {
-		try {
-			return esClient.count(c -> c.index(index)).count();
-		} catch (Exception e) {
-			log.warn("ES 카운트 실패 index={} 이유={}", index, e.getMessage());
-			return -1;
-		}
-	}
+	public Page<PlaceBriefSlimResponseDto> unifiedSearch(
+		Pageable pageable, LocaleCode lc, String q, TourismType type, Sort sortArg) {
 
-	public Page<PlaceBriefResponseDto> unifiedSearch(Pageable pageable, LocaleCode lc, String q,
-		TourismType type, Sort sort) {
 		long start = System.currentTimeMillis();
 		try {
-			log.info("ES 통합 검색 시작 q='{}' 로케일={} 타입={} 페이지={} 크기={}", q,
-				lc != null ? lc.getCode() : null, type != null ? type.name() : null,
+			log.info("ES 통합 검색 시작 q='{}' 로케일={} 타입={} 페이지={} 크기={}",
+				q, lc != null ? lc.getCode() : null, type != null ? type.name() : null,
 				pageable.getPageNumber(), pageable.getPageSize());
 
+			final boolean hasQuery = q != null && !q.isBlank();
 			String[] fields = fieldsForLocale(lc);
 
-			Query text = Query.of(b -> b.multiMatch(mm -> mm
+			Query text = hasQuery
+				? Query.of(b -> b.multiMatch(mm -> mm
 				.query(q)
 				.fields(Arrays.asList(fields))
 				.type(TextQueryType.BestFields)
-			));
+				.tieBreaker(0.3)
+			))
+				: Query.of(b -> b.matchAll(m -> m));
 
-			Sort effectiveSort = (sort != null && sort.isSorted())
-				? sort
-				: Sort.by(Sort.Order.desc("updatedAt"));
+			SearchRequest req = SearchRequest.of(s -> {
+				SearchRequest.Builder b = s
+					.index(INDEX)
+					.from((int)pageable.getOffset())
+					.size(pageable.getPageSize())
+					.query(qb -> qb.bool(bl -> {
+						bl.must(text);
+						if (lc != null) {
+							bl.filter(f -> f.term(t -> t.field("locale").value(lc.getCode())));
+						}
+						if (type != null) {
+							bl.filter(f -> f.term(t -> t.field("type").value(type.name())));
+						}
+						return bl;
+					}))
+					.source(src -> src.filter(flt -> flt.includes(
+						"placeId", "locale", "title", "type", "lat", "lng",
+						"thumbnailUrl", "like", "view", "updatedAt"
+					)));
 
-			SearchRequest req = SearchRequest.of(s -> s
-				.index(INDEX)
-				.from((int)pageable.getOffset())
-				.size(pageable.getPageSize())
-				.query(qb -> qb.bool(b -> {
-					if (lc != null) {
-						b.must(m -> m.term(t ->
-							t.field("locale").value(lc.getCode())
-						));
+				if (sortArg != null && sortArg.isSorted()) {
+					for (Sort.Order order : sortArg) {
+						String field = order.getProperty();
+						SortOrder esOrder = order.isAscending() ? SortOrder.Asc : SortOrder.Desc;
+						if ("_score".equals(field)) {
+							b.sort(ss -> ss.score(sc -> sc.order(esOrder)));
+						} else {
+							b.sort(ss -> ss.field(f -> f.field(field).order(esOrder)));
+						}
 					}
-					b.must(text);
-					if (type != null) {
-						b.must(m -> m.term(t ->
-							t.field("type").value(type.name())
-						));
-					}
-					return b;
-				}))
-			);
+				} else {
+					b.sort(ss -> ss.score(sc -> sc.order(SortOrder.Desc)));
+					b.sort(ss -> ss.field(f -> f.field("id").order(SortOrder.Asc)));
+				}
+
+				return b;
+			});
 
 			SearchResponse<PlaceDocument> res = esClient.search(req, PlaceDocument.class);
-			List<PlaceBriefResponseDto> items = new ArrayList<>();
-			res.hits().hits().forEach(h -> {
-				if (h.source() != null)
-					items.add(PlaceBriefResponseDto.from(h.source()));
-			});
-			sort(items, sort);
+
+			List<PlaceBriefSlimResponseDto> items = new ArrayList<>(res.hits().hits().size());
+			for (Hit<PlaceDocument> h : res.hits().hits()) {
+				PlaceDocument d = h.source();
+				if (d != null)
+					items.add(PlaceBriefSlimResponseDto.from(d));
+			}
 			long total = res.hits().total() != null ? res.hits().total().value() : items.size();
-			log.info("ES 통합 검색 완료 조회수={} 전체={} 소요={}ms", items.size(), total,
-				(System.currentTimeMillis() - start));
+
+			log.info("ES 통합 검색 완료 조회수={} 전체={} 소요={}ms",
+				items.size(), total, (System.currentTimeMillis() - start));
+
 			return new PageImpl<>(items, pageable, total);
+
 		} catch (Exception e) {
 			log.warn("ES 통합 검색 실패: {}", e.getMessage());
 			return Page.empty(pageable);
 		}
 	}
 
-	public Page<PlaceBriefResponseDto> unifiedEmbeddingSearch(Pageable pageable, LocaleCode lc, String q,
-		TourismType type, Sort sort) {
+	public Page<PlaceBriefSlimResponseDto> unifiedEmbeddingSearch(
+		Pageable pageable, LocaleCode lc, String q, TourismType type, Sort sortArg) {
+
 		long start = System.currentTimeMillis();
 		try {
-			log.info("ES 임베딩 통합 검색 시작 q='{}' 로케일={} 타입={} 페이지={} 크기={}", q,
-				lc != null ? lc.getCode() : null, type != null ? type.name() : null,
+			log.info("ES 임베딩 통합 검색 시작 q='{}' 로케일={} 타입={} 페이지={} 크기={}",
+				q, lc != null ? lc.getCode() : null, type != null ? type.name() : null,
 				pageable.getPageNumber(), pageable.getPageSize());
 
 			List<Float> vector = embeddingUtil.embed(q);
 
-			Sort effectiveSort = (sort != null && sort.isSorted())
-				? sort
-				: Sort.by(Sort.Order.desc("updatedAt"));
+			int from = (int)pageable.getOffset();
+			int size = pageable.getPageSize();
+			int k = Math.min(from + size, 10_000);
+			int nc = Math.min(Math.max(k * 3, 200), 10_000);
 
-			SearchRequest req = SearchRequest.of(s -> s
-				.index(INDEX)
-				.from((int)pageable.getOffset())
-				.size(pageable.getPageSize())
-				.knn(knn -> knn
-					.field("embedding")
-					.queryVector(vector)
-					.k(5)
-					.numCandidates(2000)
-					.filter(f -> f.bool(b -> {
-						if (lc != null) {
-							b.must(m -> m.term(t ->
-								t.field("locale").value(lc.getCode())
-							));
+			SearchRequest req = SearchRequest.of(s -> {
+				SearchRequest.Builder b = s
+					.index(INDEX)
+					.from(from)
+					.size(size)
+					.minScore(0.7)
+					.knn(knn -> knn
+						.field("embedding")
+						.queryVector(vector)
+						.k(k)
+						.numCandidates(nc)
+						.filter(f -> f.bool(bl -> {
+							if (lc != null) {
+								bl.filter(qb -> qb.term(t -> t.field("locale").value(lc.getCode())));
+							}
+							if (type != null) {
+								bl.filter(qb -> qb.term(t -> t.field("type").value(type.name())));
+							}
+							return bl;
+						}))
+					)
+					.source(src -> src.filter(flt -> flt.includes(
+						"placeId", "locale", "title", "type", "lat", "lng",
+						"thumbnailUrl", "like", "view", "updatedAt"
+					)))
+					.trackTotalHits(t -> t.enabled(false));
+
+				if (sortArg != null && sortArg.isSorted()) {
+					for (Sort.Order order : sortArg) {
+						String field = order.getProperty();
+						SortOrder esOrder = order.isAscending() ? SortOrder.Asc : SortOrder.Desc;
+
+						if ("_score".equals(field)) {
+							b.sort(ss -> ss.score(sc -> sc.order(esOrder)));
+						} else {
+							b.sort(ss -> ss.field(f -> f.field(field).order(esOrder)));
 						}
-						if (type != null) {
-							b.must(m -> m.term(t ->
-								t.field("type").value(type.name())
-							));
-						}
-						return b;
-					}))
-				)
-			);
-			SearchResponse<PlaceDocument> res = esClient.search(req, PlaceDocument.class);
-			List<PlaceBriefResponseDto> items = new ArrayList<>();
-			res.hits().hits().forEach(h -> {
-				if (h.source() != null)
-					items.add(PlaceBriefResponseDto.from(h.source()));
+					}
+				} else {
+					b.sort(ss -> ss.score(sc -> sc.order(SortOrder.Desc)));
+					b.sort(ss -> ss.field(f -> f.field("id").order(SortOrder.Asc)));
+				}
+
+				return b;
 			});
-			sort(items, sort);
-			long total = res.hits().total() != null ? res.hits().total().value() : items.size();
-			log.info("ES 임베딩 통합 검색 완료 조회수={} 전체={} 소요={}ms", items.size(), total,
-				(System.currentTimeMillis() - start));
+
+			SearchResponse<PlaceDocument> res = esClient.search(req, PlaceDocument.class);
+
+			List<PlaceBriefSlimResponseDto> items = new ArrayList<>();
+			for (Hit<PlaceDocument> h : res.hits().hits()) {
+				if (h.score() != null && h.score() >= 0.7) {
+					PlaceDocument d = h.source();
+					if (d != null)
+						items.add(PlaceBriefSlimResponseDto.from(d));
+				}
+			}
+
+			long total = items.size();
+			log.info("ES 임베딩 통합 검색 완료 조회수={} 전체(근사)={} 소요={}ms",
+				items.size(), total, (System.currentTimeMillis() - start));
+
 			return new PageImpl<>(items, pageable, total);
+
 		} catch (Exception e) {
 			log.warn("ES 임베딩 통합 검색 실패: {}", e.getMessage());
 			return Page.empty(pageable);
@@ -338,42 +379,57 @@ public class PlaceEsService {
 		}
 	}
 
-	private void sort(List<PlaceBriefResponseDto> placeBriefResponseDtos, Sort sort) {
+	public List<PlaceBriefSlimResponseDto> searchByDistance(double lat, double lng, String distance, int size,
+		LocaleCode locale) {
+		try {
 
+			SearchRequest req = SearchRequest.of(s -> s
+				.index(INDEX)
+				.size(size)
+				.query(q -> q
+					.bool(b -> b
+						.must(m -> m
+							.geoDistance(g -> g
+								.field("location")
+								.distance(distance)
+								.location(GeoLocation.of(l -> l.latlon(
+									LatLonGeoLocation.of(ll -> ll.lat(lat).lon(lng))
+								)))
+							)
+						)
+						.filter(f -> f
+							.term(t -> t.field("locale").value(locale.name().toLowerCase()))
+						)
+					)
+				)
+				.sort(so -> so.geoDistance(g -> g
+					.field("location")
+					.location(GeoLocation.of(l -> l.latlon(
+						LatLonGeoLocation.of(ll -> ll.lat(lat).lon(lng))
+					)))
+					.unit(DistanceUnit.Kilometers)
+					.order(SortOrder.Asc)
+				))
 
-		Comparator<PlaceBriefResponseDto> comparator = null;
+				.source(src -> src.filter(flt -> flt.includes(
+					"placeId", "locale", "title", "type", "lat", "lng",
+					"thumbnailUrl", "like", "view", "updatedAt"
+				)))
+			);
 
-		for (Sort.Order order : sort) {
-			Comparator<PlaceBriefResponseDto> fieldComparator;
-			log.info("정렬 시작 방식:{},{}",order.getProperty(), order.getDirection());
-			switch (order.getProperty()) {
-				case "updatedAt" -> fieldComparator =
-					Comparator.comparing(PlaceBriefResponseDto::updatedAt, Comparator.nullsLast(Comparator.naturalOrder()));
-				case "view", "viewCount" -> fieldComparator =
-					Comparator.comparing(PlaceBriefResponseDto::viewCount, Comparator.nullsLast(Comparator.naturalOrder()));
-				case "like", "likeCount" -> fieldComparator =
-					Comparator.comparing(PlaceBriefResponseDto::likeCount, Comparator.nullsLast(Comparator.naturalOrder()));
-				case "name" -> fieldComparator =
-					Comparator.comparing(PlaceBriefResponseDto::name, Comparator.nullsLast(Comparator.naturalOrder()));
-				default -> {
-					continue;
-				}
+			SearchResponse<PlaceDocument> res = esClient.search(req, PlaceDocument.class);
+			log.info("거리 기반 검색 완료 lat={}, lng={}, distance={}, 결과={}", lat, lng, distance, res.hits().hits().size());
+
+			List<PlaceBriefSlimResponseDto> items = new ArrayList<>();
+			for (Hit<PlaceDocument> h : res.hits().hits()) {
+				PlaceDocument d = h.source();
+				if (d != null)
+					items.add(PlaceBriefSlimResponseDto.from(d));
 			}
-
-			if (order.isDescending()) {
-				fieldComparator = fieldComparator.reversed();
-			}
-
-			comparator = (comparator == null)
-				? fieldComparator
-				: comparator.thenComparing(fieldComparator);
+			return items;
+		} catch (IOException e) {
+			log.error("거리 기반 검색 실패", e);
+			throw new RuntimeException("ES 거리 기반 검색 실패", e);
 		}
-
-		if (comparator != null) {
-			placeBriefResponseDtos.sort(comparator);
-		}
-		log.info("정렬 완료 결과: {}",placeBriefResponseDtos.stream()
-			.map(PlaceBriefResponseDto::name)
-			.collect(Collectors.joining(", ")));
 	}
 }

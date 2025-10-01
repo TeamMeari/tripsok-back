@@ -1,10 +1,14 @@
 package com.tripsok_back.controller.place;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -17,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tripsok_back.dto.PageResponse;
-import com.tripsok_back.dto.place.PlaceBriefResponseDto;
+import com.tripsok_back.dto.place.PlaceBriefSlimResponseDto;
 import com.tripsok_back.dto.place.PlaceDetailResponseDto;
 import com.tripsok_back.dto.place.PlaceDocument;
 import com.tripsok_back.dto.place.PlaceSortStyle;
@@ -61,6 +65,7 @@ public class PlaceController {
 		summary = "장소 목록 조회",
 		description = """
 			카테고리별 장소 목록을 페이지네이션과 정렬로 조회합니다.
+			검색어(q)가 있으면 텍스트 검색 후 결과가 부족하면 임베딩 검색으로 보강합니다.
 			결과가 0건이어도 200 OK와 빈 content를 반환합니다.
 			"""
 	)
@@ -70,7 +75,7 @@ public class PlaceController {
 		@ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)
 	})
 	@GetMapping("/{category}")
-	public ResponseEntity<PageResponse<PlaceBriefResponseDto>> getPlaceList(
+	public ResponseEntity<PageResponse<PlaceBriefSlimResponseDto>> getPlaceList(
 		@Parameter(
 			description = "카테고리",
 			schema = @Schema(allowableValues = {"accommodation", "restaurant", "tour", "wrong-category"})
@@ -89,17 +94,17 @@ public class PlaceController {
 		@ParameterObject
 		@ModelAttribute PlaceSortStyle sortStyle,
 
-		@Parameter(description = "언어(로케일) 코드", example = "ko", schema = @Schema(allowableValues = {"ko", "en", "ja",
-			"cn"}))
+		@Parameter(description = "언어(로케일) 코드", example = "ko",
+			schema = @Schema(allowableValues = {"ko", "en", "ja", "cn"}))
 		@RequestParam(name = "locale", defaultValue = "ko") String locale,
-		@Parameter(description = "테마 ID", example = "")
+
+		@Parameter(description = "테마 ID")
 		@RequestParam(required = false) Integer themeId,
-		@Parameter(description = "검색 모드(text 멀티 단어 검색|embedding 의미 유사 검색)", example = "text", schema = @Schema(allowableValues = {
-			"embedding", "text"}))
-		@RequestParam(name = "typeSearch", required = false, defaultValue = "text") String typeSearch,
+
 		@Parameter(description = "검색기능 사용시 카테고리 필터 사용 여부 (false면 전체 카테고리 검색)", example = "false")
 		@RequestParam(name = "categoryFilter", required = false, defaultValue = "true") boolean categoryFilter,
-		@Parameter(description = "통합 검색어(있으면 통합검색 수행)")
+
+		@Parameter(description = "통합 검색어(있으면 텍스트+임베딩 보강 검색 수행)")
 		@RequestParam(required = false) String q
 	) {
 		Sort sortEs = (sortStyle != null)
@@ -108,31 +113,44 @@ public class PlaceController {
 		Sort sortJpa = (sortStyle != null)
 			? sortStyle.toSortJpa()
 			: Sort.by(Sort.Order.desc("updatedAt"));
-		log.info(String.valueOf(sortEs));
+
 		Pageable pageable = PageRequest.of(page, size, sortJpa);
 
 		TourismType categoryType = TourismType.fromOrThrow(category);
 		log.info("{} 항목 리스트 조회 시작", categoryType.name());
+
 		LocaleCode localeCode;
 		try {
 			localeCode = LocaleCode.from(locale);
 		} catch (IllegalArgumentException ex) {
 			return ResponseEntity.badRequest().build();
 		}
+
 		if (q != null && !q.isBlank()) {
-			log.info("통합 검색 요청 카테고리={} 로케일={} 테마ID={} q='{}' 모드={} 페이지={} 크기={}",
-				categoryType.name(), localeCode.getCode(), themeId, q, typeSearch, page, size);
-			Page<PlaceBriefResponseDto> esPage;
-			boolean useEmbedding = "embedding".equalsIgnoreCase(typeSearch);
+			log.info("통합 검색 요청 카테고리={} 로케일={} 테마ID={} q='{}' 페이지={} 크기={}",
+				categoryType.name(), localeCode.getCode(), themeId, q, page, size);
+
 			TourismType typeFilter = categoryFilter ? categoryType : null;
-			if (useEmbedding) {
-				esPage = placeEsService.unifiedEmbeddingSearch(pageable, localeCode, q, typeFilter, sortEs);
-			} else {
-				esPage = placeEsService.unifiedSearch(pageable, localeCode, q, typeFilter, sortEs);
+
+			Page<PlaceBriefSlimResponseDto> textPage =
+				placeEsService.unifiedSearch(pageable, localeCode, q, typeFilter, sortEs);
+
+			int remainingSize = size - textPage.getContent().size();
+			Set<PlaceBriefSlimResponseDto> mergedSet = new LinkedHashSet<>(textPage.getContent());
+
+			if (remainingSize > 0) {
+				Pageable embeddingPageable = PageRequest.of(0, remainingSize, sortEs);
+				Page<PlaceBriefSlimResponseDto> embeddingPage =
+					placeEsService.unifiedEmbeddingSearch(embeddingPageable, localeCode, q, typeFilter, sortEs);
+				mergedSet.addAll(embeddingPage.getContent());
 			}
-			return ResponseEntity.ok(PageResponse.fromPage(esPage));
+			List<PlaceBriefSlimResponseDto> merged = new ArrayList<>(mergedSet);
+			Page<PlaceBriefSlimResponseDto> enhancedPage =
+				new PageImpl<>(merged, pageable, merged.size());
+			enhancedPage.getSort();
+			return ResponseEntity.ok(PageResponse.fromPage(enhancedPage));
 		}
-		PageResponse<PlaceBriefResponseDto> body;
+		PageResponse<PlaceBriefSlimResponseDto> body;
 		if (themeId != null) {
 			body = getService(categoryType).getPlaceListByTheme(pageable, themeId, localeCode);
 		} else {
@@ -198,10 +216,10 @@ public class PlaceController {
 			)
 		}
 	)
-	public ResponseEntity<List<PlaceBriefResponseDto>> searchByText(@RequestParam String q) throws IOException {
+	public ResponseEntity<List<PlaceBriefSlimResponseDto>> searchByText(@RequestParam String q) throws IOException {
 		try {
 			return ResponseEntity.ok(placeEsService.searchByText(q).stream()
-				.map(PlaceBriefResponseDto::from)
+				.map(PlaceBriefSlimResponseDto::from)
 				.toList());
 		} catch (Exception e) {
 			log.error("텍스트 검색 실패: {}", q, e);
@@ -214,14 +232,47 @@ public class PlaceController {
 		summary = "임베딩 기반 검색 (fallback 포함)",
 		description = "임베딩 검색을 우선 수행. 모델 오류 등으로 실패하면 multi_match 텍스트 검색으로 "
 	)
-	public ResponseEntity<List<PlaceBriefResponseDto>> searchByEmbedding(@RequestParam String q) throws IOException {
+	public ResponseEntity<List<PlaceBriefSlimResponseDto>> searchByEmbedding(@RequestParam String q) throws
+		IOException {
 		try {
 			return ResponseEntity.ok(placeEsService.searchByEmbedding(q).stream()
-				.map(PlaceBriefResponseDto::from)
+				.map(PlaceBriefSlimResponseDto::from)
 				.toList());
 		} catch (IOException e) {
 			log.error("의미 유사 검색 실패: {}", q, e);
 			return ResponseEntity.internalServerError().build();
 		}
+	}
+
+	@Operation(summary = "거리 기반 장소 검색", description = "위도, 경도, 거리, 언어를 기반으로 장소를 검색합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "조회 성공"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터", content = @Content),
+		@ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)
+	})
+	@GetMapping("/nearby")
+	public ResponseEntity<List<PlaceBriefSlimResponseDto>> searchNearby(
+		@Parameter(description = "위도", example = "37.5086534069")
+		@RequestParam double lat,
+
+		@Parameter(description = "경도", example = "129.095773005")
+		@RequestParam double lng,
+
+		@Parameter(description = "검색 거리 (예: 5km, 500m)", example = "500km")
+		@RequestParam String distance,
+
+		@Parameter(description = "결과 크기 (최대 개수)", example = "10",
+			schema = @Schema(minimum = "1", maximum = "100"))
+		@RequestParam(defaultValue = "10") @Min(1) @Max(100) int size,
+
+		@Parameter(description = "언어(로케일) 코드", example = "ko",
+			schema = @Schema(allowableValues = {"ko", "en", "ja", "cn"}))
+		@RequestParam(name = "locale", defaultValue = "ko") String locale
+	) {
+		log.info("거리 기반 장소 검색 lat={}, lng={}, distance={}, size={}, locale={}", lat, lng, distance, size, locale);
+
+		LocaleCode lc = LocaleCode.from(locale);
+
+		return ResponseEntity.ok(placeEsService.searchByDistance(lat, lng, distance, size, lc));
 	}
 }
