@@ -1,0 +1,2 @@
+ALTER TABLE TRIP_PLAN
+    DROP CONSTRAINT uk_trip_plan_user;
