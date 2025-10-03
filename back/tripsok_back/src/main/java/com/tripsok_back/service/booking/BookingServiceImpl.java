@@ -36,7 +36,7 @@ public class BookingServiceImpl implements BookingService {
 
 	@Override
 	public void validateBookingTripPlan(Integer userId) {
-		TripSokUser user = userService.findUserById(userId);
+		userService.findUserById(userId);
 		TripPlan tripPlan = tripPlanService.findDraftTripPlanByUserId(userId);
 		validateBookingRequest(tripPlan);
 	}
