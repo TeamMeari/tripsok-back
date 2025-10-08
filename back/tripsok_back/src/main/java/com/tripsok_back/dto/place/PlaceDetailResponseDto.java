@@ -21,7 +21,7 @@ public record PlaceDetailResponseDto(
 	Integer id, String language, String placeName, String summary, String address, String contact, String email,
 	String information,
 	Integer view, Integer like, BigDecimal mapX, BigDecimal mapY, LocalDateTime createdAt, LocalDateTime updatedAt,
-	PlaceJoinType type,
+	PlaceJoinType type, Boolean isLiked,
 	Set<PlaceTagResponseDto> tags,
 	ChildSummary child
 ) {
@@ -29,7 +29,7 @@ public record PlaceDetailResponseDto(
 	public PlaceDetailResponseDto {
 	}
 
-	public static PlaceDetailResponseDto from(Place place, PlaceJoinType type, LocaleCode locale) {
+	public static PlaceDetailResponseDto from(Place place, PlaceJoinType type, LocaleCode locale, Boolean isLiked) {
 		if (place == null)
 			return null;
 		PlaceTr tr = null;
@@ -50,6 +50,7 @@ public record PlaceDetailResponseDto(
 			.like(place.getLike())
 			.mapX(place.getMapX())
 			.mapY(place.getMapY())
+			.isLiked(isLiked)
 			.createdAt(place.getCreatedAt())
 			.updatedAt(place.getUpdatedAt())
 			.type(type)
