@@ -26,6 +26,7 @@ import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.repository.place.PlaceRepository;
 import com.tripsok_back.repository.place.TourRepository;
+import com.tripsok_back.repository.user.InterestPlaceRepository;
 import com.tripsok_back.service.search.PlaceEsService;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
@@ -45,10 +46,10 @@ public class TourServiceImpl extends PlaceService {
 
 	public TourServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, TourRepository tourRepository, CategoryService categoryService,
-		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
+		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient, InterestPlaceRepository interestPlaceRepository,
 		PlaceEsService placeEsService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
-			placeEsService, placeRepository);
+			placeEsService, interestPlaceRepository, placeRepository);
 		this.tourRepository = tourRepository;
 	}
 
@@ -69,12 +70,12 @@ public class TourServiceImpl extends PlaceService {
 	}
 
 	@Override
-	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, com.tripsok_back.type.LocaleCode locale) {
+	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, com.tripsok_back.type.LocaleCode locale, int userId) {
 		Optional<Place> optPlace = tourRepository.findById(placeId);
 		if (optPlace.isEmpty())
 			throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
 		Place placeTour = optPlace.get();
-
+		Boolean isLiked = interestPlaceRepository.existsByPlaceAndUser_Id(placeTour, userId);
 		if (placeTour.getPlaceTr(LocaleCode.KO) == null ||
 			!StringUtils.hasText(placeTour.getPlaceTr(LocaleCode.KO).getSummary())) {
 			createShortDescription(placeTour);
@@ -97,7 +98,7 @@ public class TourServiceImpl extends PlaceService {
 			placeTour.updateNullTourDetail(tourApiPlaceDetailResponseDto, category);
 		}
 		addView(placeTour);
-		return Optional.of(PlaceDetailResponseDto.from(placeTour, PlaceJoinType.TOUR, locale));
+		return Optional.of(PlaceDetailResponseDto.from(placeTour, PlaceJoinType.TOUR, locale, isLiked));
 	}
 
 	@Override

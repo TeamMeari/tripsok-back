@@ -20,6 +20,7 @@ import com.tripsok_back.exception.PlaceException;
 import com.tripsok_back.exception.ServiceBlockException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.repository.place.PlaceRepository;
+import com.tripsok_back.repository.user.InterestPlaceRepository;
 import com.tripsok_back.service.search.PlaceEsService;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.TourismType;
@@ -38,6 +39,7 @@ public abstract class PlaceService {
 	final ObjectMapper om;
 	final GoogleTranslateClient googleTranslateClient;
 	final PlaceEsService placeEsService;
+	final InterestPlaceRepository interestPlaceRepository;
 	private final PlaceRepository placeRepository;
 
 	@Transactional
@@ -66,7 +68,7 @@ public abstract class PlaceService {
 
 	public abstract void startPlaceUpdate(int numOfRow, int pageNo) throws ServiceBlockException;
 
-	public abstract Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale);
+	public abstract Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale, int userId);
 
 	public abstract PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable, LocaleCode locale);
 

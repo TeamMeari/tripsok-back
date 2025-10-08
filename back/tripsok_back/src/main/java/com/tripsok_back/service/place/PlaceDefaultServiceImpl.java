@@ -15,6 +15,7 @@ import com.tripsok_back.dto.place.PlaceDetailResponseDto;
 import com.tripsok_back.dto.place.ReviewRequestDto;
 import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.repository.place.PlaceRepository;
+import com.tripsok_back.repository.user.InterestPlaceRepository;
 import com.tripsok_back.service.search.PlaceEsService;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.TourismType;
@@ -29,9 +30,9 @@ public class PlaceDefaultServiceImpl extends PlaceService {
 	public PlaceDefaultServiceImpl(PlaceRepository placeRepository,
 		ApiKeyConfig apiKeyConfig, TouristApiClientUtil tourApiClient,
 		CategoryService categoryService, LlmClient groqApiClientUtil,
-		ObjectMapper om, GoogleTranslateClient googleTranslateClient, PlaceEsService placeEsService) {
+		ObjectMapper om, GoogleTranslateClient googleTranslateClient, PlaceEsService placeEsService, InterestPlaceRepository interestPlaceRepository) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
-			placeEsService, placeRepository);
+			placeEsService, interestPlaceRepository, placeRepository);
 		this.googleTranslateClient = googleTranslateClient;
 	}
 
@@ -46,7 +47,7 @@ public class PlaceDefaultServiceImpl extends PlaceService {
 	}
 
 	@Override
-	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale) {
+	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale, int userId) {
 		throw new TourApiException(CATEGORY_NOT_FOUND);
 	}
 

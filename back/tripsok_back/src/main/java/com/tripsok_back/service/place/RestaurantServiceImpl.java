@@ -27,6 +27,7 @@ import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.repository.place.PlaceRepository;
 import com.tripsok_back.repository.place.RestaurantRepository;
+import com.tripsok_back.repository.user.InterestPlaceRepository;
 import com.tripsok_back.service.search.PlaceEsService;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
@@ -47,10 +48,10 @@ public class RestaurantServiceImpl extends PlaceService {
 
 	public RestaurantServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, RestaurantRepository restaurantRepository, CategoryService categoryService,
-		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
+		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient, InterestPlaceRepository interestPlaceRepository,
 		PlaceEsService placeEsService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
-			placeEsService, placeRepository);
+			placeEsService, interestPlaceRepository, placeRepository);
 		this.restaurantRepository = restaurantRepository;
 	}
 
@@ -75,12 +76,14 @@ public class RestaurantServiceImpl extends PlaceService {
 
 	@Override
 	@Transactional
-	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, com.tripsok_back.type.LocaleCode locale) throws
+	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, com.tripsok_back.type.LocaleCode locale, int userId) throws
 		TourApiException {
 		Optional<Place> optPlace = restaurantRepository.findById(placeId);
-		if (optPlace.isEmpty())
+		if (optPlace.isEmpty()) {
 			throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
+		}
 		Place placeRestaurant = optPlace.get();
+		Boolean isLiked = interestPlaceRepository.existsByPlaceAndUser_Id(placeRestaurant, userId);
 		if (placeRestaurant.getPlaceTr(LocaleCode.KO) == null ||
 			!StringUtils.hasText(placeRestaurant.getPlaceTr(LocaleCode.KO).getSummary())) {
 			createShortDescription(placeRestaurant);
@@ -105,7 +108,7 @@ public class RestaurantServiceImpl extends PlaceService {
 			placeRestaurant.updateNullRestaurantDetail(tourApiPlaceDetailResponseDto, category);
 		}
 		addView(placeRestaurant);
-		return Optional.of(PlaceDetailResponseDto.from(placeRestaurant, PlaceJoinType.RESTAURANT, locale));
+		return Optional.of(PlaceDetailResponseDto.from(placeRestaurant, PlaceJoinType.RESTAURANT, locale, isLiked));
 	}
 
 	@Override

@@ -27,6 +27,7 @@ import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.repository.place.AccommodationRepository;
 import com.tripsok_back.repository.place.PlaceRepository;
+import com.tripsok_back.repository.user.InterestPlaceRepository;
 import com.tripsok_back.service.search.PlaceEsService;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
@@ -48,10 +49,10 @@ public class AccommodationServiceImpl extends PlaceService {
 	public AccommodationServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, AccommodationRepository accommodationRepository,
 		CategoryService categoryService,
-		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
+		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient, InterestPlaceRepository interestPlaceRepository,
 		PlaceEsService placeEsService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
-			placeEsService, placeRepository);
+			placeEsService, interestPlaceRepository, placeRepository);
 		this.accommodationRepository = accommodationRepository;
 	}
 
@@ -75,12 +76,13 @@ public class AccommodationServiceImpl extends PlaceService {
 
 	@Override
 	@Transactional
-	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale) throws
+	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale, int userId) throws
 		TourApiException {
 		Optional<Place> optPlace = accommodationRepository.findById(placeId);
 		if (optPlace.isEmpty())
 			throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
 		Place placeAccommodation = optPlace.get();
+		Boolean isLiked = interestPlaceRepository.existsByPlaceAndUser_Id(placeAccommodation, userId);
 		if (placeAccommodation.getPlaceTr(LocaleCode.KO) == null ||
 			!StringUtils.hasText(placeAccommodation.getPlaceTr(LocaleCode.KO).getSummary())) {
 			createShortDescription(placeAccommodation);
@@ -104,7 +106,7 @@ public class AccommodationServiceImpl extends PlaceService {
 		log.info("request detail 카테고리 조회 {}",
 			placeAccommodation.getAccommodation().getPlaceLclsCategory().getLclsSystm3Name());
 		addView(placeAccommodation);
-		return Optional.of(PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION, locale));
+		return Optional.of(PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION, locale, isLiked));
 	}
 
 	@Override
