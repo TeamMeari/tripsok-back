@@ -16,6 +16,7 @@ import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
 import com.tripsok_back.model.place.accommodation.Accommodation;
 import com.tripsok_back.model.place.restaurant.Restaurant;
 import com.tripsok_back.model.place.tour.Tour;
+import com.tripsok_back.model.user.InterestPlace;
 import com.tripsok_back.support.BaseModifiableEntity;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.util.TimeUtil;
@@ -102,6 +103,9 @@ public class Place extends BaseModifiableEntity {
 	// 자유 태그 2~4개 저장
 	@OneToMany(mappedBy = "place", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<PlaceTag> tags = new HashSet<>();
+
+	@OneToMany(mappedBy = "place")
+	private Set<InterestPlace> interestPlaces = new LinkedHashSet<>();
 
 	public PlaceTr getPlaceTr(String language) {
 		if (language == null)
