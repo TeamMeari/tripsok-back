@@ -12,5 +12,5 @@ public record BookingListResponse(
 	Integer numberOfPeople,
 	LocaleCode locale,
 	Booking.BookingStatus status,
-	Set<GetBookingSpotSetResponse> BookingSpotSet) {
+	Set<GetBookingSpotSetResponse> bookingSpotSet) {
 }

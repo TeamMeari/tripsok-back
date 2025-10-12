@@ -53,7 +53,7 @@ public class BookingServiceImpl implements BookingService {
 			new BookingSpot(booking, visitSpot, locale)
 		).collect(Collectors.toSet());
 		booking.setBookingSpotSet(bookingSpotSet);
-		emailService.sendBookingConfirmationEmail(request.getContactEmail(), request.getUserName(), tripPlan);
+		emailService.sendBookingConfirmationEmail(request, request.getUserName(), tripPlan);
 		return new CompleteBookingResponse(request.getContactEmail());
 	}
 

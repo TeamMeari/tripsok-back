@@ -78,7 +78,7 @@ public class Booking extends BaseTimeEntity {
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "STATUS", nullable = false, length = 20)
-	private BookingStatus status = BookingStatus.before_travel;
+	private BookingStatus status = BookingStatus.BEFORE_TRAVEL;
 
 	public Booking(TripSokUser user, BookingRequest request, LocaleCode locale, TripPlan tripPlan) {
 		this.user = user;
@@ -95,10 +95,10 @@ public class Booking extends BaseTimeEntity {
 
 	@Getter
 	public enum BookingStatus {
-		traveling("여행중"),
-		completed("여행완료"),
-		canceled("취소됨"),
-		before_travel("여행전");
+		TRAVELING("여행중"),
+		COMPLETED("여행완료"),
+		CANCELED("취소됨"),
+		BEFORE_TRAVEL("여행전");
 
 		private final String description;
 

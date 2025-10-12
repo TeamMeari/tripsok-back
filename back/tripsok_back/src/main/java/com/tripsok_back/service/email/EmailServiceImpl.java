@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import com.tripsok_back.dto.booking.request.BookingRequest;
 import com.tripsok_back.dto.email.response.EmailVerifyResponse;
 import com.tripsok_back.exception.EmailException;
 import com.tripsok_back.model.auth.EmailVerificationToken;
@@ -71,13 +72,15 @@ public class EmailServiceImpl implements EmailService {
 	}
 
 	@Override
-	public void sendBookingConfirmationEmail(String email, String userName, TripPlan tripPlan) {
+	public void sendBookingConfirmationEmail(BookingRequest request, String userName, TripPlan tripPlan) {
 		try {
 			HashMap<String, Object> values = new HashMap<>();
+			String email = request.getContactEmail();
 			values.put("userName", userName);
 			values.put("tripDate", tripPlan.getTripDate().toString());
 			values.put("startTime", tripPlan.getStartTime().toString());
 			values.put("numberOfParticipants", tripPlan.getNumberOfPeople());
+			values.put("amount", request.getPaymentInfo().getAmount());
 			MimeMessage message = createEmailMessage(email, "[Tourang] Your Payment Has Been Confirmed", values,
 				"payment_confirmation_template");
 			mailSender.send(message);

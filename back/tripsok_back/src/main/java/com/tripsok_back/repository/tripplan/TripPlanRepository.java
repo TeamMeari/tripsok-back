@@ -7,5 +7,5 @@ import com.tripsok_back.model.tripplan.TripPlan;
 
 @Repository
 public interface TripPlanRepository extends JpaRepository<TripPlan, Integer> {
-	TripPlan findByUserIdAndStatus(Integer user_id, TripPlan.PlanStatus status);
+	TripPlan findByUserIdAndStatus(Integer userId, TripPlan.PlanStatus status);
 }

@@ -16,6 +16,7 @@ import com.tripsok_back.exception.handler.ErrorResponse;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 
 @Component
@@ -32,13 +33,14 @@ public class ApiErrorCodesCustomizer implements OperationCustomizer {
 			// 각 status code에 대해 예시 추가
 			for (Map.Entry<Integer, List<ErrorCode>> entry : grouped.entrySet()) {
 				ApiResponse apiResponse = new ApiResponse().description("사용자 정의 오류 응답");
-				Content content = new Content();
+				MediaType mediaType = new io.swagger.v3.oas.models.media.MediaType();
 				for (ErrorCode errorCode : entry.getValue()) {
 					Example example = new Example();
 					example.setSummary(errorCode.name());
 					example.setValue(new ErrorResponse(errorCode.getCode(), errorCode.getErrorMessage()));
+					mediaType.addExamples(errorCode.name(), example);
 				}
-				apiResponse.setContent(content);
+				apiResponse.setContent(new Content().addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE, mediaType));
 				operation.getResponses().addApiResponse(String.valueOf(entry.getKey()), apiResponse);
 			}
 		}

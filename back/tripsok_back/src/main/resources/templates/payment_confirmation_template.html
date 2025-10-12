@@ -94,11 +94,11 @@
                                     <table width="100%">
                                         <tr>
                                             <td style="padding:8px 0; width:170px; color:#6b7280;">Product Price</td>
-                                            <td>KRW 30,000</td>
+                                            <td>KRW <span th:text="${#numbers.formatInteger(amount, 0, 'COMMA')}"></span></td>
                                         </tr>
                                         <tr>
                                             <td style="padding:8px 0; color:#6b7280;">Total Amount Paid</td>
-                                            <td><strong>KRW 30,000</strong></td>
+                                            <td><strong>KRW <span th:text="${#numbers.formatInteger(amount, 0, 'COMMA')}"></span></strong></td>
                                         </tr>
                                     </table>
                                 </td>
