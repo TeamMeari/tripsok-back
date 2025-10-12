@@ -46,11 +46,9 @@ public class Tag extends BaseTimeEntity {
 	}
 
 	public TagTr getTagTr(LocaleCode localeCode) {
-		for (TagTr tagTr : tagTrs) {
-			if (tagTr.getId() != null && localeCode == tagTr.getLocale()) {
-				return tagTr;
-			}
-		}
-		return null;
+		return tagTrs.stream()
+			.filter(tagTr -> localeCode == tagTr.getLocale())
+			.findFirst()
+			.orElse(null);
 	}
 }
