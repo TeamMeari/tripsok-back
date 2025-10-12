@@ -57,10 +57,7 @@ public class InterestPlaceServiceImpl implements InterestPlaceService {
 		List<InterestPlaceResponse> interestPlaceResponses = interestPlaces.stream()
 			.map(ip -> {
 				Place place = ip.getPlace();
-				PlaceJoinType placeType = type;
-				if (placeType == null) {
-					placeType = getPlaceType(place);
-				}
+				PlaceJoinType placeType = type != null ? type : getPlaceType(place);
 				return InterestPlaceResponse.builder()
 					.id(ip.getId())
 					.placeId(place.getId())

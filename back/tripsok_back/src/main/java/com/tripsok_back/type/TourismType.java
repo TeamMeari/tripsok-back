@@ -40,7 +40,7 @@ public enum TourismType {
 			case "accommodation" -> ACCOMMODATION;
 			case "restaurant" -> RESTAURANT;
 			case "tour" -> TOURIST_SPOT;
-			default -> throw new CustomException(ErrorCode.INVALID_TOUR_TYPE);
+			default -> throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
 		};
 	}
 
