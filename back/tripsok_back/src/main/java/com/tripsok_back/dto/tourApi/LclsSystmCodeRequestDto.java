@@ -1,17 +1,14 @@
 package com.tripsok_back.dto.tourApi;
 
-import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
 @SuperBuilder
-public class LclsSystmCodeRequestDto extends TourApiPlaceRequiredDto{
+public class LclsSystmCodeRequestDto extends TourApiPlaceRequiredDto {
 
 	@Builder.Default
 	private Integer numOfRows = 300;

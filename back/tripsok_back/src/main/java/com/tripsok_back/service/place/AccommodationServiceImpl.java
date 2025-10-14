@@ -111,8 +111,10 @@ public class AccommodationServiceImpl extends PlaceService {
 	public PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable,
 		LocaleCode locale) throws TourApiException {
 
-		Page<Place> placePage = accommodationRepository.findByAccommodationIsNotNullAndPlaceTrs_Id_Locale(locale.getCode(), pageable);
-		if (placePage.isEmpty()) return PageResponse.empty();
+		Page<Place> placePage = accommodationRepository.findByAccommodationIsNotNullAndPlaceTrs_Id_Locale(
+			locale.getCode(), pageable);
+		if (placePage.isEmpty())
+			return PageResponse.empty();
 
 		Place first = placePage.getContent().get(0);
 		int trSize = first.getPlaceTrs() != null ? first.getPlaceTrs().size() : 0;
@@ -125,7 +127,6 @@ public class AccommodationServiceImpl extends PlaceService {
 				e.getAccommodation().getAccommodationImages().size(),
 				e.getAccommodation().getAccommodationReviews().size(),
 				locale));
-
 
 		return PageResponse.fromPage(placePage, dtoList);
 	}

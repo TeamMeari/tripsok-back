@@ -111,7 +111,8 @@ public class RestaurantServiceImpl extends PlaceService {
 	@Override
 	public PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable,
 		com.tripsok_back.type.LocaleCode locale) {
-		Page<Place> placeList = restaurantRepository.findByRestaurantIsNotNullAndPlaceTrs_Id_Locale(locale.getCode(), pageable);
+		Page<Place> placeList = restaurantRepository.findByRestaurantIsNotNullAndPlaceTrs_Id_Locale(locale.getCode(),
+			pageable);
 		if (placeList.getTotalPages() == 0)
 			return PageResponse.empty();
 		Page<PlaceBriefSlimResponseDto> dtoList = placeList.map(

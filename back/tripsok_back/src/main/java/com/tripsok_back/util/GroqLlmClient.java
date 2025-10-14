@@ -24,11 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 @Primary
 public class GroqLlmClient implements LlmClient {
 
-	@Qualifier("groqApiWebClient")
-	private final WebClient groqApiWebClient;
-	private final ObjectMapper objectMapper;
-	private final TokenBucketRateLimiter tokenBucketRateLimiter;
-
 	private static final String DEFAULT_MODEL = "llama-3.3-70b-versatile";
 	private static final String shortDescriptionPrompt = """
 		ROLE
@@ -50,6 +45,10 @@ public class GroqLlmClient implements LlmClient {
 		- Use simple, catchy words that feel natural in SNS captions.
 		- End naturally on a meaningful word (no trailing quotes, punctuation, or particles like '이다', '합니다').
 				""";
+	@Qualifier("groqApiWebClient")
+	private final WebClient groqApiWebClient;
+	private final ObjectMapper objectMapper;
+	private final TokenBucketRateLimiter tokenBucketRateLimiter;
 
 	@Override
 	public String requestGroqShortDescription(String prompt) {
