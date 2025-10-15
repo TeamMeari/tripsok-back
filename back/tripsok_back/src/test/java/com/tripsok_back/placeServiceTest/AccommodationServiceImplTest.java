@@ -298,7 +298,7 @@ class AccommodationServiceImplTest {
 		Place p = mock(Place.class);
 		sut.addLike(p);
 		verify(p).incrementLikeCount();
-	}*/
+	}
 	// TODO : 수정하기
 }
 

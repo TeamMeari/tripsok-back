@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.tripsok_back.dto.tripplan.request.UpdateTripPlanRequest;
 import com.tripsok_back.dto.tripplan.request.UpdateVisitSpotRequest;
 import com.tripsok_back.dto.tripplan.response.TripPlanResponse;
+import com.tripsok_back.exception.ErrorCode;
+import com.tripsok_back.exception.TripPlanException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.tripplan.TripPlan;
 import com.tripsok_back.model.tripplan.VisitSpot;
@@ -56,6 +58,15 @@ public class TripPlanServiceImpl implements TripPlanService {
 		return new TripPlanResponse(tripPlan, locale);
 	}
 
+	@Override
+	public TripPlan findDraftTripPlanByUserId(Integer userId) {
+		TripPlan tripPlan = tripPlanRepository.findByUserIdAndStatus(userId, TripPlan.PlanStatus.DRAFT);
+		if (tripPlan == null) {
+			throw new TripPlanException(ErrorCode.TRIP_PLAN_NOT_FOUND);
+		}
+		return tripPlan;
+	}
+
 	private Set<VisitSpot> getVisitSpotSet(Set<UpdateVisitSpotRequest> visitSpots, TripPlan tripPlan) {
 		Set<Integer> placeIds = visitSpots.stream()
 			.map(UpdateVisitSpotRequest::placeId).collect(Collectors.toSet());
@@ -77,7 +88,7 @@ public class TripPlanServiceImpl implements TripPlanService {
 	}
 
 	private TripPlan findTripPlanByUserId(TripSokUser user) {
-		TripPlan tripPlan = tripPlanRepository.findByUserId(user.getId());
+		TripPlan tripPlan = tripPlanRepository.findByUserIdAndStatus(user.getId(), TripPlan.PlanStatus.DRAFT);
 		if (tripPlan == null) {
 			tripPlan = new TripPlan(user);
 			tripPlanRepository.save(tripPlan);
