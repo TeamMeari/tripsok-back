@@ -68,7 +68,7 @@ public abstract class PlaceService {
 
 	public abstract void startPlaceUpdate(int numOfRow, int pageNo) throws ServiceBlockException;
 
-	public abstract Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale, int userId);
+	public abstract Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale, Integer userId);
 
 	public abstract PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable, LocaleCode locale);
 

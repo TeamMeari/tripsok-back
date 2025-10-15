@@ -46,7 +46,8 @@ public class TourServiceImpl extends PlaceService {
 
 	public TourServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, TourRepository tourRepository, CategoryService categoryService,
-		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient, InterestPlaceRepository interestPlaceRepository,
+		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
+		InterestPlaceRepository interestPlaceRepository,
 		PlaceEsService placeEsService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
 			placeEsService, interestPlaceRepository, placeRepository);
@@ -70,7 +71,8 @@ public class TourServiceImpl extends PlaceService {
 	}
 
 	@Override
-	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, com.tripsok_back.type.LocaleCode locale, int userId) {
+	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, com.tripsok_back.type.LocaleCode locale,
+		Integer userId) {
 		Optional<Place> optPlace = tourRepository.findById(placeId);
 		if (optPlace.isEmpty())
 			throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);

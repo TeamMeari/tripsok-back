@@ -30,7 +30,8 @@ public class PlaceDefaultServiceImpl extends PlaceService {
 	public PlaceDefaultServiceImpl(PlaceRepository placeRepository,
 		ApiKeyConfig apiKeyConfig, TouristApiClientUtil tourApiClient,
 		CategoryService categoryService, LlmClient groqApiClientUtil,
-		ObjectMapper om, GoogleTranslateClient googleTranslateClient, PlaceEsService placeEsService, InterestPlaceRepository interestPlaceRepository) {
+		ObjectMapper om, GoogleTranslateClient googleTranslateClient, PlaceEsService placeEsService,
+		InterestPlaceRepository interestPlaceRepository) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
 			placeEsService, interestPlaceRepository, placeRepository);
 		this.googleTranslateClient = googleTranslateClient;
@@ -47,7 +48,7 @@ public class PlaceDefaultServiceImpl extends PlaceService {
 	}
 
 	@Override
-	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale, int userId) {
+	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale, Integer userId) {
 		throw new TourApiException(CATEGORY_NOT_FOUND);
 	}
 

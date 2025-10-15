@@ -48,7 +48,8 @@ public class RestaurantServiceImpl extends PlaceService {
 
 	public RestaurantServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, RestaurantRepository restaurantRepository, CategoryService categoryService,
-		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient, InterestPlaceRepository interestPlaceRepository,
+		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
+		InterestPlaceRepository interestPlaceRepository,
 		PlaceEsService placeEsService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
 			placeEsService, interestPlaceRepository, placeRepository);
@@ -76,7 +77,7 @@ public class RestaurantServiceImpl extends PlaceService {
 
 	@Override
 	@Transactional
-	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, com.tripsok_back.type.LocaleCode locale, int userId) throws
+	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale, Integer userId) throws
 		TourApiException {
 		Optional<Place> optPlace = restaurantRepository.findById(placeId);
 		if (optPlace.isEmpty()) {
@@ -113,8 +114,9 @@ public class RestaurantServiceImpl extends PlaceService {
 
 	@Override
 	public PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable,
-		com.tripsok_back.type.LocaleCode locale) {
-		Page<Place> placeList = restaurantRepository.findByRestaurantIsNotNullAndPlaceTrs_Id_Locale(locale.getCode(), pageable);
+		LocaleCode locale) {
+		Page<Place> placeList = restaurantRepository.findByRestaurantIsNotNullAndPlaceTrs_Id_Locale(locale.getCode(),
+			pageable);
 		if (placeList.getTotalPages() == 0)
 			return PageResponse.empty();
 		Page<PlaceBriefSlimResponseDto> dtoList = placeList.map(

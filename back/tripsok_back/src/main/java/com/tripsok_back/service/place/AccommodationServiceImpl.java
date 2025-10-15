@@ -49,7 +49,8 @@ public class AccommodationServiceImpl extends PlaceService {
 	public AccommodationServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, AccommodationRepository accommodationRepository,
 		CategoryService categoryService,
-		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient, InterestPlaceRepository interestPlaceRepository,
+		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
+		InterestPlaceRepository interestPlaceRepository,
 		PlaceEsService placeEsService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
 			placeEsService, interestPlaceRepository, placeRepository);
@@ -76,7 +77,7 @@ public class AccommodationServiceImpl extends PlaceService {
 
 	@Override
 	@Transactional
-	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale, int userId) throws
+	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale, Integer userId) throws
 		TourApiException {
 		Optional<Place> optPlace = accommodationRepository.findById(placeId);
 		if (optPlace.isEmpty())
@@ -106,15 +107,18 @@ public class AccommodationServiceImpl extends PlaceService {
 		log.info("request detail 카테고리 조회 {}",
 			placeAccommodation.getAccommodation().getPlaceLclsCategory().getLclsSystm3Name());
 		addView(placeAccommodation);
-		return Optional.of(PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION, locale, isLiked));
+		return Optional.of(
+			PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION, locale, isLiked));
 	}
 
 	@Override
 	public PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable,
 		LocaleCode locale) throws TourApiException {
 
-		Page<Place> placePage = accommodationRepository.findByAccommodationIsNotNullAndPlaceTrs_Id_Locale(locale.getCode(), pageable);
-		if (placePage.isEmpty()) return PageResponse.empty();
+		Page<Place> placePage = accommodationRepository.findByAccommodationIsNotNullAndPlaceTrs_Id_Locale(
+			locale.getCode(), pageable);
+		if (placePage.isEmpty())
+			return PageResponse.empty();
 
 		Place first = placePage.getContent().get(0);
 		int trSize = first.getPlaceTrs() != null ? first.getPlaceTrs().size() : 0;
@@ -127,7 +131,6 @@ public class AccommodationServiceImpl extends PlaceService {
 				e.getAccommodation().getAccommodationImages().size(),
 				e.getAccommodation().getAccommodationReviews().size(),
 				locale));
-
 
 		return PageResponse.fromPage(placePage, dtoList);
 	}
