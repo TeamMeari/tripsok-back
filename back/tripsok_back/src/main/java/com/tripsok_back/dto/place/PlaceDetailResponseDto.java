@@ -4,10 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.tripsok_back.model.place.Place;
-import com.tripsok_back.model.place.PlaceTag;
 import com.tripsok_back.model.place.PlaceTr;
 import com.tripsok_back.model.place.accommodation.Accommodation;
 import com.tripsok_back.model.place.restaurant.Restaurant;
@@ -29,7 +27,8 @@ public record PlaceDetailResponseDto(
 	public PlaceDetailResponseDto {
 	}
 
-	public static PlaceDetailResponseDto from(Place place, PlaceJoinType type, LocaleCode locale) {
+	public static PlaceDetailResponseDto from(Place place, PlaceJoinType type, LocaleCode locale,
+		Set<PlaceTagResponseDto> tags) {
 		if (place == null)
 			return null;
 		PlaceTr tr = null;
@@ -53,7 +52,7 @@ public record PlaceDetailResponseDto(
 			.createdAt(place.getCreatedAt())
 			.updatedAt(place.getUpdatedAt())
 			.type(type)
-			.tags(place.getTags().stream().map(PlaceTag::toDto).collect(Collectors.toSet()))
+			.tags(tags)
 			.child(switch (type) {
 				case ACCOMMODATION -> {
 					Accommodation a = place.getAccommodation();

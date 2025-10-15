@@ -29,9 +29,10 @@ public class PlaceDefaultServiceImpl extends PlaceService {
 	public PlaceDefaultServiceImpl(PlaceRepository placeRepository,
 		ApiKeyConfig apiKeyConfig, TouristApiClientUtil tourApiClient,
 		CategoryService categoryService, LlmClient groqApiClientUtil,
-		ObjectMapper om, GoogleTranslateClient googleTranslateClient, PlaceEsService placeEsService) {
+		ObjectMapper om, GoogleTranslateClient googleTranslateClient, PlaceEsService placeEsService,
+		TagService tagService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
-			placeEsService, placeRepository);
+			placeEsService, placeRepository, tagService);
 		this.googleTranslateClient = googleTranslateClient;
 	}
 

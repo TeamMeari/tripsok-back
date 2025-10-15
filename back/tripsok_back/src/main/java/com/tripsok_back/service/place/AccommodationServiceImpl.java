@@ -49,9 +49,9 @@ public class AccommodationServiceImpl extends PlaceService {
 		TouristApiClientUtil tourApiClient, AccommodationRepository accommodationRepository,
 		CategoryService categoryService,
 		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
-		PlaceEsService placeEsService) {
+		PlaceEsService placeEsService, TagService tagService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
-			placeEsService, placeRepository);
+			placeEsService, placeRepository, tagService);
 		this.accommodationRepository = accommodationRepository;
 	}
 
@@ -104,7 +104,8 @@ public class AccommodationServiceImpl extends PlaceService {
 		log.info("request detail 카테고리 조회 {}",
 			placeAccommodation.getAccommodation().getPlaceLclsCategory().getLclsSystm3Name());
 		addView(placeAccommodation);
-		return Optional.of(PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION, locale));
+		return Optional.of(PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION, locale,
+			getPlaceTags(placeAccommodation, locale)));
 	}
 
 	@Override

@@ -46,9 +46,9 @@ public class TourServiceImpl extends PlaceService {
 	public TourServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, TourRepository tourRepository, CategoryService categoryService,
 		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
-		PlaceEsService placeEsService) {
+		PlaceEsService placeEsService, TagService tagService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
-			placeEsService, placeRepository);
+			placeEsService, placeRepository, tagService);
 		this.tourRepository = tourRepository;
 	}
 
@@ -97,7 +97,8 @@ public class TourServiceImpl extends PlaceService {
 			placeTour.updateNullTourDetail(tourApiPlaceDetailResponseDto, category);
 		}
 		addView(placeTour);
-		return Optional.of(PlaceDetailResponseDto.from(placeTour, PlaceJoinType.TOUR, locale));
+		return Optional.of(PlaceDetailResponseDto.from(placeTour, PlaceJoinType.TOUR, locale,
+			getPlaceTags(placeTour, locale)));
 	}
 
 	@Override
