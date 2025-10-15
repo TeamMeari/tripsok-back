@@ -101,7 +101,7 @@ public record PlaceBriefSlimResponseDto(
 			id,
 			d.getLocale(),
 			d.getTitle(),
-			d.getTitle(),
+			d.getSummary(),
 			d.getType(),
 			d.getLat() != null ? BigDecimal.valueOf(d.getLat()) : null,
 			d.getLng() != null ? BigDecimal.valueOf(d.getLng()) : null,
