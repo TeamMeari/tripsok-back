@@ -32,7 +32,7 @@ public class PlaceDocument {
 	private String thumbnailUrl;
 	private Double lat;
 	private Double lng;
-	private String location;
+	private GeoPoint location;
 	private String type;
 	private Integer like;
 	private Integer view;
@@ -63,13 +63,13 @@ public class PlaceDocument {
 		String thumb = null;
 		Double lat = null;
 		Double lng = null;
-		String location = null;
+		GeoPoint geoPoint = null;
 
 		if (place.getMapY() != null && place.getMapX() != null) {
 			try {
 				lat = place.getMapY().doubleValue();
 				lng = place.getMapX().doubleValue();
-				location = lat + "," + lng;
+				geoPoint = new GeoPoint(lat, lng);
 			} catch (Exception ignored) {
 			}
 		}
@@ -119,7 +119,7 @@ public class PlaceDocument {
 			.thumbnailUrl(thumb)
 			.lat(lat)
 			.lng(lng)
-			.location(location)
+			.location(geoPoint)
 			.type(type != null ? type.name() : null)
 			.like(place.getLike())
 			.view(place.getView())
@@ -149,6 +149,14 @@ public class PlaceDocument {
 			return urls.getFirst();
 		}
 		return null;
+	}
+
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class GeoPoint {
+		private double lat;
+		private double lon;
 	}
 
 }

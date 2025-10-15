@@ -20,8 +20,10 @@ public interface TourRepository extends JpaRepository<Place, Integer> {
 	@EntityGraph(attributePaths = {"placeTrs", "tour"})
 	Optional<Place> findByContentId(Integer contentId);
 
-	@EntityGraph(attributePaths = {"placeTrs", "tour.tourImages"})
-	Page<Place> findByTourIsNotNull(Pageable pageable);
+	@EntityGraph(attributePaths = {"tour"})
+	Page<Place> findByTourIsNotNullAndPlaceTrs_Id_Locale(
+		String locale, Pageable pageable
+	);
 
 	@EntityGraph(attributePaths = {"placeTrs", "tour", "themes", "themes.theme"})
 	Page<Place> findByTourIsNotNullAndThemes_Theme_Id(Pageable pageable, Integer themeId);

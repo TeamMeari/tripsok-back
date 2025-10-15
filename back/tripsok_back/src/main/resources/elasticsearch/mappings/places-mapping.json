@@ -40,22 +40,11 @@
       "title": {
         "type": "text",
         "fields": {
-          "ko": {
-            "type": "text",
-            "analyzer": "korean_analyzer"
-          },
-          "en": {
-            "type": "text",
-            "analyzer": "standard"
-          },
-          "ja": {
-            "type": "text",
-            "analyzer": "kuromoji"
-          },
-          "zh": {
-            "type": "text",
-            "analyzer": "smartcn"
-          }
+          "ko": { "type": "text", "analyzer": "korean_analyzer" },
+          "en": { "type": "text", "analyzer": "standard" },
+          "ja": { "type": "text", "analyzer": "kuromoji" },
+          "zh": { "type": "text", "analyzer": "smartcn" },
+          "raw": { "type": "keyword", "ignore_above": 256 }
         }
       },
       "address": {

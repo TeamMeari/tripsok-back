@@ -14,7 +14,7 @@ public class PlaceSortStyle {
 	@Schema(
 		description = "정렬 기준 컬럼명",
 		example = "updatedAt",
-		allowableValues = {"updatedAt", "view", "like","name"},
+		allowableValues = {"updatedAt", "view", "like", "name"},
 		defaultValue = "updatedAt"
 	)
 	private String sortKey = "updatedAt";
@@ -27,9 +27,26 @@ public class PlaceSortStyle {
 	)
 	private String direction = "desc";
 
-	public Sort toSort() {
+	public Sort toSortEs() {
 		String safeKey = switch (sortKey) {
-			case "updatedAt", "view", "like","name" -> sortKey;
+			case "updatedAt", "view", "like" -> sortKey;
+			case "name" -> sortKey = "title.raw";
+			default -> "updatedAt";
+		};
+
+		Sort.Direction dir;
+		try {
+			dir = Sort.Direction.fromString(direction);
+		} catch (IllegalArgumentException e) {
+			dir = Sort.Direction.DESC;
+		}
+		return Sort.by(new Sort.Order(dir, safeKey));
+	}
+
+	public Sort toSortJpa() {
+		String safeKey = switch (sortKey) {
+			case "updatedAt", "view", "like" -> sortKey;
+			case "name" -> sortKey = "placeTrs.placeName";
 			default -> "updatedAt";
 		};
 
