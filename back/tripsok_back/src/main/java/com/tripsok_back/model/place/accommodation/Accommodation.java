@@ -5,6 +5,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -48,9 +51,11 @@ public class Accommodation extends BaseModifiableEntity {
 	private PlaceLclsCategory placeLclsCategory;
 
 	@OneToMany(mappedBy = "accommodation", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+	@BatchSize(size = 100)
 	private Set<AccommodationImage> accommodationImages = new LinkedHashSet<>();
 
 	@OneToMany(mappedBy = "accommodation")
+	@Fetch(FetchMode.SUBSELECT)
 	private Set<AccommodationReview> accommodationReviews = new LinkedHashSet<>();
 
 	@OneToOne(mappedBy = "accommodation")

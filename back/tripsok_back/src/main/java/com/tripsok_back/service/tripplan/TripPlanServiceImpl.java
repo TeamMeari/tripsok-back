@@ -14,6 +14,8 @@ import com.tripsok_back.dto.tripplan.request.UpdateTripPlanRequest;
 import com.tripsok_back.dto.tripplan.request.UpdateVisitSpotRequest;
 import com.tripsok_back.dto.tripplan.response.TripPlanExistResponse;
 import com.tripsok_back.dto.tripplan.response.TripPlanResponse;
+import com.tripsok_back.exception.ErrorCode;
+import com.tripsok_back.exception.TripPlanException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.tripplan.TripPlan;
 import com.tripsok_back.model.tripplan.VisitSpot;
@@ -43,7 +45,7 @@ public class TripPlanServiceImpl implements TripPlanService {
 	@Transactional
 	public TripPlanResponse createOrUpdateTripPlan(Integer userId, UpdateTripPlanRequest request, LocaleCode locale) {
 		TripSokUser user = userService.findUserById(userId);
-		TripPlan tripPlan = findTripPlanByUserId(user);
+		TripPlan tripPlan = findTripPlanByUser(user);
 		Set<VisitSpot> existingVisitSpots = getVisitSpotSet(request.visitSpotSet(), tripPlan);
 		tripPlan.updateTripPlan(request, existingVisitSpots);
 		return new TripPlanResponse(tripPlan, locale);
@@ -52,20 +54,26 @@ public class TripPlanServiceImpl implements TripPlanService {
 	@Override
 	@Transactional(readOnly = true)
 	public TripPlanExistResponse checkTripPlanExists(Integer userId) {
-		TripSokUser user = userService.findUserById(userId);
-		TripPlan tripPlan = tripPlanRepository.findByUserId(user.getId());
-		if (tripPlan == null) {
-			return new TripPlanExistResponse(false, null);
-		}
-		return new TripPlanExistResponse(true, tripPlan.getUpdatedAt());
+		userService.findUserById(userId);
+		TripPlan tripPlan = tripPlanRepository.findByUserIdAndStatus(userId, TripPlan.PlanStatus.DRAFT);
+		return tripPlan == null? new TripPlanExistResponse(false, null) : new TripPlanExistResponse(true, tripPlan.getUpdatedAt());
 	}
 
 	@Override
 	@Transactional
 	public TripPlanResponse getTripPlan(Integer userId, LocaleCode locale) {
 		TripSokUser user = userService.findUserById(userId);
-		TripPlan tripPlan = findTripPlanByUserId(user);
+		TripPlan tripPlan = findTripPlanByUser(user);
 		return new TripPlanResponse(tripPlan, locale);
+	}
+
+	@Override
+	public TripPlan findDraftTripPlanByUserId(Integer userId) {
+		TripPlan tripPlan = tripPlanRepository.findByUserIdAndStatus(userId, TripPlan.PlanStatus.DRAFT);
+		if (tripPlan == null) {
+			throw new TripPlanException(ErrorCode.TRIP_PLAN_NOT_FOUND);
+		}
+		return tripPlan;
 	}
 
 	private Set<VisitSpot> getVisitSpotSet(Set<UpdateVisitSpotRequest> visitSpots, TripPlan tripPlan) {
@@ -88,8 +96,8 @@ public class TripPlanServiceImpl implements TripPlanService {
 			.collect(Collectors.toSet());
 	}
 
-	private TripPlan findTripPlanByUserId(TripSokUser user) {
-		TripPlan tripPlan = tripPlanRepository.findByUserId(user.getId());
+	private TripPlan findTripPlanByUser(TripSokUser user) {
+		TripPlan tripPlan = tripPlanRepository.findByUserIdAndStatus(user.getId(), TripPlan.PlanStatus.DRAFT);
 		if (tripPlan == null) {
 			tripPlan = new TripPlan(user);
 			tripPlanRepository.save(tripPlan);

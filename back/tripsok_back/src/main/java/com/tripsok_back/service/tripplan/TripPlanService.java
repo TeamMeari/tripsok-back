@@ -3,6 +3,7 @@ package com.tripsok_back.service.tripplan;
 import com.tripsok_back.dto.tripplan.request.UpdateTripPlanRequest;
 import com.tripsok_back.dto.tripplan.response.TripPlanExistResponse;
 import com.tripsok_back.dto.tripplan.response.TripPlanResponse;
+import com.tripsok_back.model.tripplan.TripPlan;
 import com.tripsok_back.type.LocaleCode;
 
 public interface TripPlanService {
@@ -12,4 +13,5 @@ public interface TripPlanService {
 
 	TripPlanResponse getTripPlan(Integer userId, LocaleCode locale);
 
+	TripPlan findDraftTripPlanByUserId(Integer userId);
 }

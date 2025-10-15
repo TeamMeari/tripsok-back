@@ -56,7 +56,8 @@ public class AuthController {
 	public ResponseEntity<LoginResponse> loginWithOAuth2(@Valid @RequestBody OauthLoginRequest request) {
 		TokenResponse tokenResponse = authService.loginWithOauth2(request);
 		if (tokenResponse.refreshToken() == null) {
-			return ResponseEntity.status(HttpStatus.SEE_OTHER).body(new LoginResponse(tokenResponse.accessToken(), null));
+			return ResponseEntity.status(HttpStatus.SEE_OTHER)
+				.body(new LoginResponse(tokenResponse.accessToken(), null));
 		}
 		return ResponseEntity.status(HttpStatus.OK)
 			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
@@ -68,7 +69,7 @@ public class AuthController {
 		TokenResponse tokenResponse = authService.loginWithEmail(request.getEmail(), request.getPassword());
 		return ResponseEntity.status(HttpStatus.OK)
 			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
-			.body(new LoginResponse(tokenResponse.accessToken(),tokenResponse.nickname()));
+			.body(new LoginResponse(tokenResponse.accessToken(), tokenResponse.nickname()));
 	}
 
 	@PostMapping("/refresh")
@@ -76,7 +77,7 @@ public class AuthController {
 		TokenResponse tokenResponse = authService.refresh(refreshToken);
 		return ResponseEntity.status(HttpStatus.OK)
 			.header(COOKIE_HEARER, getRefreshTokenCookie(tokenResponse.refreshToken()).toString())
-			.body(new LoginResponse(tokenResponse.accessToken(),tokenResponse.nickname()));
+			.body(new LoginResponse(tokenResponse.accessToken(), tokenResponse.nickname()));
 	}
 
 	// 닉네임 중복 확인

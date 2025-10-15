@@ -5,6 +5,9 @@ import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.tripsok_back.dto.tripplan.request.UpdateTripPlanRequest;
 import com.tripsok_back.model.user.TripSokUser;
 import com.tripsok_back.support.BaseModifiableEntity;
@@ -14,16 +17,14 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -34,8 +35,6 @@ import lombok.Setter;
 @Entity
 @Table(name = "TRIP_PLAN", indexes = {
 	@Index(name = "idx_trip_plan_user_id", columnList = "user_id")
-}, uniqueConstraints = {
-	@UniqueConstraint(name = "uk_trip_plan_user", columnNames = {"user_id"})
 })
 @NoArgsConstructor
 public class TripPlan extends BaseModifiableEntity {
@@ -57,7 +56,8 @@ public class TripPlan extends BaseModifiableEntity {
 	@Enumerated(EnumType.STRING) // DRAFT(임시저장) COMPLETED(결제완료)
 	private PlanStatus status;
 
-	@OneToOne(cascade = CascadeType.ALL)
+	@ManyToOne
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	@JoinColumn(name = "user_id")
 	private TripSokUser user;
 
@@ -65,7 +65,7 @@ public class TripPlan extends BaseModifiableEntity {
 	@Column(name = "VERSION", nullable = false)
 	private Integer expectedVersion;        // 낙관적 락(자동 임시저장 충돌 방지)
 
-	@OneToMany(mappedBy = "tripPlan", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "tripPlan", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<VisitSpot> visitSpotSet = new HashSet<>();
 
 	public TripPlan(TripSokUser user) {

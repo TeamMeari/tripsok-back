@@ -13,8 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripsok_back.config.ApiKeyConfig;
 import com.tripsok_back.dto.PageResponse;
-import com.tripsok_back.dto.place.PlaceBriefResponseDto;
+import com.tripsok_back.dto.place.PlaceBriefSlimResponseDto;
 import com.tripsok_back.dto.place.PlaceDetailResponseDto;
+import com.tripsok_back.dto.place.PlaceTagResponseDto;
 import com.tripsok_back.dto.place.ReviewRequestDto;
 import com.tripsok_back.exception.PlaceException;
 import com.tripsok_back.exception.ServiceBlockException;
@@ -39,6 +40,7 @@ public abstract class PlaceService {
 	final GoogleTranslateClient googleTranslateClient;
 	final PlaceEsService placeEsService;
 	private final PlaceRepository placeRepository;
+	private final TagService tagService;
 
 	@Transactional
 	public void addLike(Place place) {
@@ -58,6 +60,10 @@ public abstract class PlaceService {
 		return placeRepository.findByIdIn(placeIds);
 	}
 
+	public Set<PlaceTagResponseDto> getPlaceTags(Place place, LocaleCode locale) {
+		return tagService.getPlaceTags(place, locale);
+	}
+
 	protected void addView(Place place) {
 		place.incrementViewCount();
 	}
@@ -68,9 +74,9 @@ public abstract class PlaceService {
 
 	public abstract Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale);
 
-	public abstract PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable, LocaleCode locale);
+	public abstract PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable, LocaleCode locale);
 
-	public abstract PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
+	public abstract PageResponse<PlaceBriefSlimResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
 		LocaleCode locale);
 
 	public abstract void addReview(Integer userId, ReviewRequestDto reviewRequestdto);

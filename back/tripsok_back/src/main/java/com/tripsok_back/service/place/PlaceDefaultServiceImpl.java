@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripsok_back.config.ApiKeyConfig;
 import com.tripsok_back.dto.PageResponse;
-import com.tripsok_back.dto.place.PlaceBriefResponseDto;
+import com.tripsok_back.dto.place.PlaceBriefSlimResponseDto;
 import com.tripsok_back.dto.place.PlaceDetailResponseDto;
 import com.tripsok_back.dto.place.ReviewRequestDto;
 import com.tripsok_back.exception.TourApiException;
@@ -29,9 +29,10 @@ public class PlaceDefaultServiceImpl extends PlaceService {
 	public PlaceDefaultServiceImpl(PlaceRepository placeRepository,
 		ApiKeyConfig apiKeyConfig, TouristApiClientUtil tourApiClient,
 		CategoryService categoryService, LlmClient groqApiClientUtil,
-		ObjectMapper om, GoogleTranslateClient googleTranslateClient, PlaceEsService placeEsService) {
+		ObjectMapper om, GoogleTranslateClient googleTranslateClient, PlaceEsService placeEsService,
+		TagService tagService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
-			placeEsService, placeRepository);
+			placeEsService, placeRepository, tagService);
 		this.googleTranslateClient = googleTranslateClient;
 	}
 
@@ -51,12 +52,12 @@ public class PlaceDefaultServiceImpl extends PlaceService {
 	}
 
 	@Override
-	public PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable, LocaleCode locale) {
+	public PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable, LocaleCode locale) {
 		throw new TourApiException(CATEGORY_NOT_FOUND);
 	}
 
 	@Override
-	public PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
+	public PageResponse<PlaceBriefSlimResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
 		LocaleCode locale) {
 		throw new TourApiException(CATEGORY_NOT_FOUND);
 	}

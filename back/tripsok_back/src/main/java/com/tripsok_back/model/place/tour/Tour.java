@@ -5,6 +5,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -55,9 +58,11 @@ public class Tour extends BaseModifiableEntity {
 	private Place place;
 
 	@OneToMany(mappedBy = "tour", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+	@BatchSize(size = 100)
 	private Set<TourImage> tourImages = new LinkedHashSet<>();
 
 	@OneToMany(mappedBy = "tour")
+	@Fetch(FetchMode.SUBSELECT)
 	private Set<TourReview> tourReviews = new LinkedHashSet<>();
 
 	public static Tour buildTour(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto) {

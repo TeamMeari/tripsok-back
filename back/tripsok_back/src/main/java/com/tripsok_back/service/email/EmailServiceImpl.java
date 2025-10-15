@@ -3,6 +3,7 @@ package com.tripsok_back.service.email;
 import static com.tripsok_back.exception.ErrorCode.*;
 
 import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.Random;
 
 import org.springframework.mail.javamail.JavaMailSender;
@@ -12,9 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import com.tripsok_back.dto.booking.request.BookingRequest;
 import com.tripsok_back.dto.email.response.EmailVerifyResponse;
 import com.tripsok_back.exception.EmailException;
 import com.tripsok_back.model.auth.EmailVerificationToken;
+import com.tripsok_back.model.tripplan.TripPlan;
 import com.tripsok_back.repository.email.RedisEmailVerificationTokenRepository;
 import com.tripsok_back.security.jwt.JwtUtil;
 
@@ -36,13 +39,15 @@ public class EmailServiceImpl implements EmailService {
 	@Transactional
 	public void sendVerificationEmail(String email) {
 		String code = createCode();
-		String subject = "[TripSok] 이메일 인증 코드 안내";
+		HashMap<String, Object> values = new HashMap<>();
+		values.put("code", code);
 		try {
 			EmailVerificationToken codeFoundByEmail = emailVerificationTokenRepository.findByEmail(email);
 			if (codeFoundByEmail != null) {
 				emailVerificationTokenRepository.delete(codeFoundByEmail);
 			}
-			MimeMessage message = createEmailMessage(email, subject, code);
+			MimeMessage message = createEmailMessage(email, "[Tourang] Email Verification Code", values,
+				"email-verify-template");
 			emailVerificationTokenRepository.save(
 				new EmailVerificationToken(email, code, jwtUtil.getEmailVerificationTokenExpirationTime()));
 			mailSender.send(message);
@@ -66,6 +71,26 @@ public class EmailServiceImpl implements EmailService {
 		return new EmailVerifyResponse(jwtUtil.generateEmailVerificationToken(email));
 	}
 
+	@Override
+	public void sendBookingConfirmationEmail(BookingRequest request, String userName, TripPlan tripPlan) {
+		try {
+			HashMap<String, Object> values = new HashMap<>();
+			String email = request.getContactEmail();
+			values.put("userName", userName);
+			values.put("tripDate", tripPlan.getTripDate().toString());
+			values.put("startTime", tripPlan.getStartTime().toString());
+			values.put("numberOfParticipants", tripPlan.getNumberOfPeople());
+			values.put("amount", request.getPaymentInfo().getAmount());
+			MimeMessage message = createEmailMessage(email, "[Tourang] Your Payment Has Been Confirmed", values,
+				"payment_confirmation_template");
+			mailSender.send(message);
+			log.info("이메일 전송 완료: {}", email);
+		} catch (Exception e) {
+			log.error("이메일 전송 실패: {}", e.getMessage());
+			throw new EmailException(EMAIL_SEND_FAILED);
+		}
+	}
+
 	private String createCode() {
 		int codeLength = 6;
 		Random random = new SecureRandom();
@@ -76,12 +101,15 @@ public class EmailServiceImpl implements EmailService {
 		return code.toString();
 	}
 
-	private MimeMessage createEmailMessage(String email, String subject, String code) throws MessagingException {
+	private MimeMessage createEmailMessage(String email, String subject, HashMap<String, Object> values,
+		String template) throws MessagingException {
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 		Context context = new Context();
-		context.setVariable("code", code);
-		String htmlContent = templateEngine.process("email-verify-template", context);
+		for (String key : values.keySet()) {
+			context.setVariable(key, values.get(key));
+		}
+		String htmlContent = templateEngine.process(template, context);
 		helper.setSubject(subject);
 		helper.setText(htmlContent, true);
 		helper.setTo(email);

@@ -22,29 +22,27 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class LocalLlmClientUtil implements LlmClient {
 
-	private final WebClient ollamaApiWebClient;
-	private final ObjectMapper objectMapper;
-
 	private static final String DEFAULT_MODEL = "qwen2.5:14b-instruct";
-
 	private static final String shortDescriptionPrompt =
 		"""
 			ROLE
 			- You are a copywriter for tourist spots.
-				
+			
 			TASK
 			- Write exactly ONE Korean sentence about the given place.
-				
+			
 			HARD CONSTRAINTS
 			- Only use facts from the input. Do NOT add places, dishes, or claims.
 			- Length: ≤ 15 Korean characters (10~15 권장).
 			- End naturally on a meaningful keyword (no trailing quotes, punctuation, or particles like '이다', '합니다').
 			- Plain Korean text only (no emojis, no English, no commas).
 			- If the input is unrelated to tourist spots OR lacks usable info, output exactly: 해당 없음
-				
+			
 			STYLE
 			- Catchy, memorable, SNS-friendly.
 			""";
+	private final WebClient ollamaApiWebClient;
+	private final ObjectMapper objectMapper;
 
 	public String requestGroqShortDescription(String prompt) {
 		String adjustPrompt = shortDescriptionPrompt + prompt;

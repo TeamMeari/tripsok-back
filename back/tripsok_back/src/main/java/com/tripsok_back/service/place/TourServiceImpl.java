@@ -13,7 +13,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripsok_back.config.ApiKeyConfig;
 import com.tripsok_back.dto.PageResponse;
-import com.tripsok_back.dto.place.PlaceBriefResponseDto;
+import com.tripsok_back.dto.place.PlaceBriefSlimResponseDto;
 import com.tripsok_back.dto.place.PlaceDetailResponseDto;
 import com.tripsok_back.dto.place.ReviewRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceDetailRequestDto;
@@ -46,9 +46,9 @@ public class TourServiceImpl extends PlaceService {
 	public TourServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, TourRepository tourRepository, CategoryService categoryService,
 		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
-		PlaceEsService placeEsService) {
+		PlaceEsService placeEsService, TagService tagService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
-			placeEsService, placeRepository);
+			placeEsService, placeRepository, tagService);
 		this.tourRepository = tourRepository;
 	}
 
@@ -97,7 +97,8 @@ public class TourServiceImpl extends PlaceService {
 			placeTour.updateNullTourDetail(tourApiPlaceDetailResponseDto, category);
 		}
 		addView(placeTour);
-		return Optional.of(PlaceDetailResponseDto.from(placeTour, PlaceJoinType.TOUR, locale));
+		return Optional.of(PlaceDetailResponseDto.from(placeTour, PlaceJoinType.TOUR, locale,
+			getPlaceTags(placeTour, locale)));
 	}
 
 	@Override
@@ -111,13 +112,13 @@ public class TourServiceImpl extends PlaceService {
 	}
 
 	@Override
-	public PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable,
+	public PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable,
 		com.tripsok_back.type.LocaleCode locale) {
-		Page<Place> placeList = tourRepository.findByTourIsNotNull(pageable);
+		Page<Place> placeList = tourRepository.findByTourIsNotNullAndPlaceTrs_Id_Locale(locale.getCode(), pageable);
 		if (placeList.getTotalPages() == 0)
 			return PageResponse.empty();
-		Page<PlaceBriefResponseDto> dtoList = placeList.map(
-			e -> PlaceBriefResponseDto.from(e, getType().name(),
+		Page<PlaceBriefSlimResponseDto> dtoList = placeList.map(
+			e -> PlaceBriefSlimResponseDto.from(e, getType().name(),
 				e.getTour().getImageUrlList().getFirst(),
 				e.getTour().getTourImages().size(),
 				e.getTour().getTourReviews().size(),
@@ -127,11 +128,11 @@ public class TourServiceImpl extends PlaceService {
 	}
 
 	@Override
-	public PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
+	public PageResponse<PlaceBriefSlimResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
 		LocaleCode locale) {
 		Page<Place> placeList = tourRepository.findByTourIsNotNullAndThemes_Theme_Id(pageable, themeId);
-		Page<PlaceBriefResponseDto> dtoList = placeList.map(
-			e -> PlaceBriefResponseDto.from(e, getType().name(),
+		Page<PlaceBriefSlimResponseDto> dtoList = placeList.map(
+			e -> PlaceBriefSlimResponseDto.from(e, getType().name(),
 				e.getTour().getImageUrlList().getFirst(),
 				e.getTour().getTourImages().size(),
 				e.getTour().getTourReviews().size(),

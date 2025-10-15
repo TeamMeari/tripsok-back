@@ -5,6 +5,9 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -54,9 +57,11 @@ public class Restaurant extends BaseModifiableEntity {
 	private Place place;
 
 	@OneToMany(mappedBy = "restaurant", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+	@Fetch(FetchMode.SUBSELECT)
 	private Set<RestaurantImage> restaurantImages = new LinkedHashSet<>();
 
 	@OneToMany(mappedBy = "restaurant")
+	@BatchSize(size = 100)
 	private Set<RestaurantReview> restaurantReviews = new LinkedHashSet<>();
 
 	public static Restaurant buildRestaurant(TourApiPlaceResponseDto placeDto,
