@@ -50,18 +50,19 @@ public class InterestPlaceServiceImpl implements InterestPlaceService {
 		LocaleCode locale) {
 		Pageable pageable = PageRequest.ofSize(size);
 		Slice<InterestPlace> interestPlaces = interestPlaceRepository.findInterestPlacesByUser(user, pageable, lastId,
-			type.name());
+			type == null ? null : type.name());
 
 		List<InterestPlaceResponse> interestPlaceResponses = interestPlaces.stream()
 			.map(ip -> {
 				Place place = ip.getPlace();
+				PlaceJoinType placeType = type != null ? type : PlaceJoinType.getPlaceType(place);
 				return InterestPlaceResponse.builder()
 					.id(ip.getId())
 					.placeId(place.getId())
 					.language(locale)
 					.name(place.getPlaceTr(locale).getPlaceName())
-					.type(type)
-					.thumbnailUrl(getThumbnailUrl(place, type)).build();
+					.type(placeType)
+					.thumbnailUrl(getThumbnailUrl(place, placeType)).build();
 			}).toList();
 		return new SliceResponse(interestPlaces.hasNext(), interestPlaceResponses);
 	}
