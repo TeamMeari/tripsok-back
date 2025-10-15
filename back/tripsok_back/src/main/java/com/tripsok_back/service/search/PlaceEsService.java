@@ -124,7 +124,7 @@ public class PlaceEsService {
 						return bl;
 					}))
 					.source(src -> src.filter(flt -> flt.includes(
-						"placeId", "locale", "title", "type", "lat", "lng",
+						"placeId", "locale", "title", "summary", "type", "lat", "lng",
 						"thumbnailUrl", "like", "view", "updatedAt"
 					)));
 
@@ -205,7 +205,7 @@ public class PlaceEsService {
 						}))
 					)
 					.source(src -> src.filter(flt -> flt.includes(
-						"placeId", "locale", "title", "type", "lat", "lng",
+						"placeId", "locale", "title", "summary", "type", "lat", "lng",
 						"thumbnailUrl", "like", "view", "updatedAt"
 					)))
 					.trackTotalHits(t -> t.enabled(false));
