@@ -34,6 +34,7 @@ import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
+import co.elastic.clients.elasticsearch.indices.DeleteIndexResponse;
 import co.elastic.clients.elasticsearch.indices.ExistsRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -412,7 +413,7 @@ public class PlaceEsService {
 				))
 
 				.source(src -> src.filter(flt -> flt.includes(
-					"placeId", "locale", "title", "type", "lat", "lng",
+					"placeId", "locale", "title", "type", "lat", "lng", "summary",
 					"thumbnailUrl", "like", "view", "updatedAt"
 				)))
 			);
@@ -430,6 +431,15 @@ public class PlaceEsService {
 		} catch (IOException e) {
 			log.error("거리 기반 검색 실패", e);
 			throw new RuntimeException("ES 거리 기반 검색 실패", e);
+		}
+	}
+
+	public void deleteAndReIndex() {
+		try {
+			DeleteIndexResponse response = esClient.indices().delete(d -> d.index(INDEX));
+			log.info("삭제 응답: {}", response.acknowledged());
+		} catch (Exception e) {
+			log.info("삭제가 정상적으로 이루어지지 않음: {}", e.getMessage());
 		}
 	}
 }

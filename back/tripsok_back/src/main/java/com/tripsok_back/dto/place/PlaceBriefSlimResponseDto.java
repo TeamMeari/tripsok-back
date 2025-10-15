@@ -13,6 +13,7 @@ public record PlaceBriefSlimResponseDto(
 	Integer id,
 	String language,
 	String name,
+	String summary,
 	String type,
 	BigDecimal lat,
 	BigDecimal lng,
@@ -40,6 +41,7 @@ public record PlaceBriefSlimResponseDto(
 			p.getId(),
 			locale != null ? locale.getLanguage() : null,
 			tr != null ? tr.getPlaceName() : null,
+			tr.getSummary(),
 			type,
 			p.getMapY(), // lat
 			p.getMapX(), // lng
@@ -78,6 +80,7 @@ public record PlaceBriefSlimResponseDto(
 			p.getId(),
 			locale.getCode(),
 			tr.getPlaceName(),
+			tr.getSummary(),
 			type,
 			p.getMapY(),
 			p.getMapX(),
@@ -97,6 +100,7 @@ public record PlaceBriefSlimResponseDto(
 		return new PlaceBriefSlimResponseDto(
 			id,
 			d.getLocale(),
+			d.getTitle(),
 			d.getTitle(),
 			d.getType(),
 			d.getLat() != null ? BigDecimal.valueOf(d.getLat()) : null,
