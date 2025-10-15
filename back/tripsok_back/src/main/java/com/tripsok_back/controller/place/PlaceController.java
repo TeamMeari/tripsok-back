@@ -160,7 +160,7 @@ public class PlaceController {
 			}
 
 			long embOffset = offset - textTotal;
-			int embPageIdx = (int) Math.max(0, embOffset / size);
+			int embPageIdx = (int)Math.max(0, embOffset / size);
 
 			Page<PlaceBriefSlimResponseDto> embPage = placeEsService.unifiedEmbeddingSearch(
 				PageRequest.of(embPageIdx, size, sortEs),

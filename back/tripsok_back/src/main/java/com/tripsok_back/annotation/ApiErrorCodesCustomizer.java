@@ -23,7 +23,8 @@ import io.swagger.v3.oas.models.responses.ApiResponse;
 public class ApiErrorCodesCustomizer implements OperationCustomizer {
 	@Override
 	public Operation customize(Operation operation, HandlerMethod handlerMethod) {
-		ApiErrorCodes annotation = AnnotatedElementUtils.findMergedAnnotation(handlerMethod.getMethod(), ApiErrorCodes.class);
+		ApiErrorCodes annotation = AnnotatedElementUtils.findMergedAnnotation(handlerMethod.getMethod(),
+			ApiErrorCodes.class);
 		if (annotation != null) {
 			// status code별로 ErrorCode 그룹화
 			Map<Integer, List<ErrorCode>> grouped = new HashMap<>();
@@ -40,7 +41,8 @@ public class ApiErrorCodesCustomizer implements OperationCustomizer {
 					example.setValue(new ErrorResponse(errorCode.getCode(), errorCode.getErrorMessage()));
 					mediaType.addExamples(errorCode.name(), example);
 				}
-				apiResponse.setContent(new Content().addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE, mediaType));
+				apiResponse.setContent(
+					new Content().addMediaType(org.springframework.http.MediaType.APPLICATION_JSON_VALUE, mediaType));
 				operation.getResponses().addApiResponse(String.valueOf(entry.getKey()), apiResponse);
 			}
 		}

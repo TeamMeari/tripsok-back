@@ -7,6 +7,7 @@ import com.tripsok_back.type.LocaleCode;
 
 public interface BookingService {
 	void validateBookingTripPlan(Integer userId);
+
 	CompleteBookingResponse completeBooking(Integer userId, LocaleCode locale, BookingRequest request);
 
 	void UpdateBookingSpotMemo(Integer userId, BookingSpotMemoUpdateRequest request);

@@ -47,7 +47,7 @@ public class PageResponse<E> {
 	}
 
 	public static <E> PageResponse<E> fromMerged(int currentPage, int size, long totalItems, List<E> items) {
-		int totalPages = (int) Math.ceil((double) totalItems / size);
+		int totalPages = (int)Math.ceil((double)totalItems / size);
 		return new PageResponse<>(
 			currentPage,
 			totalPages,

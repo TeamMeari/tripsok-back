@@ -1,32 +1,7 @@
 package com.tripsok_back.placeServiceTest;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.util.Map;
-
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.web.reactive.function.client.ClientRequest;
-import org.springframework.web.reactive.function.client.ClientResponse;
-import org.springframework.web.reactive.function.client.ExchangeFunction;
-import org.springframework.web.reactive.function.client.WebClient;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tripsok_back.dto.tourApi.LclsCategoryItemResponseDto;
-import com.tripsok_back.dto.tourApi.LclsSystmCodeRequestDto;
-import com.tripsok_back.dto.tourApi.TourApiPlaceDetailRequestDto;
-import com.tripsok_back.dto.tourApi.TourApiPlaceRequestDto;
-import com.tripsok_back.exception.InternalErrorCode;
-import com.tripsok_back.exception.TourApiException;
-import com.tripsok_back.type.TourismType;
-import com.tripsok_back.util.TouristApiClientUtil;
 
 @ExtendWith(MockitoExtension.class) // Mockito만 확장(스프링 컨텍스트 없음)
 class TouristApiClientUtilTest {

@@ -28,23 +28,23 @@ public class GroqLlmClient implements LlmClient {
 	private static final String shortDescriptionPrompt = """
 		ROLE
 		- You are a copywriter for tourist spots.
-
+		
 		TASK
 		- Write exactly ONE Korean sentence about the given place.
-
+		
 		HARD CONSTRAINTS
 		- Only use facts from the input. Do NOT add places, dishes, or claims.
 		- Length: ≤ 15 Korean characters (권장: 10~15).
 		- Must include at least one factual keyword (ex. place name, city, landmark, ocean, mountain).
 		- Plain Korean text only (no emojis, no English, no commas).
 		- If the input is unrelated to tourist spots OR lacks usable info, output exactly: 해당 없음
-
+		
 		STYLE
 		- Mix factual information with emotional expression.
 		- Deliver both clarity (what/where) and feeling (why it’s special).
 		- Use simple, catchy words that feel natural in SNS captions.
 		- End naturally on a meaningful word (no trailing quotes, punctuation, or particles like '이다', '합니다').
-				""";
+		""";
 	@Qualifier("groqApiWebClient")
 	private final WebClient groqApiWebClient;
 	private final ObjectMapper objectMapper;

@@ -29,7 +29,7 @@ public class TagServiceImpl implements TagService {
 			return place.getTags().stream().map(PlaceTag::toDto).collect(Collectors.toSet());
 		} else {
 			Set<Tag> tags = place.getTags().stream().map(PlaceTag::getTag).collect(Collectors.toSet());
-			List<TagTr> tagTrs = tags.stream().map(it-> it.getTagTr(locale)).toList();
+			List<TagTr> tagTrs = tags.stream().map(it -> it.getTagTr(locale)).toList();
 			return tagTrs.stream()
 				.map(it -> new PlaceTagResponseDto(it.getTag().getId(), it.getName()))
 				.collect(Collectors.toSet());
