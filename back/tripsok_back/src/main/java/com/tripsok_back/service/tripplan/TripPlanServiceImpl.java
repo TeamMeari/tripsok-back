@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tripsok_back.dto.tripplan.request.UpdateTripPlanRequest;
 import com.tripsok_back.dto.tripplan.request.UpdateVisitSpotRequest;
+import com.tripsok_back.dto.tripplan.response.TripPlanExistResponse;
 import com.tripsok_back.dto.tripplan.response.TripPlanResponse;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.tripplan.TripPlan;
@@ -46,6 +47,17 @@ public class TripPlanServiceImpl implements TripPlanService {
 		Set<VisitSpot> existingVisitSpots = getVisitSpotSet(request.visitSpotSet(), tripPlan);
 		tripPlan.updateTripPlan(request, existingVisitSpots);
 		return new TripPlanResponse(tripPlan, locale);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public TripPlanExistResponse checkTripPlanExists(Integer userId) {
+		TripSokUser user = userService.findUserById(userId);
+		TripPlan tripPlan = tripPlanRepository.findByUserId(user.getId());
+		if (tripPlan == null) {
+			return new TripPlanExistResponse(false, null);
+		}
+		return new TripPlanExistResponse(true, tripPlan.getUpdatedAt());
 	}
 
 	@Override

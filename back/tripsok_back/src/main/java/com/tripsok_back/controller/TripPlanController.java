@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tripsok_back.dto.tripplan.request.UpdateTripPlanRequest;
+import com.tripsok_back.dto.tripplan.response.TripPlanExistResponse;
 import com.tripsok_back.dto.tripplan.response.TripPlanResponse;
 import com.tripsok_back.service.tripplan.TripPlanService;
 import com.tripsok_back.type.LocaleCode;
@@ -38,6 +39,11 @@ public class TripPlanController {
 			"KO", "EN", "JA", "CN"}))
 		@RequestParam(name = "locale", defaultValue = "KO") LocaleCode locale) {
 		return ResponseEntity.ok(tripPlanService.createOrUpdateTripPlan(userId, request, locale));
+	}
+
+	@GetMapping("/exists")
+	public ResponseEntity<TripPlanExistResponse> checkTripExists(@AuthenticationPrincipal Integer userId) {
+		return ResponseEntity.ok(tripPlanService.checkTripPlanExists(userId));
 	}
 
 	@GetMapping
