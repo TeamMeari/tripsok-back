@@ -39,6 +39,7 @@ public class TouristApiScheduler {
 	public void initTourPlaceRequest() throws ServiceBlockException {
 
 		try {
+
 			runBatchCategoryRequestApi();
 			runBatchAccommodationRequestApi();
 			runBatchRestaurantRequestApi();

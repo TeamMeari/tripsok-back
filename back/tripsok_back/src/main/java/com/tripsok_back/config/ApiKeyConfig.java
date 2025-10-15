@@ -35,21 +35,23 @@ public class ApiKeyConfig {
 	@Value("${google.translate.keyJson:}")
 	private String googleKeyJson;
 
-    @PostConstruct
-    void resolveProjectIdFromKeyIfMissing() {
-        if (googleProjectId != null && !googleProjectId.isBlank()) {
+	@PostConstruct
+	void resolveProjectIdFromKeyIfMissing() {
+		if (googleProjectId != null && !googleProjectId.isBlank()) {
 			log.warn("Google project ID 가 비었습니다", googleProjectId);
-            return;
-        }
-        try {
-            if (googleKeyJson == null || googleKeyJson.isBlank()) return;
-            ObjectMapper mapper = new ObjectMapper();
-            Map<String, Object> json = mapper.readValue(googleKeyJson, new TypeReference<>() {});
-            Object pid = json.get("project_id");
-            if (pid != null) {
-                googleProjectId = String.valueOf(pid);
-            }
-        } catch (Exception ignored) {
-        }
-    }
+			return;
+		}
+		try {
+			if (googleKeyJson == null || googleKeyJson.isBlank())
+				return;
+			ObjectMapper mapper = new ObjectMapper();
+			Map<String, Object> json = mapper.readValue(googleKeyJson, new TypeReference<>() {
+			});
+			Object pid = json.get("project_id");
+			if (pid != null) {
+				googleProjectId = String.valueOf(pid);
+			}
+		} catch (Exception ignored) {
+		}
+	}
 }

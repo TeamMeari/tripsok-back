@@ -14,7 +14,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripsok_back.config.ApiKeyConfig;
 import com.tripsok_back.dto.PageResponse;
-import com.tripsok_back.dto.place.PlaceBriefResponseDto;
+import com.tripsok_back.dto.place.PlaceBriefSlimResponseDto;
 import com.tripsok_back.dto.place.PlaceDetailResponseDto;
 import com.tripsok_back.dto.place.ReviewRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceDetailRequestDto;
@@ -110,13 +110,14 @@ public class RestaurantServiceImpl extends PlaceService {
 	}
 
 	@Override
-	public PageResponse<PlaceBriefResponseDto> getPlaceList(Pageable pageable,
+	public PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable,
 		com.tripsok_back.type.LocaleCode locale) {
-		Page<Place> placeList = restaurantRepository.findByRestaurantIsNotNull(pageable);
+		Page<Place> placeList = restaurantRepository.findByRestaurantIsNotNullAndPlaceTrs_Id_Locale(locale.getCode(),
+			pageable);
 		if (placeList.getTotalPages() == 0)
 			return PageResponse.empty();
-		Page<PlaceBriefResponseDto> dtoList = placeList.map(
-			e -> PlaceBriefResponseDto.from(e, getType().name(),
+		Page<PlaceBriefSlimResponseDto> dtoList = placeList.map(
+			e -> PlaceBriefSlimResponseDto.from(e, getType().name(),
 				e.getRestaurant().getImageUrlList().getFirst(),
 				e.getRestaurant().getRestaurantImages().size(),
 				e.getRestaurant().getRestaurantReviews().size(),
@@ -125,11 +126,11 @@ public class RestaurantServiceImpl extends PlaceService {
 	}
 
 	@Override
-	public PageResponse<PlaceBriefResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
+	public PageResponse<PlaceBriefSlimResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
 		LocaleCode locale) {
 		Page<Place> placeList = restaurantRepository.findByRestaurantIsNotNullAndThemes_Theme_Id(pageable, themeId);
-		Page<PlaceBriefResponseDto> dtoList = placeList.map(
-			e -> PlaceBriefResponseDto.from(e, getType().name(),
+		Page<PlaceBriefSlimResponseDto> dtoList = placeList.map(
+			e -> PlaceBriefSlimResponseDto.from(e, getType().name(),
 				e.getRestaurant().getImageUrlList().getFirst(),
 				e.getRestaurant().getRestaurantImages().size(),
 				e.getRestaurant().getRestaurantReviews().size(),

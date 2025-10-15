@@ -105,7 +105,8 @@ public class AuthServiceImpl implements AuthService {
 				GoogleUserInfo googleUserInfo = getGoogleUserInfo(tokenResponse.getIdToken());
 				user = userRepository.findBySocialIdAndSocialType(googleUserInfo.getSub(), GOOGLE);
 				if (user == null) {
-					return new TokenResponse(jwtUtil.generateOAuth2Token(tokenResponse.getIdToken(), GOOGLE), null, null);
+					return new TokenResponse(jwtUtil.generateOAuth2Token(tokenResponse.getIdToken(), GOOGLE), null,
+						null);
 				}
 			}
 			default -> throw new AuthException(ErrorCode.UNSUPPORTED_SOCIAL_TYPE);
@@ -120,7 +121,8 @@ public class AuthServiceImpl implements AuthService {
 			Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(email, password));
 			TripSokUserDto userDetails = (TripSokUserDto)authentication.getPrincipal();
-			return getTokenResponse(Integer.parseInt(userDetails.getUserId()), userDetails.getAuthorities(), userDetails.getNickname());
+			return getTokenResponse(Integer.parseInt(userDetails.getUserId()), userDetails.getAuthorities(),
+				userDetails.getNickname());
 		} catch (Exception e) {
 			throw new AuthException(ErrorCode.INVALID_CREDENTIALS, e.getMessage());
 		}

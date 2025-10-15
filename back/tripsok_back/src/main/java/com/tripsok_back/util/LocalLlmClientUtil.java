@@ -22,11 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class LocalLlmClientUtil implements LlmClient {
 
-	private final WebClient ollamaApiWebClient;
-	private final ObjectMapper objectMapper;
-
 	private static final String DEFAULT_MODEL = "qwen2.5:14b-instruct";
-
 	private static final String shortDescriptionPrompt =
 		"""
 			ROLE
@@ -45,6 +41,8 @@ public class LocalLlmClientUtil implements LlmClient {
 			STYLE
 			- Catchy, memorable, SNS-friendly.
 			""";
+	private final WebClient ollamaApiWebClient;
+	private final ObjectMapper objectMapper;
 
 	public String requestGroqShortDescription(String prompt) {
 		String adjustPrompt = shortDescriptionPrompt + prompt;

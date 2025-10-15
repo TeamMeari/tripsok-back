@@ -70,7 +70,8 @@ public class TouristApiClientUtil {
 		return result;
 	}
 
-	public TourApiPlaceDetailResponseDto fetchPlaceDataDetail(TourApiPlaceDetailRequestDto dto) throws ServiceBlockException {
+	public TourApiPlaceDetailResponseDto fetchPlaceDataDetail(TourApiPlaceDetailRequestDto dto) throws
+		ServiceBlockException {
 		isServiceBlocked();
 		URI uri = UriComponentsBuilder
 			.fromHttpUrl("https://apis.data.go.kr/B551011/KorService2/detailCommon2")
