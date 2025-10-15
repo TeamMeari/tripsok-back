@@ -89,14 +89,17 @@ public class TourServiceImpl extends PlaceService {
 			createTransliterationForNameAndAddress(placeTour, locale);
 		}
 		if (placeTour.getTour().getPlaceLclsCategory() == null ||
-			(placeTour.getTour().getTourImages() == null || placeTour.getTour().getTourImages().isEmpty())) {
+			(placeTour.getTour().getTourImages() == null || placeTour.getTour().getTourImages().isEmpty()) || placeTour.getTourismType() == null) {
 			TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto = requestPlaceDetail(
 				placeTour.getContentId());
 			PlaceLclsCategory category = categoryService.getCategoryByCode(
 				tourApiPlaceDetailResponseDto.getCategoryLevel3());
 			placeTour.updateNullTourDetail(tourApiPlaceDetailResponseDto, category);
 		}
+
+		ensurePlaceIntro(placeTour);
 		addView(placeTour);
+		tourRepository.save(placeTour);
 		return Optional.of(PlaceDetailResponseDto.from(placeTour, PlaceJoinType.TOUR, locale));
 	}
 

@@ -4,6 +4,8 @@ import static com.tripsok_back.exception.InternalErrorCode.*;
 
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +16,7 @@ import com.tripsok_back.dto.place.PlaceBriefSlimResponseDto;
 import com.tripsok_back.dto.place.PlaceDetailResponseDto;
 import com.tripsok_back.dto.place.ReviewRequestDto;
 import com.tripsok_back.exception.TourApiException;
+import com.tripsok_back.model.place.Place;
 import com.tripsok_back.repository.place.PlaceRepository;
 import com.tripsok_back.service.search.PlaceEsService;
 import com.tripsok_back.type.LocaleCode;
@@ -63,6 +66,11 @@ public class PlaceDefaultServiceImpl extends PlaceService {
 
 	@Override
 	public void addReview(Integer userId, ReviewRequestDto reviewRequestdto) {
+		throw new TourApiException(CATEGORY_NOT_FOUND);
+	}
+
+	@Override
+	public Page<Place> findAll(PageRequest of) {
 		throw new TourApiException(CATEGORY_NOT_FOUND);
 	}
 

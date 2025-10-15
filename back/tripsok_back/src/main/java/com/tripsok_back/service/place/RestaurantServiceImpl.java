@@ -97,14 +97,16 @@ public class RestaurantServiceImpl extends PlaceService {
 		if (placeRestaurant.getRestaurant().getPlaceLclsCategory() == null ||
 			(placeRestaurant.getRestaurant().getRestaurantImages() == null || placeRestaurant.getRestaurant()
 				.getRestaurantImages()
-				.isEmpty())) {
+				.isEmpty()) || placeRestaurant.getTourismType() == null) {
 			TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto = requestPlaceDetail(
 				placeRestaurant.getContentId());
 			PlaceLclsCategory category = categoryService.getCategoryByCode(
 				tourApiPlaceDetailResponseDto.getCategoryLevel3());
 			placeRestaurant.updateNullRestaurantDetail(tourApiPlaceDetailResponseDto, category);
 		}
+		ensurePlaceIntro(placeRestaurant);
 		addView(placeRestaurant);
+		restaurantRepository.save(placeRestaurant);
 		return Optional.of(PlaceDetailResponseDto.from(placeRestaurant, PlaceJoinType.RESTAURANT, locale));
 	}
 

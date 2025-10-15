@@ -85,6 +85,7 @@ public class AccommodationServiceImpl extends PlaceService {
 			!StringUtils.hasText(placeAccommodation.getPlaceTr(LocaleCode.KO).getSummary())) {
 			createShortDescription(placeAccommodation);
 		}
+
 		if (locale != null && locale != LocaleCode.KO) {
 			if (placeAccommodation.getPlaceTr(locale) == null ||
 				!StringUtils.hasText(placeAccommodation.getPlaceTr(locale).getSummary())) {
@@ -94,16 +95,17 @@ public class AccommodationServiceImpl extends PlaceService {
 			createInformationTranslation(placeAccommodation, locale);
 			createTransliterationForNameAndAddress(placeAccommodation, locale);
 		}
-		if (placeAccommodation.getAccommodation().getPlaceLclsCategory() == null) {
+		if (placeAccommodation.getAccommodation().getPlaceLclsCategory() == null || (placeAccommodation.getTour().getTourImages() == null || placeAccommodation.getTour().getTourImages().isEmpty()) || placeAccommodation.getTourismType() == null) {
 			TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto = requestPlaceDetail(
 				placeAccommodation.getContentId());
 			PlaceLclsCategory category = categoryService.getCategoryByCode(
 				tourApiPlaceDetailResponseDto.getCategoryLevel3());
 			placeAccommodation.updateNullAccommodationDetail(tourApiPlaceDetailResponseDto, category);
 		}
-		log.info("request detail 카테고리 조회 {}",
-			placeAccommodation.getAccommodation().getPlaceLclsCategory().getLclsSystm3Name());
+
+		ensurePlaceIntro(placeAccommodation);
 		addView(placeAccommodation);
+		accommodationRepository.save(placeAccommodation);
 		return Optional.of(PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION, locale));
 	}
 
