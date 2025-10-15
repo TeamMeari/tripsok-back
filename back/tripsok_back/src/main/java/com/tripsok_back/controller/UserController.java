@@ -87,7 +87,7 @@ public class UserController {
 		@Parameter(description = "마지막으로 조회된 데이터 ID", example = "123")
 		@RequestParam(required = false) Integer lastId,
 		@Parameter(description = "장소 타입")
-		@RequestParam(defaultValue = "TOUR", required = false) PlaceJoinType type,
+		@RequestParam(required = false) PlaceJoinType type,
 		@Parameter(description = "언어 코드")
 		@RequestParam(defaultValue = "EN", required = false) LocaleCode locale) {
 		return ResponseEntity.ok(userService.getUserLikedPlaces(userId, size, lastId, type, locale));

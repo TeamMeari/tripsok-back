@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import com.tripsok_back.dto.SliceResponse;
 import com.tripsok_back.dto.user.response.InterestPlaceResponse;
+import com.tripsok_back.exception.ErrorCode;
+import com.tripsok_back.exception.PlaceException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.user.InterestPlace;
 import com.tripsok_back.model.user.TripSokUser;
@@ -50,18 +52,19 @@ public class InterestPlaceServiceImpl implements InterestPlaceService {
 		LocaleCode locale) {
 		Pageable pageable = PageRequest.ofSize(size);
 		Slice<InterestPlace> interestPlaces = interestPlaceRepository.findInterestPlacesByUser(user, pageable, lastId,
-			type.name());
+			type == null ? null : type.name());
 
 		List<InterestPlaceResponse> interestPlaceResponses = interestPlaces.stream()
 			.map(ip -> {
 				Place place = ip.getPlace();
+				PlaceJoinType placeType = type != null ? type : getPlaceType(place);
 				return InterestPlaceResponse.builder()
 					.id(ip.getId())
 					.placeId(place.getId())
 					.language(locale)
 					.name(place.getPlaceTr(locale).getPlaceName())
-					.type(type)
-					.thumbnailUrl(getThumbnailUrl(place, type)).build();
+					.type(placeType)
+					.thumbnailUrl(getThumbnailUrl(place, placeType)).build();
 			}).toList();
 		return new SliceResponse(interestPlaces.hasNext(), interestPlaceResponses);
 	}
@@ -72,5 +75,17 @@ public class InterestPlaceServiceImpl implements InterestPlaceService {
 			case RESTAURANT -> place.getRestaurant().getImageUrlList().getFirst();
 			case TOUR -> place.getTour().getImageUrlList().getFirst();
 		};
+	}
+
+	private PlaceJoinType getPlaceType(Place place) {
+		if (place.getAccommodation() != null) {
+			return PlaceJoinType.ACCOMMODATION;
+		} else if (place.getRestaurant() != null) {
+			return PlaceJoinType.RESTAURANT;
+		} else if (place.getTour() != null) {
+			return PlaceJoinType.TOUR;
+		} else {
+			throw new PlaceException(ErrorCode.INVALID_TOUR_TYPE);
+		}
 	}
 }
