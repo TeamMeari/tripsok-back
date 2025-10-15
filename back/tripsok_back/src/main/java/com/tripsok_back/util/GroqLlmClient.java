@@ -69,7 +69,7 @@ public class GroqLlmClient implements LlmClient {
 				.block();
 
 			if (res != null && res.getChoices() != null && !res.getChoices().isEmpty()) {
-				return sanitizePlainText(res.getChoices().get(0).getMessage().getContent());
+				return sanitizePlainText(res.getChoices().getFirst().getMessage().getContent());
 			}
 		} catch (Exception e) {
 			log.error("Groq API 요청 실패: {}", e.getMessage(), e);

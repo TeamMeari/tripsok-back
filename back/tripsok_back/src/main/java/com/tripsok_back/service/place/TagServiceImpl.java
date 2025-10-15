@@ -11,7 +11,6 @@ import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceTag;
 import com.tripsok_back.model.place.Tag;
 import com.tripsok_back.model.place.TagTr;
-import com.tripsok_back.repository.place.TagTrRepository;
 import com.tripsok_back.type.LocaleCode;
 
 import lombok.RequiredArgsConstructor;
@@ -21,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RequiredArgsConstructor
 public class TagServiceImpl implements TagService {
-	private final TagTrRepository tagTrRepository;
 
 	@Override
 	public Set<PlaceTagResponseDto> getPlaceTags(Place place, LocaleCode locale) {
