@@ -95,7 +95,10 @@ public class AccommodationServiceImpl extends PlaceService {
 			createInformationTranslation(placeAccommodation, locale);
 			createTransliterationForNameAndAddress(placeAccommodation, locale);
 		}
-		if (placeAccommodation.getAccommodation().getPlaceLclsCategory() == null || (placeAccommodation.getTour().getTourImages() == null || placeAccommodation.getTour().getTourImages().isEmpty()) || placeAccommodation.getTourismType() == null) {
+		if (placeAccommodation.getAccommodation().getPlaceLclsCategory() == null || (
+			placeAccommodation.getAccommodation().getAccommodationImages() == null || placeAccommodation.getTour()
+				.getTourImages()
+				.isEmpty()) || placeAccommodation.getTourismType() == null) {
 			TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto = requestPlaceDetail(
 				placeAccommodation.getContentId());
 			PlaceLclsCategory category = categoryService.getCategoryByCode(
@@ -113,8 +116,10 @@ public class AccommodationServiceImpl extends PlaceService {
 	public PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable,
 		LocaleCode locale) throws TourApiException {
 
-		Page<Place> placePage = accommodationRepository.findByAccommodationIsNotNullAndPlaceTrs_Id_Locale(locale.getCode(), pageable);
-		if (placePage.isEmpty()) return PageResponse.empty();
+		Page<Place> placePage = accommodationRepository.findByAccommodationIsNotNullAndPlaceTrs_Id_Locale(
+			locale.getCode(), pageable);
+		if (placePage.isEmpty())
+			return PageResponse.empty();
 
 		Place first = placePage.getContent().get(0);
 		int trSize = first.getPlaceTrs() != null ? first.getPlaceTrs().size() : 0;
@@ -127,7 +132,6 @@ public class AccommodationServiceImpl extends PlaceService {
 				e.getAccommodation().getAccommodationImages().size(),
 				e.getAccommodation().getAccommodationReviews().size(),
 				locale));
-
 
 		return PageResponse.fromPage(placePage, dtoList);
 	}
