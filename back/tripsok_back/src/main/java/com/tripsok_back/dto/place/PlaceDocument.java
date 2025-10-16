@@ -2,7 +2,6 @@ package com.tripsok_back.dto.place;
 
 import java.util.List;
 
-import com.azure.core.models.GeoPoint;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.model.place.PlaceLclsCategoryTr;
@@ -34,15 +33,6 @@ public class PlaceDocument {
 	private Double lat;
 	private Double lng;
 	private GeoPoint location;
-
-	@Data
-	@NoArgsConstructor
-	@AllArgsConstructor
-	public static class GeoPoint {
-		private double lat;
-		private double lon;
-	}
-
 	private String type;
 	private Integer like;
 	private Integer view;
@@ -159,6 +149,14 @@ public class PlaceDocument {
 			return urls.getFirst();
 		}
 		return null;
+	}
+
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	public static class GeoPoint {
+		private double lat;
+		private double lon;
 	}
 
 }

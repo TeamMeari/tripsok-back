@@ -46,14 +46,14 @@ import lombok.extern.slf4j.Slf4j;
 public class AccommodationServiceImpl extends PlaceService {
 	private final AccommodationRepository accommodationRepository;
 
-	public AccommodationServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
+	public AccommodationServiceImpl(PlaceRepository placeRepository, TagService tagService, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, AccommodationRepository accommodationRepository,
 		CategoryService categoryService,
 		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
 		InterestPlaceRepository interestPlaceRepository,
 		PlaceEsService placeEsService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
-			placeEsService, interestPlaceRepository, placeRepository);
+			placeEsService, interestPlaceRepository, placeRepository, tagService);
 		this.accommodationRepository = accommodationRepository;
 	}
 
@@ -108,7 +108,7 @@ public class AccommodationServiceImpl extends PlaceService {
 			placeAccommodation.getAccommodation().getPlaceLclsCategory().getLclsSystm3Name());
 		addView(placeAccommodation);
 		return Optional.of(
-			PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION, locale, isLiked));
+			PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION, locale, isLiked, getPlaceTags(placeAccommodation, locale)));
 	}
 
 	@Override

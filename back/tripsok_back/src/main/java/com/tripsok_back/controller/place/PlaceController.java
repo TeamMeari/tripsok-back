@@ -2,13 +2,10 @@ package com.tripsok_back.controller.place;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -132,24 +129,49 @@ public class PlaceController {
 				categoryType.name(), localeCode.getCode(), themeId, q, page, size);
 
 			TourismType typeFilter = categoryFilter ? categoryType : null;
+			int offset = page * size;
 
-			Page<PlaceBriefSlimResponseDto> textPage =
-				placeEsService.unifiedSearch(pageable, localeCode, q, typeFilter, sortEs);
+			Page<PlaceBriefSlimResponseDto> textPage = placeEsService.unifiedSearch(
+				PageRequest.of(page, size, sortEs),
+				localeCode, q, typeFilter, sortEs
+			);
 
-			int remainingSize = size - textPage.getContent().size();
-			Set<PlaceBriefSlimResponseDto> mergedSet = new LinkedHashSet<>(textPage.getContent());
+			long textTotal = textPage.getTotalElements();
+			List<PlaceBriefSlimResponseDto> textItems = textPage.getContent();
 
-			if (remainingSize > 0) {
-				Pageable embeddingPageable = PageRequest.of(0, remainingSize, sortEs);
-				Page<PlaceBriefSlimResponseDto> embeddingPage =
-					placeEsService.unifiedEmbeddingSearch(embeddingPageable, localeCode, q, typeFilter, sortEs);
-				mergedSet.addAll(embeddingPage.getContent());
+			if (offset + size <= textTotal) {
+				return ResponseEntity.ok(PageResponse.fromPage(textPage));
 			}
-			List<PlaceBriefSlimResponseDto> merged = new ArrayList<>(mergedSet);
-			Page<PlaceBriefSlimResponseDto> enhancedPage =
-				new PageImpl<>(merged, pageable, merged.size());
-			enhancedPage.getSort();
-			return ResponseEntity.ok(PageResponse.fromPage(enhancedPage));
+
+			List<PlaceBriefSlimResponseDto> items = new ArrayList<>(textItems);
+
+			if (offset < textTotal) {
+				int remainSize = size - items.size();
+
+				Page<PlaceBriefSlimResponseDto> embPage = placeEsService.unifiedEmbeddingSearch(
+					PageRequest.of(0, remainSize, sortEs),
+					localeCode, q, typeFilter, sortEs
+				);
+
+				long embTotal = embPage.getTotalElements();
+				items.addAll(embPage.getContent());
+
+				long total = textTotal + embTotal;
+				return ResponseEntity.ok(PageResponse.fromMerged(page, size, total, items));
+			}
+
+			long embOffset = offset - textTotal;
+			int embPageIdx = (int)Math.max(0, embOffset / size);
+
+			Page<PlaceBriefSlimResponseDto> embPage = placeEsService.unifiedEmbeddingSearch(
+				PageRequest.of(embPageIdx, size, sortEs),
+				localeCode, q, typeFilter, sortEs
+			);
+
+			long embTotal = embPage.getTotalElements();
+			long total = textTotal + embTotal;
+
+			return ResponseEntity.ok(PageResponse.fromMerged(page, size, total, embPage.getContent()));
 		}
 		PageResponse<PlaceBriefSlimResponseDto> body;
 		if (themeId != null) {
@@ -276,5 +298,27 @@ public class PlaceController {
 		LocaleCode lc = LocaleCode.from(locale);
 
 		return ResponseEntity.ok(placeEsService.searchByDistance(lat, lng, distance, size, lc));
+	}
+
+	@Operation(
+		summary = "Elasticsearch 전체 리인덱스 실행",
+		description = """
+			'Execute' 버튼 클릭 시 전체 인덱스 삭제 후 재색인 수행합니다.
+			"""
+	)
+	@GetMapping("/reindex")
+	public void reindex(
+		@Parameter(
+			description = "보안 확인용 키워드. 'reindex'를 입력해야 실행됨.",
+			example = "reindex"
+		)
+		@RequestParam String q
+	) {
+		if (!"reindex".equals(q))
+			return;
+		placeEsService.deleteAndReIndex();
+		for (PlaceService service : placeService) {
+			service.reindexFullEs();
+		}
 	}
 }

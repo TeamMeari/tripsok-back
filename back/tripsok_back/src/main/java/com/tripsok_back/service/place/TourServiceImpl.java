@@ -44,13 +44,13 @@ import lombok.extern.slf4j.Slf4j;
 public class TourServiceImpl extends PlaceService {
 	private final TourRepository tourRepository;
 
-	public TourServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
+	public TourServiceImpl(PlaceRepository placeRepository, TagService tagService, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, TourRepository tourRepository, CategoryService categoryService,
 		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
 		InterestPlaceRepository interestPlaceRepository,
 		PlaceEsService placeEsService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
-			placeEsService, interestPlaceRepository, placeRepository);
+			placeEsService, interestPlaceRepository, placeRepository, tagService);
 		this.tourRepository = tourRepository;
 	}
 
@@ -71,7 +71,7 @@ public class TourServiceImpl extends PlaceService {
 	}
 
 	@Override
-	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, com.tripsok_back.type.LocaleCode locale,
+	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale,
 		Integer userId) {
 		Optional<Place> optPlace = tourRepository.findById(placeId);
 		if (optPlace.isEmpty())
@@ -100,7 +100,8 @@ public class TourServiceImpl extends PlaceService {
 			placeTour.updateNullTourDetail(tourApiPlaceDetailResponseDto, category);
 		}
 		addView(placeTour);
-		return Optional.of(PlaceDetailResponseDto.from(placeTour, PlaceJoinType.TOUR, locale, isLiked));
+		return Optional.of(PlaceDetailResponseDto.from(placeTour, PlaceJoinType.TOUR, locale, isLiked,
+			getPlaceTags(placeTour, locale)));
 	}
 
 	@Override
@@ -115,7 +116,7 @@ public class TourServiceImpl extends PlaceService {
 
 	@Override
 	public PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable,
-		com.tripsok_back.type.LocaleCode locale) {
+		LocaleCode locale) {
 		Page<Place> placeList = tourRepository.findByTourIsNotNullAndPlaceTrs_Id_Locale(locale.getCode(), pageable);
 		if (placeList.getTotalPages() == 0)
 			return PageResponse.empty();

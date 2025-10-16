@@ -46,13 +46,13 @@ import lombok.extern.slf4j.Slf4j;
 public class RestaurantServiceImpl extends PlaceService {
 	private final RestaurantRepository restaurantRepository;
 
-	public RestaurantServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
+	public RestaurantServiceImpl(PlaceRepository placeRepository, TagService tagService, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, RestaurantRepository restaurantRepository, CategoryService categoryService,
 		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
 		InterestPlaceRepository interestPlaceRepository,
 		PlaceEsService placeEsService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
-			placeEsService, interestPlaceRepository, placeRepository);
+			placeEsService, interestPlaceRepository, placeRepository, tagService);
 		this.restaurantRepository = restaurantRepository;
 	}
 
@@ -109,7 +109,8 @@ public class RestaurantServiceImpl extends PlaceService {
 			placeRestaurant.updateNullRestaurantDetail(tourApiPlaceDetailResponseDto, category);
 		}
 		addView(placeRestaurant);
-		return Optional.of(PlaceDetailResponseDto.from(placeRestaurant, PlaceJoinType.RESTAURANT, locale, isLiked));
+		return Optional.of(PlaceDetailResponseDto.from(placeRestaurant, PlaceJoinType.RESTAURANT, locale, isLiked,
+			getPlaceTags(placeRestaurant, locale)));
 	}
 
 	@Override

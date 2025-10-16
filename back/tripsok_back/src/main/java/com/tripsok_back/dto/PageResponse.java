@@ -45,4 +45,14 @@ public class PageResponse<E> {
 	public static <E> PageResponse<E> empty() {
 		return new PageResponse<>(0, 0, 0L, List.of());
 	}
+
+	public static <E> PageResponse<E> fromMerged(int currentPage, int size, long totalItems, List<E> items) {
+		int totalPages = (int)Math.ceil((double)totalItems / size);
+		return new PageResponse<>(
+			currentPage,
+			totalPages,
+			totalItems,
+			items
+		);
+	}
 }

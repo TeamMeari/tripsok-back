@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.tripsok_back.support.BaseTimeEntity;
+import com.tripsok_back.type.LocaleCode;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -42,5 +43,12 @@ public class Tag extends BaseTimeEntity {
 
 	public Tag(String name) {
 		this.name = name;
+	}
+
+	public TagTr getTagTr(LocaleCode localeCode) {
+		return tagTrs.stream()
+			.filter(tagTr -> localeCode == tagTr.getLocale())
+			.findFirst()
+			.orElse(null);
 	}
 }

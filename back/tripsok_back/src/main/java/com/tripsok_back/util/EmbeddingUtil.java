@@ -26,7 +26,8 @@ public class EmbeddingUtil implements AutoCloseable {
 			Criteria<String, float[]> criteria = Criteria.builder()
 				.setTypes(String.class, float[].class)
 				.optEngine("PyTorch")
-				.optModelUrls("djl://ai.djl.huggingface.pytorch/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+				.optModelUrls(
+					"djl://ai.djl.huggingface.pytorch/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
 				.optTranslatorFactory(new TextEmbeddingTranslatorFactory())
 				.build();
 

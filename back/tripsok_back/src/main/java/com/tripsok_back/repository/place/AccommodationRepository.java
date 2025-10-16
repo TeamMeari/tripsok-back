@@ -10,7 +10,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import com.tripsok_back.model.place.Place;
-import com.tripsok_back.type.LocaleCode;
 
 @Repository
 public interface AccommodationRepository extends JpaRepository<Place, Integer> {

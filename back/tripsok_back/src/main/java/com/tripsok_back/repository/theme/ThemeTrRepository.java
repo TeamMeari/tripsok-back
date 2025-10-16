@@ -11,7 +11,7 @@ import com.tripsok_back.type.LocaleCode;
 
 @Repository
 public interface ThemeTrRepository extends JpaRepository<ThemeTr, Integer> {
-    List<ThemeTr> findAllByLocaleOrderByThemeIdAsc(LocaleCode locale);
+	List<ThemeTr> findAllByLocaleOrderByThemeIdAsc(LocaleCode locale);
 
 	List<ThemeTr> findAllByThemeInAndLocaleOrderByThemeIdAsc(List<Theme> theme, LocaleCode locale);
 }

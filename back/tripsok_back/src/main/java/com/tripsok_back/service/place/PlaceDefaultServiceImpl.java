@@ -27,13 +27,13 @@ import com.tripsok_back.util.llm.LlmClient;
 public class PlaceDefaultServiceImpl extends PlaceService {
 	private final GoogleTranslateClient googleTranslateClient;
 
-	public PlaceDefaultServiceImpl(PlaceRepository placeRepository,
+	public PlaceDefaultServiceImpl(PlaceRepository placeRepository, TagService tagService,
 		ApiKeyConfig apiKeyConfig, TouristApiClientUtil tourApiClient,
 		CategoryService categoryService, LlmClient groqApiClientUtil,
 		ObjectMapper om, GoogleTranslateClient googleTranslateClient, PlaceEsService placeEsService,
 		InterestPlaceRepository interestPlaceRepository) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
-			placeEsService, interestPlaceRepository, placeRepository);
+			placeEsService, interestPlaceRepository, placeRepository, tagService);
 		this.googleTranslateClient = googleTranslateClient;
 	}
 
