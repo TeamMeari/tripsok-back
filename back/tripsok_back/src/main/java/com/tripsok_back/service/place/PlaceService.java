@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tripsok_back.config.ApiKeyConfig;
 import com.tripsok_back.dto.PageResponse;
@@ -18,6 +19,8 @@ import com.tripsok_back.dto.place.PlaceDetailResponseDto;
 import com.tripsok_back.dto.place.ReviewRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiIntroRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiIntroResponseDto;
+import com.tripsok_back.exception.CustomInternalException;
+import com.tripsok_back.exception.InternalErrorCode;
 import com.tripsok_back.exception.PlaceException;
 import com.tripsok_back.exception.ServiceBlockException;
 import com.tripsok_back.model.place.Place;
@@ -117,7 +120,8 @@ public abstract class PlaceService {
 			return;
 		try {
 			intro = om.readValue(raw, TourApiIntroResponseDto.class);
-		} catch (Exception ignore) {
+		} catch (JsonProcessingException e) {
+			throw new CustomInternalException(InternalErrorCode.JSON_PARSE_ERROR);
 		}
 		if (intro == null)
 			return;
@@ -131,7 +135,13 @@ public abstract class PlaceService {
 			pi.setRawJson(raw);
 		}
 
-		TourismType type = TourismType.fromId(Integer.parseInt(intro.getContentTypeId()));
+		TourismType type;
+		try {
+			type = TourismType.fromId(Integer.parseInt(intro.getContentTypeId()));
+		} catch (NumberFormatException e) {
+			log.warn("contentTypeId 파싱 실패: '{}'", intro.getContentTypeId(), e);
+			throw new CustomInternalException(InternalErrorCode.INTEGER_PARSE_ERROR);
+		}
 		String open = null, rest = null, use = null;
 		switch (type) {
 			case TOURIST_SPOT:
