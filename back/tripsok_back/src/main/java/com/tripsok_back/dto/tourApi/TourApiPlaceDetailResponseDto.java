@@ -21,7 +21,7 @@ public class TourApiPlaceDetailResponseDto {
 	private String contentId;
 
 	@JsonProperty("contenttypeid")
-	private String contentTypeId;
+	private Integer contentTypeId;
 
 	@JsonProperty("title")
 	private String title;

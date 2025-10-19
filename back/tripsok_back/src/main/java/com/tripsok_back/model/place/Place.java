@@ -19,11 +19,14 @@ import com.tripsok_back.model.place.tour.Tour;
 import com.tripsok_back.model.user.InterestPlace;
 import com.tripsok_back.support.BaseModifiableEntity;
 import com.tripsok_back.type.LocaleCode;
+import com.tripsok_back.type.TourismType;
 import com.tripsok_back.util.TimeUtil;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -71,6 +74,10 @@ public class Place extends BaseModifiableEntity {
 	@Column(name = "\"like\"", nullable = false)
 	private Integer like;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "TOURISM_TYPE")
+	private TourismType tourismType;
+
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "TOUR_ID")
@@ -85,6 +92,9 @@ public class Place extends BaseModifiableEntity {
 	@OnDelete(action = OnDeleteAction.RESTRICT)
 	@JoinColumn(name = "ACCOMMODATION_ID")
 	private Accommodation accommodation;
+
+	@OneToOne(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
+	private PlaceIntro placeIntro;
 
 	@Column(name = "MAP_X", precision = 13, scale = 10)
 	private BigDecimal mapX;
@@ -106,6 +116,114 @@ public class Place extends BaseModifiableEntity {
 
 	@OneToMany(mappedBy = "place")
 	private Set<InterestPlace> interestPlaces = new LinkedHashSet<>();
+
+	public static Place buildAccommodation(TourApiPlaceResponseDto placeDto,
+		TourApiPlaceDetailResponseDto detailResponseDto, PlaceLclsCategory categoryName, String summary) {
+		Place place = new Place();
+
+		place.setContentId(placeDto.getContentId());
+		place.initPlaceTrsWithKorean(placeDto.getTitle(),
+			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : ""),
+			detailResponseDto.getOverview(), summary);
+		place.setContact(placeDto.getPhoneNumber());
+		place.setEmail(null);
+		place.setTourismType(TourismType.fromId(detailResponseDto.getContentTypeId()));
+		place.setView(0);
+		place.setLike(0);
+
+		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
+			place.setMapX(new BigDecimal(placeDto.getLongitude()));
+			place.setMapY(new BigDecimal(placeDto.getLatitude()));
+		}
+
+		place.setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
+
+		place.setTour(null);
+		place.setRestaurant(null);
+		place.setAccommodation(Accommodation.buildAccommodation(placeDto, detailResponseDto, categoryName));
+		Accommodation accommodation = place.getAccommodation();
+		accommodation.setPlaceLclsCategory(categoryName);
+		accommodation.addImageUrl(detailResponseDto.getFirstImageUrl());
+		accommodation.addImageUrl(detailResponseDto.getFirstImageUrlSecondary());
+		return place;
+	}
+
+	public static Place buildAccommodation(TourApiPlaceResponseDto placeDto,
+		TourApiPlaceDetailResponseDto detailResponseDto, PlaceLclsCategory categoryName) {
+		return buildAccommodation(placeDto, detailResponseDto, categoryName, null);
+	}
+
+	public static Place buildTour(TourApiPlaceResponseDto placeDto,
+		TourApiPlaceDetailResponseDto detailResponseDto, PlaceLclsCategory categoryName, String summary) {
+		Place place = new Place();
+
+		place.setContentId(placeDto.getContentId());
+		place.initPlaceTrsWithKorean(placeDto.getTitle(),
+			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : ""),
+			detailResponseDto.getOverview(), summary);
+		place.setContact(placeDto.getPhoneNumber());
+		place.setTourismType(TourismType.fromId(detailResponseDto.getContentTypeId()));
+		place.setEmail(null);
+		place.setView(0);
+		place.setLike(0);
+
+		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
+			place.setMapX(new BigDecimal(placeDto.getLongitude()));
+			place.setMapY(new BigDecimal(placeDto.getLatitude()));
+		}
+
+		place.setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
+
+		place.setAccommodation(null);
+		place.setRestaurant(null);
+		place.setTour(Tour.buildTour(placeDto, detailResponseDto));
+		Tour tour = place.getTour();
+		tour.setPlaceLclsCategory(categoryName);
+		tour.addImageUrl(detailResponseDto.getFirstImageUrl());
+		tour.addImageUrl(detailResponseDto.getFirstImageUrlSecondary());
+		return place;
+	}
+
+	public static Place buildTour(TourApiPlaceResponseDto placeDto,
+		TourApiPlaceDetailResponseDto detailResponseDto, PlaceLclsCategory categoryName) {
+		return buildTour(placeDto, detailResponseDto, categoryName, null);
+	}
+
+	public static Place buildRestaurant(TourApiPlaceResponseDto placeDto,
+		TourApiPlaceDetailResponseDto detailResponseDto, PlaceLclsCategory categoryName, String summary) {
+		Place place = new Place();
+
+		place.setContentId(placeDto.getContentId());
+		place.initPlaceTrsWithKorean(placeDto.getTitle(),
+			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : ""),
+			detailResponseDto.getOverview(), summary);
+		place.setContact(placeDto.getPhoneNumber());
+		place.setTourismType(TourismType.fromId(detailResponseDto.getContentTypeId()));
+		place.setEmail(null);
+		place.setView(0);
+		place.setLike(0);
+
+		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
+			place.setMapX(new BigDecimal(placeDto.getLongitude()));
+			place.setMapY(new BigDecimal(placeDto.getLatitude()));
+		}
+
+		place.setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
+
+		place.setTour(null);
+		place.setAccommodation(null);
+		place.setRestaurant(Restaurant.buildRestaurant(placeDto, detailResponseDto));
+		Restaurant restaurant = place.getRestaurant();
+		restaurant.setPlaceLclsCategory(categoryName);
+		restaurant.addImageUrl(detailResponseDto.getFirstImageUrl());
+		restaurant.addImageUrl(detailResponseDto.getFirstImageUrlSecondary());
+		return place;
+	}
+
+	public static Place buildRestaurant(TourApiPlaceResponseDto placeDto,
+		TourApiPlaceDetailResponseDto detailResponseDto, PlaceLclsCategory categoryName) {
+		return buildRestaurant(placeDto, detailResponseDto, categoryName, null);
+	}
 
 	public PlaceTr getPlaceTr(String language) {
 		if (language == null)
@@ -186,111 +304,6 @@ public class Place extends BaseModifiableEntity {
 			tr.setSummary(summary);
 	}
 
-	public static Place buildAccommodation(TourApiPlaceResponseDto placeDto,
-		TourApiPlaceDetailResponseDto detailResponseDto, PlaceLclsCategory categoryName, String summary) {
-		Place place = new Place();
-
-		place.setContentId(placeDto.getContentId());
-		place.initPlaceTrsWithKorean(placeDto.getTitle(),
-			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : ""),
-			detailResponseDto.getOverview(), summary);
-		place.setContact(placeDto.getPhoneNumber());
-		place.setEmail(null);
-		place.setView(0);
-		place.setLike(0);
-
-		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
-			place.setMapX(new BigDecimal(placeDto.getLongitude()));
-			place.setMapY(new BigDecimal(placeDto.getLatitude()));
-		}
-
-		place.setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
-
-		place.setTour(null);
-		place.setRestaurant(null);
-		place.setAccommodation(Accommodation.buildAccommodation(placeDto, detailResponseDto, categoryName));
-		Accommodation accommodation = place.getAccommodation();
-		accommodation.setPlaceLclsCategory(categoryName);
-		accommodation.addImageUrl(detailResponseDto.getFirstImageUrl());
-		accommodation.addImageUrl(detailResponseDto.getFirstImageUrlSecondary());
-		return place;
-	}
-
-	public static Place buildAccommodation(TourApiPlaceResponseDto placeDto,
-		TourApiPlaceDetailResponseDto detailResponseDto, PlaceLclsCategory categoryName) {
-		return buildAccommodation(placeDto, detailResponseDto, categoryName, null);
-	}
-
-	public static Place buildTour(TourApiPlaceResponseDto placeDto,
-		TourApiPlaceDetailResponseDto detailResponseDto, PlaceLclsCategory categoryName, String summary) {
-		Place place = new Place();
-
-		place.setContentId(placeDto.getContentId());
-		place.initPlaceTrsWithKorean(placeDto.getTitle(),
-			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : ""),
-			detailResponseDto.getOverview(), summary);
-		place.setContact(placeDto.getPhoneNumber());
-		place.setEmail(null);
-		place.setView(0);
-		place.setLike(0);
-
-		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
-			place.setMapX(new BigDecimal(placeDto.getLongitude()));
-			place.setMapY(new BigDecimal(placeDto.getLatitude()));
-		}
-
-		place.setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
-
-		place.setAccommodation(null);
-		place.setRestaurant(null);
-		place.setTour(Tour.buildTour(placeDto, detailResponseDto));
-		Tour tour = place.getTour();
-		tour.setPlaceLclsCategory(categoryName);
-		tour.addImageUrl(detailResponseDto.getFirstImageUrl());
-		tour.addImageUrl(detailResponseDto.getFirstImageUrlSecondary());
-		return place;
-	}
-
-	public static Place buildTour(TourApiPlaceResponseDto placeDto,
-		TourApiPlaceDetailResponseDto detailResponseDto, PlaceLclsCategory categoryName) {
-		return buildTour(placeDto, detailResponseDto, categoryName, null);
-	}
-
-	public static Place buildRestaurant(TourApiPlaceResponseDto placeDto,
-		TourApiPlaceDetailResponseDto detailResponseDto, PlaceLclsCategory categoryName, String summary) {
-		Place place = new Place();
-
-		place.setContentId(placeDto.getContentId());
-		place.initPlaceTrsWithKorean(placeDto.getTitle(),
-			placeDto.getAddress() + (placeDto.getAddressDetail() != null ? " " + placeDto.getAddressDetail() : ""),
-			detailResponseDto.getOverview(), summary);
-		place.setContact(placeDto.getPhoneNumber());
-		place.setEmail(null);
-		place.setView(0);
-		place.setLike(0);
-
-		if (placeDto.getLongitude() != null && placeDto.getLatitude() != null) {
-			place.setMapX(new BigDecimal(placeDto.getLongitude()));
-			place.setMapY(new BigDecimal(placeDto.getLatitude()));
-		}
-
-		place.setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
-
-		place.setTour(null);
-		place.setAccommodation(null);
-		place.setRestaurant(Restaurant.buildRestaurant(placeDto, detailResponseDto));
-		Restaurant restaurant = place.getRestaurant();
-		restaurant.setPlaceLclsCategory(categoryName);
-		restaurant.addImageUrl(detailResponseDto.getFirstImageUrl());
-		restaurant.addImageUrl(detailResponseDto.getFirstImageUrlSecondary());
-		return place;
-	}
-
-	public static Place buildRestaurant(TourApiPlaceResponseDto placeDto,
-		TourApiPlaceDetailResponseDto detailResponseDto, PlaceLclsCategory categoryName) {
-		return buildRestaurant(placeDto, detailResponseDto, categoryName, null);
-	}
-
 	public void updateAccommodation(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto,
 		PlaceLclsCategory categoryName) {
 		upsertKorean(
@@ -308,6 +321,10 @@ public class Place extends BaseModifiableEntity {
 		}
 
 		setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
+
+		if (this.tourismType == null) {
+			this.tourismType = TourismType.ACCOMMODATION;
+		}
 	}
 
 	public void updateRestaurant(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto,
@@ -326,6 +343,10 @@ public class Place extends BaseModifiableEntity {
 		}
 
 		setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
+
+		if (this.tourismType == null) {
+			this.tourismType = TourismType.RESTAURANT;
+		}
 	}
 
 	public void updateTour(TourApiPlaceResponseDto placeDto, TourApiPlaceDetailResponseDto detailResponseDto,
@@ -344,11 +365,16 @@ public class Place extends BaseModifiableEntity {
 		}
 
 		setUpdatedAt(TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime()));
+
+		if (this.tourismType == null) {
+			this.tourismType = TourismType.TOURIST_SPOT;
+		}
 	}
 
 	public void updateNullRestaurantDetail(TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto,
 		PlaceLclsCategory category) {
 		Restaurant restaurant = this.getRestaurant();
+		this.setTourismType(TourismType.fromId(tourApiPlaceDetailResponseDto.getContentTypeId()));
 		restaurant.setPlaceLclsCategory(category);
 		restaurant.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrl());
 		restaurant.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrlSecondary());
@@ -357,6 +383,7 @@ public class Place extends BaseModifiableEntity {
 	public void updateNullAccommodationDetail(TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto,
 		PlaceLclsCategory category) {
 		Accommodation accommodation = this.getAccommodation();
+		this.setTourismType(TourismType.fromId(tourApiPlaceDetailResponseDto.getContentTypeId()));
 		accommodation.setPlaceLclsCategory(category);
 		accommodation.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrl());
 		accommodation.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrlSecondary());
@@ -365,6 +392,7 @@ public class Place extends BaseModifiableEntity {
 	public void updateNullTourDetail(TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto,
 		PlaceLclsCategory category) {
 		Tour tour = this.getTour();
+		this.setTourismType(TourismType.fromId(tourApiPlaceDetailResponseDto.getContentTypeId()));
 		tour.setPlaceLclsCategory(category);
 		tour.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrl());
 		tour.addImageUrl(tourApiPlaceDetailResponseDto.getFirstImageUrlSecondary());

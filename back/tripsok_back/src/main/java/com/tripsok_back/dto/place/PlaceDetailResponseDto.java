@@ -21,7 +21,10 @@ public record PlaceDetailResponseDto(
 	Integer view, Integer like, BigDecimal mapX, BigDecimal mapY, LocalDateTime createdAt, LocalDateTime updatedAt,
 	PlaceJoinType type, Boolean isLiked,
 	Set<PlaceTagResponseDto> tags,
-	ChildSummary child
+	ChildSummary child,
+	String openDate,
+	String restDate,
+	String useTime
 ) {
 	@Builder
 	public PlaceDetailResponseDto {
@@ -74,6 +77,9 @@ public record PlaceDetailResponseDto(
 							t.getImageUrlList());
 				}
 			})
+			.openDate(place.getPlaceIntro() != null ? place.getPlaceIntro().getOpenDate() : null)
+			.restDate(place.getPlaceIntro() != null ? place.getPlaceIntro().getRestDate() : null)
+			.useTime(place.getPlaceIntro() != null ? place.getPlaceIntro().getUseTime() : null)
 			.build();
 	}
 
