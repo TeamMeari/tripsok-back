@@ -26,6 +26,7 @@ import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.repository.place.PlaceRepository;
 import com.tripsok_back.repository.place.TourRepository;
+import com.tripsok_back.repository.user.InterestPlaceRepository;
 import com.tripsok_back.service.search.PlaceEsService;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
@@ -43,12 +44,13 @@ import lombok.extern.slf4j.Slf4j;
 public class TourServiceImpl extends PlaceService {
 	private final TourRepository tourRepository;
 
-	public TourServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
+	public TourServiceImpl(PlaceRepository placeRepository, TagService tagService, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, TourRepository tourRepository, CategoryService categoryService,
 		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
-		PlaceEsService placeEsService, TagService tagService) {
+		InterestPlaceRepository interestPlaceRepository,
+		PlaceEsService placeEsService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
-			placeEsService, placeRepository, tagService);
+			placeEsService, interestPlaceRepository, placeRepository, tagService);
 		this.tourRepository = tourRepository;
 	}
 
@@ -69,12 +71,13 @@ public class TourServiceImpl extends PlaceService {
 	}
 
 	@Override
-	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, com.tripsok_back.type.LocaleCode locale) {
+	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale,
+		Integer userId) {
 		Optional<Place> optPlace = tourRepository.findById(placeId);
 		if (optPlace.isEmpty())
 			throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
 		Place placeTour = optPlace.get();
-
+		Boolean isLiked = interestPlaceRepository.existsByPlaceAndUser_Id(placeTour, userId);
 		if (placeTour.getPlaceTr(LocaleCode.KO) == null ||
 			!StringUtils.hasText(placeTour.getPlaceTr(LocaleCode.KO).getSummary())) {
 			createShortDescription(placeTour);
@@ -89,15 +92,18 @@ public class TourServiceImpl extends PlaceService {
 			createTransliterationForNameAndAddress(placeTour, locale);
 		}
 		if (placeTour.getTour().getPlaceLclsCategory() == null ||
-			(placeTour.getTour().getTourImages() == null || placeTour.getTour().getTourImages().isEmpty())) {
+			(placeTour.getTour().getTourImages() == null || placeTour.getTour().getTourImages().isEmpty())
+			|| placeTour.getTourismType() == null) {
 			TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto = requestPlaceDetail(
 				placeTour.getContentId());
 			PlaceLclsCategory category = categoryService.getCategoryByCode(
 				tourApiPlaceDetailResponseDto.getCategoryLevel3());
 			placeTour.updateNullTourDetail(tourApiPlaceDetailResponseDto, category);
 		}
+
+		ensurePlaceIntro(placeTour);
 		addView(placeTour);
-		return Optional.of(PlaceDetailResponseDto.from(placeTour, PlaceJoinType.TOUR, locale,
+		return Optional.of(PlaceDetailResponseDto.from(placeTour, PlaceJoinType.TOUR, locale, isLiked,
 			getPlaceTags(placeTour, locale)));
 	}
 
@@ -113,7 +119,7 @@ public class TourServiceImpl extends PlaceService {
 
 	@Override
 	public PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable,
-		com.tripsok_back.type.LocaleCode locale) {
+		LocaleCode locale) {
 		Page<Place> placeList = tourRepository.findByTourIsNotNullAndPlaceTrs_Id_Locale(locale.getCode(), pageable);
 		if (placeList.getTotalPages() == 0)
 			return PageResponse.empty();

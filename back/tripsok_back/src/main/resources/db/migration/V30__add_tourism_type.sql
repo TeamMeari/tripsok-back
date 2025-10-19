@@ -1,0 +1,1 @@
+ALTER TABLE place ADD tourism_type VARCHAR2(100);
