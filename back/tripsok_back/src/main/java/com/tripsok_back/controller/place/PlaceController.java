@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -196,6 +197,7 @@ public class PlaceController {
 	})
 	@GetMapping("/{category}/{id}")
 	public ResponseEntity<PlaceDetailResponseDto> getPlaceDetail(
+		@AuthenticationPrincipal Integer userId,
 		@Parameter(
 			description = "카테고리",
 			schema = @Schema(allowableValues = {"accommodation", "restaurant", "tour", "wrong-category"})
@@ -217,7 +219,7 @@ public class PlaceController {
 			return ResponseEntity.badRequest().build();
 		}
 		try {
-			return ResponseEntity.of(getService(categoryType).getPlaceDetail(id, localeCode)); // empty → 404
+			return ResponseEntity.of(getService(categoryType).getPlaceDetail(id, localeCode, userId)); // empty → 404
 		} catch (TourApiException e) {
 			return ResponseEntity.notFound().build();
 		}

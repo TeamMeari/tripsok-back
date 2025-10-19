@@ -23,6 +23,8 @@ import com.tripsok_back.dto.tourApi.TourApiPlaceDetailRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceDetailResponseDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceRequestDto;
 import com.tripsok_back.dto.tourApi.TourApiPlaceResponseDto;
+import com.tripsok_back.dto.tourApi.TourApiIntroRequestDto;
+import com.tripsok_back.dto.tourApi.TourApiIntroResponseDto;
 import com.tripsok_back.exception.InternalErrorCode;
 import com.tripsok_back.exception.RetryableExternalException;
 import com.tripsok_back.exception.ServiceBlockException;
@@ -103,6 +105,33 @@ public class TouristApiClientUtil {
 			return objectMapper.convertValue(itemNode.get(0), TourApiPlaceDetailResponseDto.class);
 		}
 		return objectMapper.convertValue(itemNode.get(0), TourApiPlaceDetailResponseDto.class);
+	}
+
+	public String fetchPlaceIntroRaw(TourApiIntroRequestDto dto) throws ServiceBlockException {
+		isServiceBlocked();
+		URI uri = UriComponentsBuilder
+			.fromHttpUrl("https://apis.data.go.kr/B551011/KorService2/detailIntro2")
+			.queryParam("numOfRows", dto.getNumOfRows())
+			.queryParam("pageNo", dto.getPageNo())
+			.queryParam("MobileOS", dto.getMobileOS())
+			.queryParam("MobileApp", dto.getMobileApp())
+			.queryParam("_type", dto.getResponseType())
+			.queryParam("contentTypeId", dto.getContentTypeId())
+			.queryParam("contentId", dto.getContentId())
+			.queryParam("serviceKey", dto.getServiceKey())
+			.build(true).toUri();
+
+		String body = fetchBodyWithRetry(uri);
+		try {
+			JsonNode itemNode = resolvePath(objectMapper.readTree(body), "response.body.items.item");
+			if (itemNode.isMissingNode() || itemNode.isNull())
+				return null;
+			JsonNode first = itemNode.isArray() ? (itemNode.isEmpty() ? null : itemNode.get(0)) : itemNode;
+			return first != null ? objectMapper.writeValueAsString(first) : null;
+		} catch (Exception e) {
+			log.error("관광 API 소개정보 RAW 추출 실패", e);
+			return null;
+		}
 	}
 
 	public Map<String, LclsCategoryItemResponseDto> fetchCategories(LclsSystmCodeRequestDto dto,

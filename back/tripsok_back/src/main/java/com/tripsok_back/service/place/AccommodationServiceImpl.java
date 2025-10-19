@@ -27,6 +27,7 @@ import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.repository.place.AccommodationRepository;
 import com.tripsok_back.repository.place.PlaceRepository;
+import com.tripsok_back.repository.user.InterestPlaceRepository;
 import com.tripsok_back.service.search.PlaceEsService;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
@@ -45,13 +46,14 @@ import lombok.extern.slf4j.Slf4j;
 public class AccommodationServiceImpl extends PlaceService {
 	private final AccommodationRepository accommodationRepository;
 
-	public AccommodationServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
+	public AccommodationServiceImpl(PlaceRepository placeRepository, TagService tagService, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, AccommodationRepository accommodationRepository,
 		CategoryService categoryService,
 		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
-		PlaceEsService placeEsService, TagService tagService) {
+		InterestPlaceRepository interestPlaceRepository,
+		PlaceEsService placeEsService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
-			placeEsService, placeRepository, tagService);
+			placeEsService, interestPlaceRepository, placeRepository, tagService);
 		this.accommodationRepository = accommodationRepository;
 	}
 
@@ -75,16 +77,18 @@ public class AccommodationServiceImpl extends PlaceService {
 
 	@Override
 	@Transactional
-	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale) throws
+	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale, Integer userId) throws
 		TourApiException {
 		Optional<Place> optPlace = accommodationRepository.findById(placeId);
 		if (optPlace.isEmpty())
 			throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
 		Place placeAccommodation = optPlace.get();
+		Boolean isLiked = interestPlaceRepository.existsByPlaceAndUser_Id(placeAccommodation, userId);
 		if (placeAccommodation.getPlaceTr(LocaleCode.KO) == null ||
 			!StringUtils.hasText(placeAccommodation.getPlaceTr(LocaleCode.KO).getSummary())) {
 			createShortDescription(placeAccommodation);
 		}
+
 		if (locale != null && locale != LocaleCode.KO) {
 			if (placeAccommodation.getPlaceTr(locale) == null ||
 				!StringUtils.hasText(placeAccommodation.getPlaceTr(locale).getSummary())) {
@@ -94,18 +98,23 @@ public class AccommodationServiceImpl extends PlaceService {
 			createInformationTranslation(placeAccommodation, locale);
 			createTransliterationForNameAndAddress(placeAccommodation, locale);
 		}
-		if (placeAccommodation.getAccommodation().getPlaceLclsCategory() == null) {
+		if (placeAccommodation.getAccommodation().getPlaceLclsCategory() == null || (
+			placeAccommodation.getAccommodation().getAccommodationImages() == null || placeAccommodation.getTour()
+				.getTourImages()
+				.isEmpty()) || placeAccommodation.getTourismType() == null) {
 			TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto = requestPlaceDetail(
 				placeAccommodation.getContentId());
 			PlaceLclsCategory category = categoryService.getCategoryByCode(
 				tourApiPlaceDetailResponseDto.getCategoryLevel3());
 			placeAccommodation.updateNullAccommodationDetail(tourApiPlaceDetailResponseDto, category);
 		}
-		log.info("request detail 카테고리 조회 {}",
-			placeAccommodation.getAccommodation().getPlaceLclsCategory().getLclsSystm3Name());
+
+		ensurePlaceIntro(placeAccommodation);
 		addView(placeAccommodation);
-		return Optional.of(PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION, locale,
-			getPlaceTags(placeAccommodation, locale)));
+		accommodationRepository.save(placeAccommodation);
+		return Optional.of(
+			PlaceDetailResponseDto.from(placeAccommodation, PlaceJoinType.ACCOMMODATION, locale, isLiked,
+				getPlaceTags(placeAccommodation, locale)));
 	}
 
 	@Override
