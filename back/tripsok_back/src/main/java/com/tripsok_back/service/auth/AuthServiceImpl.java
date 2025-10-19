@@ -27,6 +27,7 @@ import com.tripsok_back.dto.auth.request.EmailSignUpRequest;
 import com.tripsok_back.dto.auth.request.OauthLoginRequest;
 import com.tripsok_back.dto.auth.request.OauthSignUpRequest;
 import com.tripsok_back.dto.auth.response.GoogleTokenResponse;
+import com.tripsok_back.dto.auth.response.ResetPasswordResponse;
 import com.tripsok_back.dto.auth.response.TokenResponse;
 import com.tripsok_back.exception.AuthException;
 import com.tripsok_back.exception.ErrorCode;
@@ -176,11 +177,12 @@ public class AuthServiceImpl implements AuthService {
 
 	@Override
 	@Transactional
-	public void resetPassword(String emailVerifyToken, String newPassword) {
+	public ResetPasswordResponse resetPassword(String emailVerifyToken, String newPassword) {
 		String email = getEmailFromToken(emailVerifyToken);
 		TripSokUser user = userRepository.findByEmailAndSocialType(email, SocialType.EMAIL)
 			.orElseThrow(() -> new AuthException(ErrorCode.USER_NOT_FOUND));
 		user.changePassword(passwordEncoder.encode(newPassword));
+		return new ResetPasswordResponse(user.getNickname());
 	}
 
 	@Override

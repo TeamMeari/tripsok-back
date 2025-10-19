@@ -35,6 +35,8 @@ public enum ErrorCode {
 	INVALID_NICKNAME_FORMAT(HttpStatus.BAD_REQUEST, -11015, NICKNAME_MESSAGE),
 	FORBIDDEN_ACCESS(HttpStatus.FORBIDDEN, -11016, "접근이 금지된 사용자입니다."),
 	FAILED_DELETE_USER(HttpStatus.INTERNAL_SERVER_ERROR, -11017, "사용자 탈퇴에 실패했습니다."),
+	REQUIRED_PASSWORD(HttpStatus.BAD_REQUEST, -11018, "비밀번호는 필수 입력값입니다."),
+	REQUIRED_EMAIL_VERIFICATION_TOKEN(HttpStatus.BAD_REQUEST, -11019, "이메일 인증 토큰은 필수 입력값입니다."),
 
 	// Email-verification API error 12000대
 	EMAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, -12000, "이메일 전송에 실패했습니다."),
