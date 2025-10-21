@@ -3,6 +3,7 @@ package com.tripsok_back.service.auth;
 import com.tripsok_back.dto.auth.request.EmailSignUpRequest;
 import com.tripsok_back.dto.auth.request.OauthLoginRequest;
 import com.tripsok_back.dto.auth.request.OauthSignUpRequest;
+import com.tripsok_back.dto.auth.response.ResetPasswordResponse;
 import com.tripsok_back.dto.auth.response.TokenResponse;
 
 public interface AuthService {
@@ -22,7 +23,7 @@ public interface AuthService {
 
 	void logout(String accessToken);
 
-	void resetPassword(String emailVerifyToken, String newPassword);
+	ResetPasswordResponse resetPassword(String emailVerifyToken, String newPassword);
 
 	String getUserAccessToken(Integer userId);
 }

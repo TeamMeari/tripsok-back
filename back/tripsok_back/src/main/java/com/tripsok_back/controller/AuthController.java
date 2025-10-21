@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tripsok_back.annotation.ApiErrorCodes;
 import com.tripsok_back.dto.auth.request.EmailLoginRequest;
 import com.tripsok_back.dto.auth.request.EmailSignUpRequest;
 import com.tripsok_back.dto.auth.request.NicknameDuplicateCheckRequest;
@@ -20,6 +21,7 @@ import com.tripsok_back.dto.auth.request.OauthSignUpRequest;
 import com.tripsok_back.dto.auth.request.ResetPasswordRequest;
 import com.tripsok_back.dto.auth.response.LoginResponse;
 import com.tripsok_back.dto.auth.response.NicknameDuplicateCheckResponse;
+import com.tripsok_back.dto.auth.response.ResetPasswordResponse;
 import com.tripsok_back.dto.auth.response.TokenResponse;
 import com.tripsok_back.exception.AuthException;
 import com.tripsok_back.exception.ErrorCode;
@@ -100,10 +102,13 @@ public class AuthController {
 			.build();
 	}
 
+	@ApiErrorCodes({ErrorCode.INVALID_TOKEN, ErrorCode.EXPIRED_EMAIL_VERIFICATION_TOKEN, ErrorCode.USER_NOT_FOUND,
+		ErrorCode.INVALID_PASSWORD_FORMAT, ErrorCode.REQUIRED_PASSWORD,
+		ErrorCode.REQUIRED_EMAIL_VERIFICATION_TOKEN})
 	@PostMapping("/reset/password")
-	public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
-		authService.resetPassword(request.getEmailVerifyToken(), request.getPassword());
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+	public ResponseEntity<ResetPasswordResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+		return ResponseEntity.status(HttpStatus.OK)
+			.body(authService.resetPassword(request.getEmailVerifyToken(), request.getPassword()));
 	}
 
 	private HttpCookie getRefreshTokenCookie(String refreshToken) {

@@ -27,6 +27,7 @@ import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
 import com.tripsok_back.repository.place.PlaceRepository;
 import com.tripsok_back.repository.place.RestaurantRepository;
+import com.tripsok_back.repository.user.InterestPlaceRepository;
 import com.tripsok_back.service.search.PlaceEsService;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
@@ -45,12 +46,13 @@ import lombok.extern.slf4j.Slf4j;
 public class RestaurantServiceImpl extends PlaceService {
 	private final RestaurantRepository restaurantRepository;
 
-	public RestaurantServiceImpl(PlaceRepository placeRepository, ApiKeyConfig apiKeyConfig,
+	public RestaurantServiceImpl(PlaceRepository placeRepository, TagService tagService, ApiKeyConfig apiKeyConfig,
 		TouristApiClientUtil tourApiClient, RestaurantRepository restaurantRepository, CategoryService categoryService,
 		ObjectMapper om, LlmClient groqApiClientUtil, GoogleTranslateClient googleTranslateClient,
-		PlaceEsService placeEsService, TagService tagService) {
+		InterestPlaceRepository interestPlaceRepository,
+		PlaceEsService placeEsService) {
 		super(apiKeyConfig, tourApiClient, categoryService, groqApiClientUtil, om, googleTranslateClient,
-			placeEsService, placeRepository, tagService);
+			placeEsService, interestPlaceRepository, placeRepository, tagService);
 		this.restaurantRepository = restaurantRepository;
 	}
 
@@ -75,12 +77,14 @@ public class RestaurantServiceImpl extends PlaceService {
 
 	@Override
 	@Transactional
-	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, com.tripsok_back.type.LocaleCode locale) throws
+	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale, Integer userId) throws
 		TourApiException {
 		Optional<Place> optPlace = restaurantRepository.findById(placeId);
-		if (optPlace.isEmpty())
+		if (optPlace.isEmpty()) {
 			throw new TourApiException(InternalErrorCode.PLACE_DETAIL_NOT_FOUND);
+		}
 		Place placeRestaurant = optPlace.get();
+		Boolean isLiked = interestPlaceRepository.existsByPlaceAndUser_Id(placeRestaurant, userId);
 		if (placeRestaurant.getPlaceTr(LocaleCode.KO) == null ||
 			!StringUtils.hasText(placeRestaurant.getPlaceTr(LocaleCode.KO).getSummary())) {
 			createShortDescription(placeRestaurant);
@@ -97,21 +101,23 @@ public class RestaurantServiceImpl extends PlaceService {
 		if (placeRestaurant.getRestaurant().getPlaceLclsCategory() == null ||
 			(placeRestaurant.getRestaurant().getRestaurantImages() == null || placeRestaurant.getRestaurant()
 				.getRestaurantImages()
-				.isEmpty())) {
+				.isEmpty()) || placeRestaurant.getTourismType() == null) {
 			TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto = requestPlaceDetail(
 				placeRestaurant.getContentId());
 			PlaceLclsCategory category = categoryService.getCategoryByCode(
 				tourApiPlaceDetailResponseDto.getCategoryLevel3());
 			placeRestaurant.updateNullRestaurantDetail(tourApiPlaceDetailResponseDto, category);
 		}
+		ensurePlaceIntro(placeRestaurant);
 		addView(placeRestaurant);
-		return Optional.of(PlaceDetailResponseDto.from(placeRestaurant, PlaceJoinType.RESTAURANT, locale,
+		restaurantRepository.save(placeRestaurant);
+		return Optional.of(PlaceDetailResponseDto.from(placeRestaurant, PlaceJoinType.RESTAURANT, locale, isLiked,
 			getPlaceTags(placeRestaurant, locale)));
 	}
 
 	@Override
 	public PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable,
-		com.tripsok_back.type.LocaleCode locale) {
+		LocaleCode locale) {
 		Page<Place> placeList = restaurantRepository.findByRestaurantIsNotNullAndPlaceTrs_Id_Locale(locale.getCode(),
 			pageable);
 		if (placeList.getTotalPages() == 0)

@@ -30,7 +30,7 @@ public class PlaceSortStyle {
 	public Sort toSortEs() {
 		String safeKey = switch (sortKey) {
 			case "updatedAt", "view", "like" -> sortKey;
-			case "name" -> sortKey = "title.raw";
+			case "name" -> sortKey = "title.keyword";
 			default -> "updatedAt";
 		};
 
