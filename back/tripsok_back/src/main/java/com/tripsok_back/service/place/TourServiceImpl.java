@@ -97,7 +97,7 @@ public class TourServiceImpl extends PlaceService {
 			TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto = requestPlaceDetail(
 				placeTour.getContentId());
 			PlaceLclsCategory category = categoryService.getCategoryByCode(
-				tourApiPlaceDetailResponseDto.getCategoryLevel3());
+				tourApiPlaceDetailResponseDto.getLargeClassificationSystem3());
 			placeTour.updateNullTourDetail(tourApiPlaceDetailResponseDto, category);
 		}
 
@@ -334,6 +334,7 @@ public class TourServiceImpl extends PlaceService {
 		Page<Place> placePage;
 		do {
 			placePage = tourRepository.findAllByTourIsNotNullOrderByIdAsc(PageRequest.of(page, size));
+			placeEsService.createIndexIfMissing();
 			for (Place e : placePage.getContent()) {
 				docCount += placeEsService.indexPlaceDocuments(e);
 				placeCount++;

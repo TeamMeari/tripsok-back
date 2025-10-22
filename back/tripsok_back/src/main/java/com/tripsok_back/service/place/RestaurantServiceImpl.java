@@ -105,7 +105,7 @@ public class RestaurantServiceImpl extends PlaceService {
 			TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto = requestPlaceDetail(
 				placeRestaurant.getContentId());
 			PlaceLclsCategory category = categoryService.getCategoryByCode(
-				tourApiPlaceDetailResponseDto.getCategoryLevel3());
+				tourApiPlaceDetailResponseDto.getLargeClassificationSystem3());
 			placeRestaurant.updateNullRestaurantDetail(tourApiPlaceDetailResponseDto, category);
 		}
 		ensurePlaceIntro(placeRestaurant);
@@ -329,6 +329,7 @@ public class RestaurantServiceImpl extends PlaceService {
 		Page<Place> placePage;
 		do {
 			placePage = restaurantRepository.findAllByRestaurantIsNotNullOrderByIdAsc(PageRequest.of(page, size));
+			placeEsService.createIndexIfMissing();
 			for (Place e : placePage.getContent()) {
 				docCount += placeEsService.indexPlaceDocuments(e);
 				placeCount++;
