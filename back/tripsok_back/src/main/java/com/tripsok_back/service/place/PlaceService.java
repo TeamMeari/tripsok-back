@@ -214,7 +214,7 @@ public abstract class PlaceService {
 		if (s == null)
 			return null;
 		String out = s
-			.replaceAll("(?i)<br\s*/?>", " / ")
+			.replaceAll("(?i)<br */?>", " / ")
 			.replaceAll("<[^>]+>", " ")
 			.replaceAll("\r?\n+", " ")
 			.replace('\u200B', ' ')
@@ -222,7 +222,7 @@ public abstract class PlaceService {
 			.replace('\u200D', ' ')
 			.replace('\u2060', ' ')
 			.replace('\uFEFF', ' ')
-			.replaceAll("\s{2,}", " ")
+			.replaceAll(" {2,}", " ")
 			.trim();
 		if (out.length() > 255)
 			out = out.substring(0, 255);

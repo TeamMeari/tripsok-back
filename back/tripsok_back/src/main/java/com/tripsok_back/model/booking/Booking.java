@@ -103,20 +103,6 @@ public class Booking extends BaseTimeEntity {
 		this.locale = locale;
 	}
 
-	@Getter
-	public enum BookingStatus {
-		TRAVELING("여행중"),
-		COMPLETED("여행완료"),
-		CANCELED("취소됨"),
-		BEFORE_TRAVEL("여행전");
-
-		private final String description;
-
-		BookingStatus(String description) {
-			this.description = description;
-		}
-	}
-
 	public BookingStatus getCurrentStatus() {
 		if (this.status != BookingStatus.COMPLETED && this.status != BookingStatus.CANCELED) {
 			if (LocalDate.now().isAfter(this.tripDate)) {
@@ -135,5 +121,19 @@ public class Booking extends BaseTimeEntity {
 		bb.putLong(u.getMostSignificantBits()); // 8 bytes
 		bb.putLong(u.getLeastSignificantBits());
 		this.shareCode = Base64.getUrlEncoder().withoutPadding().encodeToString(bb.array()); // URL-safe base64 encoding
+	}
+
+	@Getter
+	public enum BookingStatus {
+		TRAVELING("여행중"),
+		COMPLETED("여행완료"),
+		CANCELED("취소됨"),
+		BEFORE_TRAVEL("여행전");
+
+		private final String description;
+
+		BookingStatus(String description) {
+			this.description = description;
+		}
 	}
 }

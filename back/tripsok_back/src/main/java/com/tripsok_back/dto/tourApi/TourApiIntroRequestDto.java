@@ -8,9 +8,8 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @SuperBuilder
 public class TourApiIntroRequestDto extends TourApiPlaceRequiredDto {
-    private Integer numOfRows;
-    private Integer pageNo;
-    private Integer contentId;
-    private Integer contentTypeId;
+	private Integer numOfRows;
+	private Integer pageNo;
+	private Integer contentId;
+	private Integer contentTypeId;
 }
-
