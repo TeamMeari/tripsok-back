@@ -11,4 +11,6 @@ import com.tripsok_back.model.user.TripSokUser;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
 	List<Booking> findAllByUserOrderByTripDateDesc(TripSokUser user);
+
+	Booking findTopByUserOrderByCreatedAtDesc(TripSokUser user);
 }
