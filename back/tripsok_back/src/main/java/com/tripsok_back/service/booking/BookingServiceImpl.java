@@ -105,6 +105,14 @@ public class BookingServiceImpl implements BookingService {
 		return new BookingShareResponse(booking.getShareCode());
 	}
 
+	@Override
+	@Transactional
+	public BookingResponse getLatestBooking(Integer userId) {
+		TripSokUser user = userService.findUserById(userId);
+		Booking booking = bookingRepository.findTopByUserOrderByCreatedAtDesc(user);
+		return booking == null ? null : new BookingResponse(booking);
+	}
+
 	private void validateBookingRequest(TripPlan tripPlan) {
 		if (tripPlan == null) {
 			throw new BookingException(ErrorCode.NOT_FOUND_BOOKING_TRIP_PLAN);

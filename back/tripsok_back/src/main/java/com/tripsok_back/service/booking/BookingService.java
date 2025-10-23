@@ -22,4 +22,6 @@ public interface BookingService {
 	BookingDetailResponse getBookingDetail(Integer userId, Integer bookingId, String shareCode);
 
 	BookingShareResponse getBookingShareInfo(Integer bookingId, Integer userId);
+
+	BookingResponse getLatestBooking(Integer userId);
 }
