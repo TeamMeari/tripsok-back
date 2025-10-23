@@ -143,7 +143,7 @@ public class BookingController {
 	}
 
 	@Operation(
-		summary = "가장 최신에 예약한 예약 내역 조회",
+		summary = "가장 최신에 예약한 예약 내역 조회(존재하지 않으면 null 반환)",
 		description = "현재 인증된 사용자의 가장 최신에 예약한 예약 내역을 조회합니다. 해당 요청으로 DB가 바뀔 수 있는 요소가 있어서 Post 요청으로 처리합니다."
 	)
 	@PostMapping("/latest")
