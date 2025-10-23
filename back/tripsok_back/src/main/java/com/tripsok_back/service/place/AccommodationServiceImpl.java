@@ -99,13 +99,14 @@ public class AccommodationServiceImpl extends PlaceService {
 			createTransliterationForNameAndAddress(placeAccommodation, locale);
 		}
 		if (placeAccommodation.getAccommodation().getPlaceLclsCategory() == null || (
-			placeAccommodation.getAccommodation().getAccommodationImages() == null || placeAccommodation.getTour()
-				.getTourImages()
+			placeAccommodation.getAccommodation().getAccommodationImages() == null
+				|| placeAccommodation.getAccommodation()
+				.getAccommodationImages()
 				.isEmpty()) || placeAccommodation.getTourismType() == null) {
 			TourApiPlaceDetailResponseDto tourApiPlaceDetailResponseDto = requestPlaceDetail(
 				placeAccommodation.getContentId());
 			PlaceLclsCategory category = categoryService.getCategoryByCode(
-				tourApiPlaceDetailResponseDto.getCategoryLevel3());
+				tourApiPlaceDetailResponseDto.getLargeClassificationSystem3());
 			placeAccommodation.updateNullAccommodationDetail(tourApiPlaceDetailResponseDto, category);
 		}
 
@@ -341,6 +342,7 @@ public class AccommodationServiceImpl extends PlaceService {
 		Page<Place> placePage;
 		do {
 			placePage = accommodationRepository.findAllByAccommodationIsNotNullOrderByIdAsc(PageRequest.of(page, size));
+			placeEsService.createIndexIfMissing();
 			for (Place e : placePage.getContent()) {
 				docCount += placeEsService.indexPlaceDocuments(e);
 				placeCount++;
