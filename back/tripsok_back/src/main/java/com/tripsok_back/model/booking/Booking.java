@@ -118,11 +118,12 @@ public class Booking extends BaseTimeEntity {
 	}
 
 	public BookingStatus getCurrentStatus() {
-		if (this.status != BookingStatus.COMPLETED) {
+		if (this.status != BookingStatus.COMPLETED && this.status != BookingStatus.CANCELED) {
 			if (LocalDate.now().isAfter(this.tripDate)) {
 				this.status = BookingStatus.COMPLETED;
+				return BookingStatus.COMPLETED;
 			} else if (LocalDate.now().isEqual(this.tripDate)) {
-				this.status = BookingStatus.TRAVELING;
+				return BookingStatus.TRAVELING;
 			}
 		}
 		return this.status;

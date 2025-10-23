@@ -64,7 +64,7 @@ public class BookingController {
 		USER_NOT_FOUND
 	})
 	@PostMapping
-	public ResponseEntity<CompleteBookingResponse> CompleteBooking(
+	public ResponseEntity<CompleteBookingResponse> completeBooking(
 		@RequestBody @Valid BookingRequest request,
 		@AuthenticationPrincipal Integer userId,
 		@Parameter(description = "언어(로케일) 코드", example = "KO", schema = @Schema(type = "string", allowableValues = {
@@ -84,7 +84,7 @@ public class BookingController {
 		USER_NOT_FOUND
 	})
 	@PatchMapping("/spot-memo")
-	public ResponseEntity<Void> UpdateBookingSpotMemo(
+	public ResponseEntity<Void> updateBookingSpotMemo(
 		@AuthenticationPrincipal Integer userId,
 		@RequestBody
 		@Parameter(description = "여행지 메모 수정 정보", required = true)
@@ -133,7 +133,7 @@ public class BookingController {
 		BOOKING_NOT_FOUND,
 		BOOKING_USER_MISMATCH
 	})
-	@GetMapping("/share/{bookingId}/code")
+	@PostMapping("/share/{bookingId}/code")
 	public ResponseEntity<BookingShareResponse> getBookingShareCode(
 		@AuthenticationPrincipal Integer userId,
 		@Parameter(description = "예약 번호", required = true)

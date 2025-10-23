@@ -71,13 +71,14 @@ public class BookingServiceImpl implements BookingService {
 	}
 
 	@Override
-	@Transactional(readOnly = true)
+	@Transactional
 	public List<BookingResponse> getUserBookings(Integer userId) {
 		TripSokUser user = userService.findUserById(userId);
-		return bookingRepository.findAllByUser(user).stream().map(BookingResponse::new).toList();
+		return bookingRepository.findAllByUserOrderByTripDateDesc(user).stream().map(BookingResponse::new).toList();
 	}
 
 	@Override
+	@Transactional
 	public BookingDetailResponse getBookingDetail(Integer userId, Integer bookingId, String shareCode) {
 		Booking booking = bookingRepository.findById(bookingId)
 			.orElseThrow(() -> new BookingException(ErrorCode.BOOKING_NOT_FOUND));
@@ -98,7 +99,7 @@ public class BookingServiceImpl implements BookingService {
 		if (!booking.getUser().getId().equals(userId)) {
 			throw new BookingException(ErrorCode.BOOKING_USER_MISMATCH);
 		}
-		if (booking.getShareCode() != null) {
+		if (booking.getShareCode() == null) {
 			booking.generateShareCode();
 		}
 		return new BookingShareResponse(booking.getShareCode());
