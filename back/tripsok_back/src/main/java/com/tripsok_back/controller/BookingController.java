@@ -97,9 +97,9 @@ public class BookingController {
 
 	@Operation(
 		summary = "사용자 예약 내역 조회",
-		description = "현재 인증된 사용자의 모든 예약 내역을 조회합니다."
+		description = "현재 인증된 사용자의 모든 예약 내역을 조회합니다. 해당 요청으로 DB가 바뀔 수 있는 요소가 있어서 Post 요청으로 처리합니다."
 	)
-	@GetMapping("/list")
+	@PostMapping("/list")
 	public ResponseEntity<List<BookingResponse>> getUserBookings(
 		@AuthenticationPrincipal Integer userId
 	) {
@@ -108,13 +108,13 @@ public class BookingController {
 
 	@Operation(
 		summary = "예약 상세 조회",
-		description = "현재 인증된 사용자의 특정 예약 내역 상세 정보를 조회합니다."
+		description = "현재 인증된 사용자의 특정 예약 내역 상세 정보를 조회합니다. 해당 요청으로 DB가 바뀔 수 있는 요소가 있어서 Post 요청으로 처리합니다."
 	)
 	@ApiErrorCodes({
 		BOOKING_NOT_FOUND,
 		BOOKING_USER_MISMATCH
 	})
-	@GetMapping("/detail/{bookingId}")
+	@PostMapping("/detail/{bookingId}")
 	public ResponseEntity<BookingDetailResponse> getBookingDetail(
 		@AuthenticationPrincipal Integer userId,
 		@Parameter(description = "예약 번호", required = true)
