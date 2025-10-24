@@ -24,6 +24,6 @@ public record GetBookingSpotSetResponse(
 	@Schema(description = "기존 mapX = lng (deprecated)", deprecated = true, example = "126.9780")
 	@JsonProperty("longitude")
 	public Double getMapX() {
-		return lng.doubleValue();
+        return lng;
 	}
 }
