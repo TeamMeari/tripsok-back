@@ -38,13 +38,13 @@ public record VisitSpotResponse(
 
 	@Schema(deprecated = true, accessMode = Schema.AccessMode.READ_ONLY)
 	@JsonProperty("latitude")
-	public Double getMapY() {
+	public Double getLatitude() {
 		return lat;
 	}
 
 	@Schema(deprecated = true, accessMode = Schema.AccessMode.READ_ONLY)
 	@JsonProperty("longitude")
-	public Double getMapX() {
+	public Double getLongitude() {
 		return lng;
 	}
 }
