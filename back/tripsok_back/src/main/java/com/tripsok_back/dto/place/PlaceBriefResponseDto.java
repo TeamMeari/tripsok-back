@@ -1,6 +1,5 @@
 package com.tripsok_back.dto.place;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Objects;
@@ -19,8 +18,8 @@ public record PlaceBriefResponseDto(
 	String summary,
 	String information,
 	String type,
-	BigDecimal lat,
-	BigDecimal lng,
+	Double lat,
+	Double lng,
 	Integer likeCount,
 	Integer viewCount,
 	Integer reviewCount,
@@ -54,8 +53,8 @@ public record PlaceBriefResponseDto(
 			tr.getSummary(),
 			tr.getInformation(),
 			type,
-			p.getMapY(), // lat
-			p.getMapX(), // lng
+			p.getMapY().doubleValue(), // lat
+			p.getMapX().doubleValue(), // lng
 			p.getLike(),
 			p.getView(),
 			reviewCount != null ? reviewCount : 0,
@@ -114,8 +113,8 @@ public record PlaceBriefResponseDto(
 			tr.getSummary(),
 			tr.getInformation(),
 			type,
-			p.getMapY(),
-			p.getMapX(),
+			p.getMapY().doubleValue(),
+			p.getMapX().doubleValue(),
 			p.getLike(),
 			p.getView(),
 			reviewCount != null ? reviewCount : 0,
@@ -142,8 +141,8 @@ public record PlaceBriefResponseDto(
 			d.getSummary(),
 			d.getInformation(),
 			d.getType(),
-			d.getLat() != null ? java.math.BigDecimal.valueOf(d.getLat()) : null,
-			d.getLng() != null ? java.math.BigDecimal.valueOf(d.getLng()) : null,
+			d.getLat() != null ? d.getLat() : null,
+			d.getLng() != null ? d.getLng() : null,
 			d.getLike() != null ? d.getLike() : 0,
 			d.getView() != null ? d.getView() : 0,
 			0,
