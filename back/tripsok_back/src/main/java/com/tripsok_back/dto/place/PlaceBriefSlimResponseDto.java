@@ -42,8 +42,8 @@ public record PlaceBriefSlimResponseDto(
 			tr != null ? tr.getPlaceName() : null,
 			tr.getSummary(),
 			type,
-			p.getMapY().doubleValue(), // lat
-			p.getMapX().doubleValue(), // lng
+            p.getMapY() != null ? p.getMapY().doubleValue() : null, // lat
+            p.getMapX() != null ? p.getMapX().doubleValue() : null, // lng
 			thumbnailUrl,
 			p.getUpdatedAt() != null ? p.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant() : null
 		);
