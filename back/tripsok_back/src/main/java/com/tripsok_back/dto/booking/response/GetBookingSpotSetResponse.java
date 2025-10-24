@@ -21,7 +21,7 @@ public record GetBookingSpotSetResponse(
 		return lat.doubleValue();
 	}
 
-	@Schema(description = "기존 mapX = lng (deprecated)", deprecated = true, example = "126.9780")
+    @Schema(description = "기존 longitude 필드입니다. `lng` 필드를 사용해주세요. (deprecated)", deprecated = true, example = "126.9780")
 	@JsonProperty("longitude")
 	public Double getMapX() {
         return lng;
