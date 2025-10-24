@@ -1,6 +1,7 @@
 package com.tripsok_back.service.booking;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -9,6 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.tripsok_back.dto.booking.request.BookingRequest;
 import com.tripsok_back.dto.booking.request.BookingSpotMemoUpdateRequest;
+import com.tripsok_back.dto.booking.response.BookingDetailResponse;
+import com.tripsok_back.dto.booking.response.BookingResponse;
+import com.tripsok_back.dto.booking.response.BookingShareResponse;
 import com.tripsok_back.dto.booking.response.CompleteBookingResponse;
 import com.tripsok_back.exception.BookingException;
 import com.tripsok_back.exception.ErrorCode;
@@ -59,11 +63,46 @@ public class BookingServiceImpl implements BookingService {
 
 	@Override
 	@Transactional
-	public void UpdateBookingSpotMemo(Integer userId, BookingSpotMemoUpdateRequest request) {
+	public void updateBookingSpotMemo(Integer userId, BookingSpotMemoUpdateRequest request) {
 		TripSokUser user = userService.findUserById(userId);
 		bookingSpotRepository.findByIdAndBooking_User(request.getBookingSpotId(), user)
 			.orElseThrow(() -> new BookingException(ErrorCode.BOOKING_SPOT_NOT_FOUND))
 			.updateMemo(request.getMemo());
+	}
+
+	@Override
+	@Transactional
+	public List<BookingResponse> getUserBookings(Integer userId) {
+		TripSokUser user = userService.findUserById(userId);
+		return bookingRepository.findAllByUserOrderByTripDateDesc(user).stream().map(BookingResponse::new).toList();
+	}
+
+	@Override
+	@Transactional
+	public BookingDetailResponse getBookingDetail(Integer userId, Integer bookingId, String shareCode) {
+		Booking booking = bookingRepository.findById(bookingId)
+			.orElseThrow(() -> new BookingException(ErrorCode.BOOKING_NOT_FOUND));
+		if (booking.getUser().getId().equals(userId)) {
+			return new BookingDetailResponse(booking);
+		}
+		if (booking.getShareCode() != null && booking.getShareCode().equals(shareCode)) {
+			return new BookingDetailResponse(booking);
+		}
+		throw new BookingException(ErrorCode.BOOKING_USER_MISMATCH);
+	}
+
+	@Override
+	@Transactional
+	public BookingShareResponse getBookingShareInfo(Integer bookingId, Integer userId) {
+		Booking booking = bookingRepository.findById(bookingId)
+			.orElseThrow(() -> new BookingException(ErrorCode.BOOKING_NOT_FOUND));
+		if (!booking.getUser().getId().equals(userId)) {
+			throw new BookingException(ErrorCode.BOOKING_USER_MISMATCH);
+		}
+		if (booking.getShareCode() == null) {
+			booking.generateShareCode();
+		}
+		return new BookingShareResponse(booking.getShareCode());
 	}
 
 	private void validateBookingRequest(TripPlan tripPlan) {

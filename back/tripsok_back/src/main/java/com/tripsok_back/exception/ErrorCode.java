@@ -55,6 +55,8 @@ public enum ErrorCode {
 	NOT_FOUND_BOOKING_TRIP_PLAN(HttpStatus.BAD_REQUEST, -15002, "예약할 여행 계획을 찾을 수 없습니다."),
 	INCOMPLETE_TRIP_PLAN(HttpStatus.BAD_REQUEST, -15003, "여행 계획이 완성되지 않았습니다. 여행 계획을 완성한 후 예약을 진행해주세요."),
 	BOOKING_PAST_TRIP_DATE(HttpStatus.BAD_REQUEST, -15004, "여행 출발일은 오늘 이후여야합니다."),
+	BOOKING_NOT_FOUND(HttpStatus.NOT_FOUND, -15005, "존재하지 않는 예약입니다."),
+	BOOKING_USER_MISMATCH(HttpStatus.FORBIDDEN, -15006, "해당 예약에 접근할 권한이 없습니다."),
 
 	// redis lock error 16000대
 	REDISSON_LOCK_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, -16000, "Redis Lock 획득에 실패했습니다. 잠시 후 다시 시도해주세요.");

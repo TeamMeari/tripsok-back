@@ -44,7 +44,7 @@ public class TripPlanServiceImpl implements TripPlanService {
 	@Transactional
 	public TripPlanResponse createOrUpdateTripPlan(Integer userId, UpdateTripPlanRequest request, LocaleCode locale) {
 		TripSokUser user = userService.findUserById(userId);
-		TripPlan tripPlan = findTripPlanByUserId(user);
+		TripPlan tripPlan = findTripPlanByUser(user);
 		Set<VisitSpot> existingVisitSpots = getVisitSpotSet(request.visitSpotSet(), tripPlan);
 		tripPlan.updateTripPlan(request, existingVisitSpots);
 		return new TripPlanResponse(tripPlan, locale);
@@ -54,7 +54,7 @@ public class TripPlanServiceImpl implements TripPlanService {
 	@Transactional
 	public TripPlanResponse getTripPlan(Integer userId, LocaleCode locale) {
 		TripSokUser user = userService.findUserById(userId);
-		TripPlan tripPlan = findTripPlanByUserId(user);
+		TripPlan tripPlan = findTripPlanByUser(user);
 		return new TripPlanResponse(tripPlan, locale);
 	}
 
@@ -87,7 +87,7 @@ public class TripPlanServiceImpl implements TripPlanService {
 			.collect(Collectors.toSet());
 	}
 
-	private TripPlan findTripPlanByUserId(TripSokUser user) {
+	private TripPlan findTripPlanByUser(TripSokUser user) {
 		TripPlan tripPlan = tripPlanRepository.findByUserIdAndStatus(user.getId(), TripPlan.PlanStatus.DRAFT);
 		if (tripPlan == null) {
 			tripPlan = new TripPlan(user);
