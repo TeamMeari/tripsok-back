@@ -102,8 +102,8 @@ public record PlaceBriefSlimResponseDto(
 			d.getTitle(),
 			d.getSummary(),
 			d.getType(),
-			d.getLat() != null ? Double.valueOf(d.getLat()) : null,
-			d.getLng() != null ? Double.valueOf(d.getLng()) : null,
+            d.getLat(),
+            d.getLng(),
 			d.getThumbnailUrl(),
 			d.getUpdatedAt() != null ? Instant.ofEpochMilli(d.getUpdatedAt()) : null
 		);
