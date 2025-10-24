@@ -15,7 +15,7 @@ public record GetBookingSpotSetResponse(
 	Integer orderIndex,
 	String memo
 ) {
-	@Schema(description = "기존 mapY = lat (deprecated)", deprecated = true, example = "37.5665")
+    @Schema(description = "기존 latitude 필드입니다. `lat` 필드를 사용해주세요. (deprecated)", deprecated = true, example = "37.5665")
 	@JsonProperty("latitude")
 	public Double getMapY() {
 		return lat.doubleValue();
