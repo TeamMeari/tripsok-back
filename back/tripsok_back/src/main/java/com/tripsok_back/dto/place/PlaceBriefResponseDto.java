@@ -53,8 +53,8 @@ public record PlaceBriefResponseDto(
 			tr.getSummary(),
 			tr.getInformation(),
 			type,
-            p.getMapY() != null ? p.getMapY().doubleValue() : null, // lat
-            p.getMapX() != null ? p.getMapX().doubleValue() : null, // lng
+            p.getMapY() != null ? convertToDouble(p.getMapY()) : null, // lat
+            p.getMapX() != null ? convertToDouble(p.getMapX()) : null, // lng
 			p.getLike(),
 			p.getView(),
 			reviewCount != null ? reviewCount : 0,
