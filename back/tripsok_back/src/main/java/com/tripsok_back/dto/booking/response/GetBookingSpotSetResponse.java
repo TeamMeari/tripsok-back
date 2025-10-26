@@ -6,8 +6,8 @@ public record GetBookingSpotSetResponse(
 	Integer placeId,
 	String placeName,
 	String address,
-	Double latitude,
-	Double longitude,
+	Double lat,
+	Double lng,
 	Integer orderIndex,
 	String memo
 ) {
