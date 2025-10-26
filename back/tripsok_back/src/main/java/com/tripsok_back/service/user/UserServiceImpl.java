@@ -13,7 +13,6 @@ import com.tripsok_back.dto.user.response.UserInfoResponse;
 import com.tripsok_back.exception.ErrorCode;
 import com.tripsok_back.exception.UserException;
 import com.tripsok_back.model.user.TripSokUser;
-import com.tripsok_back.repository.tripplan.TripPlanRepository;
 import com.tripsok_back.repository.user.UserRepository;
 import com.tripsok_back.security.jwt.JwtUtil;
 import com.tripsok_back.type.LocaleCode;
@@ -27,7 +26,6 @@ public class UserServiceImpl implements UserService {
 	private final UserRepository userRepository;
 	private final InterestThemeService interestThemeService;
 	private final InterestPlaceService interestPlaceService;
-	private final TripPlanRepository tripPlanRepository;
 	private final JwtUtil jwtUtil;
 
 	@Override
