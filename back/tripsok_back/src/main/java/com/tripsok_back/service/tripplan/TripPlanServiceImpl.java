@@ -54,8 +54,8 @@ public class TripPlanServiceImpl implements TripPlanService {
 	@Transactional
 	public TripPlanResponse getTripPlan(Integer userId, LocaleCode locale) {
 		TripSokUser user = userService.findUserById(userId);
-		TripPlan tripPlan = findTripPlanByUser(user);
-		return new TripPlanResponse(tripPlan, locale);
+		TripPlan tripPlan = tripPlanRepository.findByUserIdAndStatus(user.getId(), TripPlan.PlanStatus.DRAFT);
+		return tripPlan==null ? null : new TripPlanResponse(tripPlan, locale);
 	}
 
 	@Override
