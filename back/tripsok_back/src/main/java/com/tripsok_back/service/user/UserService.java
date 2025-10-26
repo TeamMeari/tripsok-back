@@ -3,7 +3,7 @@ package com.tripsok_back.service.user;
 import java.util.List;
 import java.util.Set;
 
-import com.tripsok_back.dto.SliceResponse;
+import com.tripsok_back.dto.InterestPlaceSliceResponse;
 import com.tripsok_back.dto.user.request.ChangeUserInfoRequest;
 import com.tripsok_back.dto.user.response.UserInfoResponse;
 import com.tripsok_back.model.user.TripSokUser;
@@ -21,7 +21,7 @@ public interface UserService {
 
 	void likePlace(Integer userId, Integer placeId);
 
-	SliceResponse getUserLikedPlaces(Integer userId, Integer size, Integer lastId, PlaceJoinType type,
+	InterestPlaceSliceResponse getUserLikedPlaces(Integer userId, Integer size, Integer lastId, PlaceJoinType type,
 		LocaleCode locale);
 
 	TripSokUser findUserById(Integer userId);

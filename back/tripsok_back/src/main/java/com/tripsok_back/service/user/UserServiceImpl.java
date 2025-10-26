@@ -6,7 +6,7 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tripsok_back.dto.SliceResponse;
+import com.tripsok_back.dto.InterestPlaceSliceResponse;
 import com.tripsok_back.dto.user.request.ChangeUserInfoRequest;
 import com.tripsok_back.dto.user.response.InterestThemeResponse;
 import com.tripsok_back.dto.user.response.UserInfoResponse;
@@ -69,7 +69,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public SliceResponse getUserLikedPlaces(Integer userId, Integer size, Integer lastId, PlaceJoinType type,
+	public InterestPlaceSliceResponse getUserLikedPlaces(Integer userId, Integer size, Integer lastId, PlaceJoinType type,
 		LocaleCode locale) {
 		TripSokUser user = findUserById(userId);
 		return interestPlaceService.getUserLikedPlaces(user, size, lastId, type, locale);

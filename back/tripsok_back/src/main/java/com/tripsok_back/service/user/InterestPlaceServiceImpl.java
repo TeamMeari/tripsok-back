@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
-import com.tripsok_back.dto.SliceResponse;
+import com.tripsok_back.dto.InterestPlaceSliceResponse;
 import com.tripsok_back.dto.user.response.InterestPlaceResponse;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.user.InterestPlace;
@@ -46,12 +46,15 @@ public class InterestPlaceServiceImpl implements InterestPlaceService {
 	}
 
 	@Override
-	public SliceResponse getUserLikedPlaces(TripSokUser user, Integer size, Integer lastId, PlaceJoinType type,
+	public InterestPlaceSliceResponse getUserLikedPlaces(TripSokUser user, Integer size, Integer lastId, PlaceJoinType type,
 		LocaleCode locale) {
 		Pageable pageable = PageRequest.ofSize(size);
 		Slice<InterestPlace> interestPlaces = interestPlaceRepository.findInterestPlacesByUser(user, pageable, lastId,
 			type == null ? null : type.name());
-
+		Integer count = null;
+		if (type!=null){
+			 count = interestPlaceRepository.countByUserAndCategory(user, type.name());
+		}
 		List<InterestPlaceResponse> interestPlaceResponses = interestPlaces.stream()
 			.map(ip -> {
 				Place place = ip.getPlace();
@@ -64,7 +67,7 @@ public class InterestPlaceServiceImpl implements InterestPlaceService {
 					.type(placeType)
 					.thumbnailUrl(getThumbnailUrl(place, placeType)).build();
 			}).toList();
-		return new SliceResponse(interestPlaces.hasNext(), interestPlaceResponses);
+		return new InterestPlaceSliceResponse(interestPlaces.hasNext(), interestPlaceResponses, count);
 	}
 
 	private String getThumbnailUrl(Place place, PlaceJoinType type) {
