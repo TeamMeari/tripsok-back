@@ -33,7 +33,7 @@ public class ThemeServiceImpl implements ThemeService {
 		String themeType = themeRepository.findById(themeId)
 			.map(Theme::getType)
 			.orElse(null);
-		log.info("조회된 테마 타입: {}", themeType);
+		log.debug("조회된 테마 타입: {}", themeType);
 		return themeType;
 	}
 }
