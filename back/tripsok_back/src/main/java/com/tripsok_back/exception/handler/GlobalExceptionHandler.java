@@ -13,6 +13,7 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import com.tripsok_back.exception.CustomException;
 import com.tripsok_back.exception.ErrorCode;
 
+import io.sentry.Sentry;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -24,6 +25,7 @@ public class GlobalExceptionHandler {
 		log.error("HttpMessageNotReadableException : {}", e.getMessage());
 		ErrorCode errorCode = ErrorCode.BAD_REQUEST_JSON;
 		ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.getErrorMessage());
+		Sentry.captureException(e);
 		return ResponseEntity.status(errorCode.getHttpStatus()).body(errorResponse);
 	}
 
@@ -33,6 +35,7 @@ public class GlobalExceptionHandler {
 		log.error("NoHandlerFoundException : {}", e.getMessage());
 		ErrorCode errorCode = ErrorCode.NOT_FOUND_END_POINT;
 		ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.getErrorMessage());
+		Sentry.captureException(e);
 		return ResponseEntity.status(errorCode.getHttpStatus()).body(errorResponse);
 	}
 
@@ -43,6 +46,7 @@ public class GlobalExceptionHandler {
 		log.error("MethodArgumentNotValidException : {}", errorMessage);
 		ErrorCode errorCode = ErrorCode.INVALID_INPUT_VALUE;
 		ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorMessage);
+		Sentry.captureException(e);
 		return ResponseEntity.status(errorCode.getHttpStatus()).body(errorResponse);
 	}
 
@@ -52,6 +56,7 @@ public class GlobalExceptionHandler {
 		log.error("MethodArgumentTypeMismatchException : {}", e.getMessage());
 		ErrorCode errorCode = ErrorCode.INVALID_TYPE_VALUE;
 		ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.getErrorMessage());
+		Sentry.captureException(e);
 		return ResponseEntity.status(errorCode.getHttpStatus()).body(errorResponse);
 	}
 
@@ -61,6 +66,7 @@ public class GlobalExceptionHandler {
 		log.error("MissingServletRequestParameterException : {}", e.getMessage());
 		ErrorCode errorCode = ErrorCode.MISSING_REQUEST_PARAMETER;
 		ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), e.getMessage());
+		Sentry.captureException(e);
 		return ResponseEntity.status(errorCode.getHttpStatus()).body(errorResponse);
 	}
 
@@ -69,6 +75,7 @@ public class GlobalExceptionHandler {
 		log.error("CustomException: {}", e.getMessage());
 		ErrorCode errorCode = e.getErrorCode();
 		ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.getErrorMessage());
+		Sentry.captureException(e);
 		return ResponseEntity.status(errorCode.getHttpStatus()).body(errorResponse);
 	}
 
@@ -78,6 +85,7 @@ public class GlobalExceptionHandler {
 		log.error("Exception : ", e);
 		ErrorCode errorCode = ErrorCode.INTERNAL_SERVER_ERROR;
 		ErrorResponse errorResponse = new ErrorResponse(errorCode.getCode(), errorCode.getErrorMessage());
+		Sentry.captureException(e);
 		return ResponseEntity.status(errorCode.getHttpStatus()).body(errorResponse);
 	}
 }
