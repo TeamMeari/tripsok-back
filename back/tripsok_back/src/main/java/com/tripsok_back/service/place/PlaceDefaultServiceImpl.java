@@ -56,13 +56,13 @@ public class PlaceDefaultServiceImpl extends PlaceService {
 	}
 
 	@Override
-	public PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable, LocaleCode locale) {
+	public PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable, LocaleCode locale, Integer userId) {
 		throw new TourApiException(CATEGORY_NOT_FOUND);
 	}
 
 	@Override
 	public PageResponse<PlaceBriefSlimResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
-		LocaleCode locale) {
+		Integer userId, LocaleCode locale) {
 		throw new TourApiException(CATEGORY_NOT_FOUND);
 	}
 

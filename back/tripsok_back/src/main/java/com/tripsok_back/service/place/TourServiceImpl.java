@@ -3,7 +3,10 @@ package com.tripsok_back.service.place;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +27,7 @@ import com.tripsok_back.exception.InternalErrorCode;
 import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
+import com.tripsok_back.model.user.InterestPlace;
 import com.tripsok_back.repository.place.PlaceRepository;
 import com.tripsok_back.repository.place.TourRepository;
 import com.tripsok_back.repository.user.InterestPlaceRepository;
@@ -119,31 +123,47 @@ public class TourServiceImpl extends PlaceService {
 
 	@Override
 	public PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable,
-		LocaleCode locale) {
-		Page<Place> placeList = tourRepository.findByTourIsNotNullAndPlaceTrs_Id_Locale(locale.getCode(), pageable);
-		if (placeList.getTotalPages() == 0)
+		LocaleCode locale, Integer userId) {
+		Page<Place> placePage = tourRepository.findByTourIsNotNullAndPlaceTrs_Id_Locale(locale.getCode(), pageable);
+		if (placePage.getTotalPages() == 0)
 			return PageResponse.empty();
-		Page<PlaceBriefSlimResponseDto> dtoList = placeList.map(
-			e -> PlaceBriefSlimResponseDto.from(e, getType().name(),
-				e.getTour().getImageUrlList().getFirst(),
-				e.getTour().getTourImages().size(),
-				e.getTour().getTourReviews().size(),
-				locale)
-		);
-		return PageResponse.fromPage(placeList, dtoList);
+		List<InterestPlace> interestPlaces = getPlacesLikedByUserAndPlaces(userId, placePage);
+		Set<Integer> likedPlaceIds = interestPlaces.stream()
+			.map(ip -> ip.getPlace().getId())
+			.collect(Collectors.toSet());
+		return getPlaceBriefSlimResponseDtoPageResponse(locale, placePage, likedPlaceIds);
 	}
 
 	@Override
 	public PageResponse<PlaceBriefSlimResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
+		Integer userId,
 		LocaleCode locale) {
-		Page<Place> placeList = tourRepository.findByTourIsNotNullAndThemes_Theme_Id(pageable, themeId);
-		Page<PlaceBriefSlimResponseDto> dtoList = placeList.map(
-			e -> PlaceBriefSlimResponseDto.from(e, getType().name(),
-				e.getTour().getImageUrlList().getFirst(),
-				e.getTour().getTourImages().size(),
-				e.getTour().getTourReviews().size(),
-				locale));
-		return PageResponse.fromPage(placeList, dtoList);
+		Page<Place> placePage = tourRepository.findByTourIsNotNullAndThemes_Theme_Id(pageable, themeId);
+		List<InterestPlace> interestPlaces = getPlacesLikedByUserAndPlaces(userId, placePage);
+		Set<Integer> likedPlaceIds = interestPlaces.stream()
+			.map(ip -> ip.getPlace().getId())
+			.collect(Collectors.toSet());
+		return getPlaceBriefSlimResponseDtoPageResponse(locale, placePage, likedPlaceIds);
+	}
+
+	@NotNull
+	protected PageResponse<PlaceBriefSlimResponseDto> getPlaceBriefSlimResponseDtoPageResponse(LocaleCode locale,
+		Page<Place> placePage, Set<Integer> likedPlaceIds) {
+		Page<PlaceBriefSlimResponseDto> dtoList = placePage.map(place -> {
+			boolean liked = likedPlaceIds.contains(place.getId());
+
+			return PlaceBriefSlimResponseDto.from(
+				place,
+				getType().name(),
+				place.getTour().getImageUrlList().getFirst(),
+				liked,
+				place.getTour().getTourImages().size(),
+				place.getTour().getTourReviews().size(),
+				locale
+			);
+		});
+
+		return PageResponse.fromPage(placePage, dtoList);
 	}
 
 	@Override
