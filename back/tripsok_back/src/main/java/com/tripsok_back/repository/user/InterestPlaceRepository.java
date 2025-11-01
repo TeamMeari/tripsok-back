@@ -22,7 +22,7 @@ public interface InterestPlaceRepository extends JpaRepository<InterestPlace, In
 
 	boolean existsByPlaceAndUser_Id(Place place, Integer userId);
 
-	List<InterestPlace> findByUser_IdAndPlace_IdIn(Integer user_id, Collection<Integer> place_id);
+List<InterestPlace> findByUser_IdAndPlace_IdIn(Integer userId, Collection<Integer> placeIds);
 
-	List<InterestPlace> findByUser_IdAndPlace_In(Integer user_id, List<Place> places);
+	List<InterestPlace> findByUser_IdAndPlace_In(Integer userId, List<Place> places);
 }
