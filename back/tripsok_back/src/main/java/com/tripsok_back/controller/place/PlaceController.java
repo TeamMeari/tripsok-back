@@ -1,6 +1,5 @@
 package com.tripsok_back.controller.place;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.tripsok_back.dto.PageResponse;
 import com.tripsok_back.dto.place.PlaceBriefSlimResponseDto;
 import com.tripsok_back.dto.place.PlaceDetailResponseDto;
-import com.tripsok_back.dto.place.PlaceDocument;
 import com.tripsok_back.dto.place.PlaceSortStyle;
 import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.service.place.PlaceService;
@@ -31,7 +29,6 @@ import com.tripsok_back.type.TourismType;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -74,6 +71,7 @@ public class PlaceController {
 	})
 	@GetMapping("/{category}")
 	public ResponseEntity<PageResponse<PlaceBriefSlimResponseDto>> getPlaceList(
+		@AuthenticationPrincipal Integer userId,
 		@Parameter(
 			description = "카테고리",
 			schema = @Schema(allowableValues = {"accommodation", "restaurant", "tour", "wrong-category"})
@@ -133,7 +131,7 @@ public class PlaceController {
 
 			Page<PlaceBriefSlimResponseDto> textPage = placeEsService.unifiedSearch(
 				PageRequest.of(page, size, sortEs),
-				localeCode, q, typeFilter, sortEs
+				localeCode, q, typeFilter, sortEs, userId
 			);
 
 			long textTotal = textPage.getTotalElements();
@@ -150,7 +148,7 @@ public class PlaceController {
 
 				Page<PlaceBriefSlimResponseDto> embPage = placeEsService.unifiedEmbeddingSearch(
 					PageRequest.of(0, remainSize, sortEs),
-					localeCode, q, typeFilter, sortEs
+					localeCode, q, typeFilter, sortEs, userId
 				);
 
 				long embTotal = embPage.getTotalElements();
@@ -165,7 +163,7 @@ public class PlaceController {
 
 			Page<PlaceBriefSlimResponseDto> embPage = placeEsService.unifiedEmbeddingSearch(
 				PageRequest.of(embPageIdx, size, sortEs),
-				localeCode, q, typeFilter, sortEs
+				localeCode, q, typeFilter, sortEs, userId
 			);
 
 			long embTotal = embPage.getTotalElements();
@@ -175,9 +173,9 @@ public class PlaceController {
 		}
 		PageResponse<PlaceBriefSlimResponseDto> body;
 		if (themeId != null) {
-			body = getService(categoryType).getPlaceListByTheme(pageable, themeId, localeCode);
+			body = getService(categoryType).getPlaceListByTheme(pageable, themeId, userId, localeCode);
 		} else {
-			body = getService(categoryType).getPlaceList(pageable, localeCode);
+			body = getService(categoryType).getPlaceList(pageable, localeCode, userId);
 		}
 		return ResponseEntity.ok(body);
 	}
@@ -224,7 +222,7 @@ public class PlaceController {
 			return ResponseEntity.notFound().build();
 		}
 	}
-
+	/*
 	@GetMapping("/search/text")
 	@Operation(
 		summary = "텍스트 기반 검색",
@@ -268,6 +266,8 @@ public class PlaceController {
 		}
 	}
 
+	 */
+
 	@Operation(summary = "거리 기반 장소 검색", description = "위도, 경도, 거리, 언어를 기반으로 장소를 검색합니다.")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "조회 성공"),
@@ -276,6 +276,7 @@ public class PlaceController {
 	})
 	@GetMapping("/nearby")
 	public ResponseEntity<List<PlaceBriefSlimResponseDto>> searchNearby(
+		@AuthenticationPrincipal Integer userId,
 		@Parameter(description = "위도", example = "37.5086534069")
 		@RequestParam double lat,
 
@@ -297,7 +298,7 @@ public class PlaceController {
 
 		LocaleCode lc = LocaleCode.from(locale);
 
-		return ResponseEntity.ok(placeEsService.searchByDistance(lat, lng, distance, size, lc));
+		return ResponseEntity.ok(placeEsService.searchByDistance(lat, lng, distance, size, lc, userId));
 	}
 
 	@Operation(
