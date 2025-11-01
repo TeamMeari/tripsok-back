@@ -12,6 +12,7 @@ import com.tripsok_back.model.place.restaurant.Restaurant;
 import com.tripsok_back.model.place.tour.Tour;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
+import com.tripsok_back.type.TourismType;
 
 import lombok.Builder;
 
@@ -19,7 +20,7 @@ public record PlaceDetailResponseDto(
 	Integer id, String language, String placeName, String summary, String address, String contact, String email,
 	String information,
 	Integer view, Integer like, BigDecimal mapX, BigDecimal mapY, LocalDateTime createdAt, LocalDateTime updatedAt,
-	PlaceJoinType type, Boolean isLiked,
+	TourismType type, Boolean isLiked,
 	Set<PlaceTagResponseDto> tags,
 	ChildSummary child,
 	String openDate,
@@ -55,7 +56,7 @@ public record PlaceDetailResponseDto(
 			.isLiked(isLiked)
 			.createdAt(place.getCreatedAt())
 			.updatedAt(place.getUpdatedAt())
-			.type(type)
+			.type(TourismType.fromPlaceJoinType(type))
 			.tags(tags)
 			.child(switch (type) {
 				case ACCOMMODATION -> {

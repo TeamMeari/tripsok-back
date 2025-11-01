@@ -141,7 +141,7 @@ public record PlaceBriefResponseDto(
 			d.getAddress(),
 			d.getSummary(),
 			d.getInformation(),
-			d.getType(),
+			d.getType().name(),
 			d.getLat() != null ? java.math.BigDecimal.valueOf(d.getLat()) : null,
 			d.getLng() != null ? java.math.BigDecimal.valueOf(d.getLng()) : null,
 			d.getLike() != null ? d.getLike() : 0,

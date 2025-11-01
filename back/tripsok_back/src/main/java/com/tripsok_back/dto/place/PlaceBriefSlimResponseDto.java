@@ -15,6 +15,7 @@ public record PlaceBriefSlimResponseDto(
 	String name,
 	String summary,
 	String type,
+	Boolean isLiked,
 	BigDecimal lat,
 	BigDecimal lng,
 	String thumbnailUrl,
@@ -25,6 +26,7 @@ public record PlaceBriefSlimResponseDto(
 		Place p,
 		String type,
 		String thumbnailUrl,
+		Boolean isLiked,
 		Integer imageCount,
 		Integer reviewCount,
 		LocaleCode locale
@@ -43,6 +45,7 @@ public record PlaceBriefSlimResponseDto(
 			tr != null ? tr.getPlaceName() : null,
 			tr.getSummary(),
 			type,
+			isLiked,
 			p.getMapY(), // lat
 			p.getMapX(), // lng
 			thumbnailUrl,
@@ -50,7 +53,7 @@ public record PlaceBriefSlimResponseDto(
 		);
 	}
 
-	public static PlaceBriefSlimResponseDto from(Place p, LocaleCode locale) {
+	public static PlaceBriefSlimResponseDto from(Place p, LocaleCode locale, Boolean isLiked) {
 		if (p == null || locale == null)
 			return null;
 		PlaceTr tr = p.getPlaceTr(locale);
@@ -82,6 +85,7 @@ public record PlaceBriefSlimResponseDto(
 			tr.getPlaceName(),
 			tr.getSummary(),
 			type,
+			isLiked,
 			p.getMapY(),
 			p.getMapX(),
 			thumb,
@@ -89,7 +93,7 @@ public record PlaceBriefSlimResponseDto(
 		);
 	}
 
-	public static PlaceBriefSlimResponseDto from(PlaceDocument d) {
+	public static PlaceBriefSlimResponseDto from(PlaceDocument d, Boolean isLiked) {
 		if (d == null)
 			return null;
 		Integer id = null;
@@ -102,7 +106,8 @@ public record PlaceBriefSlimResponseDto(
 			d.getLocale(),
 			d.getTitle(),
 			d.getSummary(),
-			d.getType(),
+			d.getType().name(),
+			isLiked,
 			d.getLat() != null ? BigDecimal.valueOf(d.getLat()) : null,
 			d.getLng() != null ? BigDecimal.valueOf(d.getLng()) : null,
 			d.getThumbnailUrl(),
