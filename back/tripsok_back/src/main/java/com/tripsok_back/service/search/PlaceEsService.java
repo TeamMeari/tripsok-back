@@ -427,6 +427,9 @@ public class PlaceEsService {
 				if (d != null)
 					items.add(PlaceBriefSlimResponseDto.from(d));
 			}
+			if (!items.isEmpty()) {
+				items.remove(0);
+			}
 			return items;
 		} catch (IOException e) {
 			log.error("거리 기반 검색 실패", e);
