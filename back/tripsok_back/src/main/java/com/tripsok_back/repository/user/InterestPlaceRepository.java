@@ -1,5 +1,8 @@
 package com.tripsok_back.repository.user;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,4 +21,8 @@ public interface InterestPlaceRepository extends JpaRepository<InterestPlace, In
 	Slice<InterestPlace> findInterestPlacesByUser(TripSokUser user, Pageable pageable, Integer lastId, String type);
 
 	boolean existsByPlaceAndUser_Id(Place place, Integer userId);
+
+	List<InterestPlace> findByUser_IdAndPlace_IdIn(Integer user_id, Collection<Integer> place_id);
+
+	List<InterestPlace> findByUser_IdAndPlace_In(Integer user_id, List<Place> places);
 }
