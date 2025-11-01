@@ -268,13 +268,14 @@ public class PlaceController {
 		}
 	}
 
+	@Deprecated
 	@Operation(summary = "거리 기반 장소 검색", description = "위도, 경도, 거리, 언어를 기반으로 장소를 검색합니다.")
 	@ApiResponses({
 		@ApiResponse(responseCode = "200", description = "조회 성공"),
 		@ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터", content = @Content),
 		@ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)
 	})
-	@GetMapping("/nearby")
+	@GetMapping("/nearby2")
 	public ResponseEntity<List<PlaceBriefSlimResponseDto>> searchNearby(
 		@Parameter(description = "위도", example = "37.5086534069")
 		@RequestParam double lat,
@@ -298,6 +299,40 @@ public class PlaceController {
 		LocaleCode lc = LocaleCode.from(locale);
 
 		return ResponseEntity.ok(placeEsService.searchByDistance(lat, lng, distance, size, lc));
+	}
+
+	@Operation(summary = "거리 기반 장소 검색 중복한 ID는 제거합니다", description = "위도, 경도, 거리, 언어를 기반으로 장소를 검색합니다.")
+	@ApiResponses({
+		@ApiResponse(responseCode = "200", description = "조회 성공"),
+		@ApiResponse(responseCode = "400", description = "잘못된 요청 파라미터", content = @Content),
+		@ApiResponse(responseCode = "500", description = "서버 오류", content = @Content)
+	})
+	@GetMapping("/nearby")
+	public ResponseEntity<List<PlaceBriefSlimResponseDto>> searchNearbyAndRemovePlaceId(
+		@Parameter(description = "위도", example = "37.5086534069")
+		@RequestParam double lat,
+
+		@Parameter(description = "경도", example = "129.095773005")
+		@RequestParam double lng,
+
+		@Parameter(description = "검색 거리 (예: 5km, 500m)", example = "500km")
+		@RequestParam String distance,
+		@Parameter(description = "해당장소의 id")
+		@RequestParam int placeId,
+
+		@Parameter(description = "결과 크기 (최대 개수)", example = "10",
+			schema = @Schema(minimum = "1", maximum = "100"))
+		@RequestParam(defaultValue = "10") @Min(1) @Max(100) int size,
+
+		@Parameter(description = "언어(로케일) 코드", example = "ko",
+			schema = @Schema(allowableValues = {"ko", "en", "ja", "cn"}))
+		@RequestParam(name = "locale", defaultValue = "ko") String locale
+	) {
+		log.info("거리 기반 장소 검색 lat={}, lng={}, distance={}, size={}, locale={}", lat, lng, distance, size, locale);
+
+		LocaleCode lc = LocaleCode.from(locale);
+
+		return ResponseEntity.ok(placeEsService.searchByDistanceAndRemoveId(lat, lng, placeId, distance, size, lc));
 	}
 
 	@Operation(
