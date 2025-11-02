@@ -7,5 +7,5 @@ import lombok.Builder;
 
 @Builder
 public record InterestPlaceResponse(Integer id, LocaleCode language, Integer placeId, String name, PlaceJoinType type,
-									String thumbnailUrl) {
+									String thumbnailUrl, String summary) {
 }
