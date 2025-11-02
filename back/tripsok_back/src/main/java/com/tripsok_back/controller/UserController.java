@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tripsok_back.dto.SliceResponse;
+import com.tripsok_back.dto.InterestPlaceSliceResponse;
 import com.tripsok_back.dto.user.request.ChangeContactEmailRequest;
 import com.tripsok_back.dto.user.request.ChangeInterestThemeRequest;
 import com.tripsok_back.dto.user.request.ChangeUserInfoRequest;
@@ -25,7 +25,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -81,9 +80,9 @@ public class UserController {
 			"""
 	)
 	@GetMapping("/like-places")
-	public ResponseEntity<SliceResponse> getLikedPlaces(@AuthenticationPrincipal Integer userId,
-		@Parameter(description = "가져올 데이터 사이즈", example = "20", schema = @Schema(minimum = "10", maximum = "100"))
-		@RequestParam(defaultValue = "20") @Min(10) @Max(100) int size,
+	public ResponseEntity<InterestPlaceSliceResponse> getLikedPlaces(@AuthenticationPrincipal Integer userId,
+		@Parameter(description = "가져올 데이터 사이즈", example = "20", schema = @Schema(maximum = "100"))
+		@RequestParam(defaultValue = "20") @Max(100) int size,
 		@Parameter(description = "마지막으로 조회된 데이터 ID", example = "123")
 		@RequestParam(required = false) Integer lastId,
 		@Parameter(description = "장소 타입")

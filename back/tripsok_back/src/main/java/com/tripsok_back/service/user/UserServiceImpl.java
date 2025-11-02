@@ -6,14 +6,13 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.tripsok_back.dto.SliceResponse;
+import com.tripsok_back.dto.InterestPlaceSliceResponse;
 import com.tripsok_back.dto.user.request.ChangeUserInfoRequest;
 import com.tripsok_back.dto.user.response.InterestThemeResponse;
 import com.tripsok_back.dto.user.response.UserInfoResponse;
 import com.tripsok_back.exception.ErrorCode;
 import com.tripsok_back.exception.UserException;
 import com.tripsok_back.model.user.TripSokUser;
-import com.tripsok_back.repository.tripplan.TripPlanRepository;
 import com.tripsok_back.repository.user.UserRepository;
 import com.tripsok_back.security.jwt.JwtUtil;
 import com.tripsok_back.type.LocaleCode;
@@ -27,7 +26,6 @@ public class UserServiceImpl implements UserService {
 	private final UserRepository userRepository;
 	private final InterestThemeService interestThemeService;
 	private final InterestPlaceService interestPlaceService;
-	private final TripPlanRepository tripPlanRepository;
 	private final JwtUtil jwtUtil;
 
 	@Override
@@ -69,7 +67,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public SliceResponse getUserLikedPlaces(Integer userId, Integer size, Integer lastId, PlaceJoinType type,
+	public InterestPlaceSliceResponse getUserLikedPlaces(Integer userId, Integer size, Integer lastId,
+		PlaceJoinType type,
 		LocaleCode locale) {
 		TripSokUser user = findUserById(userId);
 		return interestPlaceService.getUserLikedPlaces(user, size, lastId, type, locale);

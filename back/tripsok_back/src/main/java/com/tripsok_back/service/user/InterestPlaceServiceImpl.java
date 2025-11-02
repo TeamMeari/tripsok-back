@@ -8,9 +8,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 
-import com.tripsok_back.dto.SliceResponse;
+import com.tripsok_back.dto.InterestPlaceSliceResponse;
 import com.tripsok_back.dto.user.response.InterestPlaceResponse;
 import com.tripsok_back.model.place.Place;
+import com.tripsok_back.model.place.PlaceTr;
 import com.tripsok_back.model.user.InterestPlace;
 import com.tripsok_back.model.user.TripSokUser;
 import com.tripsok_back.repository.user.InterestPlaceRepository;
@@ -46,25 +47,31 @@ public class InterestPlaceServiceImpl implements InterestPlaceService {
 	}
 
 	@Override
-	public SliceResponse getUserLikedPlaces(TripSokUser user, Integer size, Integer lastId, PlaceJoinType type,
+	public InterestPlaceSliceResponse getUserLikedPlaces(TripSokUser user, Integer size, Integer lastId,
+		PlaceJoinType type,
 		LocaleCode locale) {
 		Pageable pageable = PageRequest.ofSize(size);
 		Slice<InterestPlace> interestPlaces = interestPlaceRepository.findInterestPlacesByUser(user, pageable, lastId,
 			type == null ? null : type.name());
-
+		Integer totalItems = null;
+		if (type != null) {
+			totalItems = interestPlaceRepository.countByUserAndCategory(user, type.name());
+		}
 		List<InterestPlaceResponse> interestPlaceResponses = interestPlaces.stream()
 			.map(ip -> {
 				Place place = ip.getPlace();
 				PlaceJoinType placeType = type != null ? type : PlaceJoinType.getPlaceType(place);
+				PlaceTr placeTr = place.getPlaceTr(locale);
 				return InterestPlaceResponse.builder()
 					.id(ip.getId())
 					.placeId(place.getId())
 					.language(locale)
-					.name(place.getPlaceTr(locale).getPlaceName())
+					.name(placeTr.getPlaceName())
 					.type(placeType)
-					.thumbnailUrl(getThumbnailUrl(place, placeType)).build();
+					.thumbnailUrl(getThumbnailUrl(place, placeType))
+					.summary(placeTr.getSummary()).build();
 			}).toList();
-		return new SliceResponse(interestPlaces.hasNext(), interestPlaceResponses);
+		return new InterestPlaceSliceResponse(interestPlaces.hasNext(), interestPlaceResponses, totalItems);
 	}
 
 	private String getThumbnailUrl(Place place, PlaceJoinType type) {
