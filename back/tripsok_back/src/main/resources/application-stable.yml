@@ -3,7 +3,7 @@ spring:
   datasource:
     url: ${DB_STABLE_URL}
     username: ${DB_STABLE_USERNAME}
-    driver-class-name: com.p6spy.engine.spy.P6SpyDriver
+    driver-class-name: ${DB_STABLE_DRIVER_CLASS_NAME}
   jpa:
     show-sql: false
 
