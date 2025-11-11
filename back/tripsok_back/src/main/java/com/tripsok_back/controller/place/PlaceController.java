@@ -131,7 +131,7 @@ public class PlaceController {
 
 			Page<PlaceBriefSlimResponseDto> textPage = placeEsService.unifiedSearch(
 				PageRequest.of(page, size, sortEs),
-				localeCode, q, typeFilter, sortEs, userId
+				localeCode, q, typeFilter, sortEs, themeId, userId
 			);
 
 			long textTotal = textPage.getTotalElements();
@@ -148,7 +148,7 @@ public class PlaceController {
 
 				Page<PlaceBriefSlimResponseDto> embPage = placeEsService.unifiedEmbeddingSearch(
 					PageRequest.of(0, remainSize, sortEs),
-					localeCode, q, typeFilter, sortEs, userId
+					localeCode, q, typeFilter, sortEs, themeId, userId
 				);
 
 				long embTotal = embPage.getTotalElements();
@@ -163,7 +163,7 @@ public class PlaceController {
 
 			Page<PlaceBriefSlimResponseDto> embPage = placeEsService.unifiedEmbeddingSearch(
 				PageRequest.of(embPageIdx, size, sortEs),
-				localeCode, q, typeFilter, sortEs, userId
+				localeCode, q, typeFilter, sortEs, themeId, userId
 			);
 
 			long embTotal = embPage.getTotalElements();

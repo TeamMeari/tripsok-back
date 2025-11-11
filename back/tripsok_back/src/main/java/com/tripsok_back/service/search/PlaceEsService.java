@@ -187,7 +187,7 @@ public class PlaceEsService {
 	}
 
 	public Page<PlaceBriefSlimResponseDto> unifiedEmbeddingSearch(
-		Pageable pageable, LocaleCode lc, String q, TourismType type, Sort sortArg, Integer userId, Integer themeId) {
+		Pageable pageable, LocaleCode lc, String q, TourismType type, Sort sortArg, Integer themeId, Integer userId) {
 
 		long start = System.currentTimeMillis();
 		try {
