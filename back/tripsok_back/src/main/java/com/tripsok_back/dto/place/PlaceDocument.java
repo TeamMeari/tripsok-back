@@ -74,7 +74,9 @@ public class PlaceDocument {
 			}
 		}
 
-		List<String> themes = List.of();
+		List<String> themes = place.getThemes().stream()
+			.map(pt -> pt.getTheme().getType())
+			.toList();
 		switch (type) {
 			case ACCOMMODATION -> {
 				if (place.getAccommodation() == null) {

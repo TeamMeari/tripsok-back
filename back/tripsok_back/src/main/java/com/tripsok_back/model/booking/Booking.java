@@ -1,9 +1,12 @@
 package com.tripsok_back.model.booking;
 
+import java.nio.ByteBuffer;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 import com.tripsok_back.dto.booking.request.BookingRequest;
 import com.tripsok_back.model.tripplan.TripPlan;
@@ -24,6 +27,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,7 +38,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @Table(indexes = {
 	@Index(name = "idx_booking_user_id", columnList = "user_id"),
-})
+},
+	uniqueConstraints = {
+		@UniqueConstraint(name = "uk_booking_share_code", columnNames = "SHARE_CODE"),
+	})
 public class Booking extends BaseTimeEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -80,6 +87,9 @@ public class Booking extends BaseTimeEntity {
 	@Column(name = "STATUS", nullable = false, length = 20)
 	private BookingStatus status = BookingStatus.BEFORE_TRAVEL;
 
+	@Column(name = "SHARE_CODE", unique = true, length = 40)
+	private String shareCode;
+
 	public Booking(TripSokUser user, BookingRequest request, LocaleCode locale, TripPlan tripPlan) {
 		this.user = user;
 		this.contactEmail = request.getContactEmail();
@@ -91,6 +101,26 @@ public class Booking extends BaseTimeEntity {
 		this.amount = request.getPaymentInfo().getAmount();
 		this.paymentKey = request.getPaymentInfo().getPaymentKey();
 		this.locale = locale;
+	}
+
+	public BookingStatus getCurrentStatus() {
+		if (this.status != BookingStatus.COMPLETED && this.status != BookingStatus.CANCELED) {
+			if (LocalDate.now().isAfter(this.tripDate)) {
+				this.status = BookingStatus.COMPLETED;
+				return BookingStatus.COMPLETED;
+			} else if (LocalDate.now().isEqual(this.tripDate)) {
+				return BookingStatus.TRAVELING;
+			}
+		}
+		return this.status;
+	}
+
+	public void generateShareCode() {
+		UUID u = UUID.randomUUID();
+		ByteBuffer bb = ByteBuffer.allocate(16);
+		bb.putLong(u.getMostSignificantBits()); // 8 bytes
+		bb.putLong(u.getLeastSignificantBits());
+		this.shareCode = Base64.getUrlEncoder().withoutPadding().encodeToString(bb.array()); // URL-safe base64 encoding
 	}
 
 	@Getter
@@ -106,5 +136,4 @@ public class Booking extends BaseTimeEntity {
 			this.description = description;
 		}
 	}
-
 }

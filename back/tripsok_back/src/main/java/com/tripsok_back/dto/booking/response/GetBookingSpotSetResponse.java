@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import com.tripsok_back.model.booking.BookingSpot;
+
 public record GetBookingSpotSetResponse(
 	Integer placeId,
 	String placeName,
@@ -27,5 +29,16 @@ public record GetBookingSpotSetResponse(
 	@JsonProperty("longitude")
 	public Double getMapX() {
         return lng;
+	}
+	public GetBookingSpotSetResponse(BookingSpot bookingSpotSet) {
+		this(
+			bookingSpotSet.getPlaceId(),
+			bookingSpotSet.getPlaceName(),
+			bookingSpotSet.getAddress(),
+			bookingSpotSet.getLatitude().doubleValue(),
+			bookingSpotSet.getLongitude().doubleValue(),
+			bookingSpotSet.getOrderIndex(),
+			bookingSpotSet.getMemo()
+		);
 	}
 }
