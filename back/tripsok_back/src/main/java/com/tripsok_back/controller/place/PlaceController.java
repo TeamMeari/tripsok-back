@@ -71,6 +71,7 @@ public class PlaceController {
 	})
 	@GetMapping("/{category}")
 	public ResponseEntity<PageResponse<PlaceBriefSlimResponseDto>> getPlaceList(
+		@AuthenticationPrincipal Integer userId,
 		@Parameter(
 			description = "카테고리",
 			schema = @Schema(allowableValues = {"accommodation", "restaurant", "tour", "wrong-category"})
@@ -299,7 +300,8 @@ public class PlaceController {
 
 		LocaleCode lc = LocaleCode.from(locale);
 
-		return ResponseEntity.ok(placeEsService.searchByDistanceAndRemoveId(lat, lng, placeId, distance, size, lc));
+		return ResponseEntity.ok(
+			placeEsService.searchByDistanceAndRemoveId(lat, lng, placeId, distance, size, lc, userId));
 	}
 
 	@Operation(
