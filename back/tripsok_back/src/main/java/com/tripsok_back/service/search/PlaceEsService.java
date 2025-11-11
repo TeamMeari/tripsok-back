@@ -47,6 +47,7 @@ public class PlaceEsService {
 
 	private static final String INDEX = "places";
 	private static final String MAPPING_PATH = "elasticsearch/mappings/places-mapping.json";
+	private static final double EPS = 1e-6;
 	private final ElasticsearchClient esClient;
 	private final EmbeddingUtil embeddingUtil;
 	private final PlaceRepository placeRepository;
@@ -504,6 +505,15 @@ public class PlaceEsService {
 				PlaceDocument d = h.source();
 				if (d != null)
 					items.add(PlaceBriefSlimResponseDto.from(d));
+			}
+			if (placeId == null && !items.isEmpty()) {
+				var first = items.getFirst();
+				double firstLat = first.lat().doubleValue();
+				double firstLng = first.lng().doubleValue();
+
+				if (Math.abs(firstLat - lat) < EPS && Math.abs(firstLng - lng) < EPS) {
+					items.removeFirst();
+				}
 			}
 			return items;
 		} catch (IOException e) {
