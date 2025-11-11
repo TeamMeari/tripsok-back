@@ -1,7 +1,6 @@
 package com.tripsok_back.dto.tripplan.response;
 
-import java.math.BigDecimal;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tripsok_back.model.tripplan.VisitSpot;
 import com.tripsok_back.type.LocaleCode;
 
@@ -16,10 +15,10 @@ public record VisitSpotResponse(
 	String memo,
 	@Schema(description = "방문지점 주소", example = "서울특별시 종로구 사직로 161")
 	String address,
-	@Schema(description = "경도", example = "126.9768")
-	BigDecimal longitude,
 	@Schema(description = "위도", example = "37.5759")
-	BigDecimal latitude,
+	Double lat,
+	@Schema(description = "경도", example = "126.9768")
+	Double lng,
 	@Schema(description = "방문 순서", example = "1", requiredMode = Schema.RequiredMode.REQUIRED)
 	Integer orderIndex
 ) {
@@ -31,9 +30,21 @@ public record VisitSpotResponse(
 			visitSpot.getMemo(),
 			visitSpot.getPlace().getPlaceTr(locale) != null ? visitSpot.getPlace().getPlaceTr(locale).getAddress() :
 				null,
-			visitSpot.getPlace().getMapX(),
-			visitSpot.getPlace().getMapY(),
+visitSpot.getPlace().getMapX() != null ? visitSpot.getPlace().getMapX().doubleValue() : null,
+visitSpot.getPlace().getMapY() != null ? visitSpot.getPlace().getMapY().doubleValue() : null,
 			visitSpot.getOrderIndex()
 		);
+	}
+
+	@Schema(deprecated = true, accessMode = Schema.AccessMode.READ_ONLY)
+	@JsonProperty("latitude")
+	public Double getLatitude() {
+		return lat;
+	}
+
+	@Schema(deprecated = true, accessMode = Schema.AccessMode.READ_ONLY)
+	@JsonProperty("longitude")
+	public Double getLongitude() {
+		return lng;
 	}
 }
