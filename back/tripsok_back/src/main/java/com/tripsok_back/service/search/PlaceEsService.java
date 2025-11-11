@@ -422,78 +422,9 @@ public class PlaceEsService {
 		}
 	}
 
-	public List<PlaceBriefSlimResponseDto> searchByDistance(double lat, double lng, String distance, int size,
-		LocaleCode locale, Integer userId) {
-		try {
-
-			SearchRequest req = SearchRequest.of(s -> s
-				.index(INDEX)
-				.size(size)
-				.query(q -> q
-					.bool(b -> b
-						.must(m -> m
-							.geoDistance(g -> g
-								.field("location")
-								.distance(distance)
-								.location(GeoLocation.of(l -> l.latlon(
-									LatLonGeoLocation.of(ll -> ll.lat(lat).lon(lng))
-								)))
-							)
-						)
-						.filter(f -> f
-							.term(t -> t.field("locale").value(locale.name().toLowerCase()))
-						)
-					)
-				)
-				.sort(so -> so.geoDistance(g -> g
-					.field("location")
-					.location(GeoLocation.of(l -> l.latlon(
-						LatLonGeoLocation.of(ll -> ll.lat(lat).lon(lng))
-					)))
-					.unit(DistanceUnit.Kilometers)
-					.order(SortOrder.Asc)
-				))
-
-				.source(src -> src.filter(flt -> flt.includes(
-					"placeId", "locale", "title", "type", "lat", "lng", "summary",
-					"thumbnailUrl", "like", "view", "updatedAt"
-				)))
-			);
-
-			SearchResponse<PlaceDocument> res = esClient.search(req, PlaceDocument.class);
-			log.info("거리 기반 검색 완료 lat={}, lng={}, distance={}, 결과={}", lat, lng, distance, res.hits().hits().size());
-
-			List<PlaceBriefSlimResponseDto> items = new ArrayList<>();
-			Set<Integer> placeIds = res.hits().hits().stream()
-				.map(Hit::source)
-				.filter(Objects::nonNull)
-				.map(PlaceDocument::getPlaceId)
-				.filter(Objects::nonNull)
-				.map(Integer::parseInt)
-				.collect(Collectors.toSet());
-			List<InterestPlace> interestPlaces = interestPlaceRepository.findByUser_IdAndPlace_IdIn(userId, placeIds);
-			Set<Integer> likedPlaceIds = interestPlaces.stream()
-				.map(ip -> ip.getPlace().getId())
-				.collect(Collectors.toSet());
-			for (Hit<PlaceDocument> h : res.hits().hits()) {
-				PlaceDocument d = h.source();
-				if (d != null)
-					items.add(
-						PlaceBriefSlimResponseDto.from(d, likedPlaceIds.contains(Integer.parseInt(d.getPlaceId()))));
-			}
-			if (!items.isEmpty()) {
-				items.removeFirst();
-			}
-			return items;
-		} catch (IOException e) {
-			log.error("거리 기반 검색 실패", e);
-			throw new RuntimeException("ES 거리 기반 검색 실패", e);
-		}
-	}
-
 	public List<PlaceBriefSlimResponseDto> searchByDistanceAndRemoveId(double lat, double lng, Integer placeId,
 		String distance, int size,
-		LocaleCode locale) {
+		LocaleCode locale, Integer userId) {
 		try {
 
 			SearchRequest req = SearchRequest.of(s -> s
@@ -537,10 +468,22 @@ public class PlaceEsService {
 			log.info("거리 기반 검색 완료 lat={}, lng={}, distance={}, 결과={}", lat, lng, distance, res.hits().hits().size());
 
 			List<PlaceBriefSlimResponseDto> items = new ArrayList<>();
+			Set<Integer> placeIds = res.hits().hits().stream()
+				.map(Hit::source)
+				.filter(Objects::nonNull)
+				.map(PlaceDocument::getPlaceId)
+				.filter(Objects::nonNull)
+				.map(Integer::parseInt)
+				.collect(Collectors.toSet());
+			List<InterestPlace> interestPlaces = interestPlaceRepository.findByUser_IdAndPlace_IdIn(userId, placeIds);
+			Set<Integer> likedPlaceIds = interestPlaces.stream()
+				.map(ip -> ip.getPlace().getId())
+				.collect(Collectors.toSet());
 			for (Hit<PlaceDocument> h : res.hits().hits()) {
 				PlaceDocument d = h.source();
 				if (d != null)
-					items.add(PlaceBriefSlimResponseDto.from(d));
+					items.add(
+						PlaceBriefSlimResponseDto.from(d, likedPlaceIds.contains(Integer.parseInt(d.getPlaceId()))));
 			}
 			if (placeId == null && !items.isEmpty()) {
 				var first = items.getFirst();
