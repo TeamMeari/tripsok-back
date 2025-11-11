@@ -286,7 +286,7 @@ public class PlaceController {
 		@Parameter(description = "검색 거리 (예: 5km, 500m)", example = "500km")
 		@RequestParam String distance,
 		@Parameter(description = "해당장소의 id")
-		@RequestParam(required = false) int placeId,
+		@RequestParam(required = false) Integer placeId,
 
 		@Parameter(description = "결과 크기 (최대 개수)", example = "10",
 			schema = @Schema(minimum = "1", maximum = "100"))
