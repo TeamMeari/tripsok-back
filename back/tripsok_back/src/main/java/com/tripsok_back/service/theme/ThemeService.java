@@ -7,4 +7,6 @@ import com.tripsok_back.type.LocaleCode;
 
 public interface ThemeService {
 	List<ThemeResponse> getThemeList(LocaleCode locale);
+
+	String getThemeType(Integer themeId);
 }
