@@ -83,8 +83,6 @@ public abstract class PlaceService {
 
 	public abstract TourismType getType();
 
-	;
-
 	public abstract void startPlaceUpdate(int numOfRow, int pageNo) throws ServiceBlockException;
 
 	public abstract Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale, Integer userId);
