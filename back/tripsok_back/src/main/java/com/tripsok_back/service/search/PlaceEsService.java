@@ -18,6 +18,7 @@ import com.tripsok_back.dto.place.PlaceBriefSlimResponseDto;
 import com.tripsok_back.dto.place.PlaceDocument;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.repository.place.PlaceRepository;
+import com.tripsok_back.service.theme.ThemeService;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.TourismType;
 import com.tripsok_back.util.EmbeddingUtil;
@@ -49,6 +50,7 @@ public class PlaceEsService {
 	private final ElasticsearchClient esClient;
 	private final EmbeddingUtil embeddingUtil;
 	private final PlaceRepository placeRepository;
+	private final ThemeService themeService;
 
 	public String indexPlaceDocument(PlaceDocument doc) throws Exception {
 		IndexResponse res = esClient.index(i -> i
@@ -88,13 +90,13 @@ public class PlaceEsService {
 	}
 
 	public Page<PlaceBriefSlimResponseDto> unifiedSearch(
-		Pageable pageable, LocaleCode lc, String q, TourismType type, Sort sortArg) {
+		Pageable pageable, LocaleCode lc, String q, TourismType type, Sort sortArg, Integer themeId) {
 
 		long start = System.currentTimeMillis();
 		try {
-			log.info("ES 통합 검색 시작 q='{}' 로케일={} 타입={} 페이지={} 크기={}",
+			log.info("ES 통합 검색 시작 q='{}' 로케일={} 타입={} 페이지={} 크기={} 테마ID={}",
 				q, lc != null ? lc.getCode() : null, type != null ? type.name() : null,
-				pageable.getPageNumber(), pageable.getPageSize());
+				pageable.getPageNumber(), pageable.getPageSize(), themeId);
 
 			final boolean hasQuery = q != null && !q.isBlank();
 			String[] fields = fieldsForLocale(lc);
@@ -121,11 +123,18 @@ public class PlaceEsService {
 						if (type != null) {
 							bl.filter(f -> f.term(t -> t.field("type").value(type.name())));
 						}
+						if (themeId != null) {
+							String themeType = themeService.getThemeType(themeId);
+							if (themeType != null) {
+								bl.filter(f -> f.term(t -> t.field("themes")
+									.value(themeType)));
+							}
+						}
 						return bl;
 					}))
 					.source(src -> src.filter(flt -> flt.includes(
 						"placeId", "locale", "title", "summary", "type", "lat", "lng",
-						"thumbnailUrl", "like", "view", "updatedAt"
+						"thumbnailUrl", "like", "view", "updatedAt", "themes"
 					)));
 
 				if (sortArg != null && sortArg.isSorted()) {
@@ -168,13 +177,13 @@ public class PlaceEsService {
 	}
 
 	public Page<PlaceBriefSlimResponseDto> unifiedEmbeddingSearch(
-		Pageable pageable, LocaleCode lc, String q, TourismType type, Sort sortArg) {
+		Pageable pageable, LocaleCode lc, String q, TourismType type, Sort sortArg, Integer themeId) {
 
 		long start = System.currentTimeMillis();
 		try {
-			log.info("ES 임베딩 통합 검색 시작 q='{}' 로케일={} 타입={} 페이지={} 크기={}",
+			log.info("ES 임베딩 통합 검색 시작 q='{}' 로케일={} 타입={} 페이지={} 크기={} 테마ID={}",
 				q, lc != null ? lc.getCode() : null, type != null ? type.name() : null,
-				pageable.getPageNumber(), pageable.getPageSize());
+				pageable.getPageNumber(), pageable.getPageSize(), themeId);
 
 			List<Float> vector = embeddingUtil.embed(q);
 
@@ -200,6 +209,14 @@ public class PlaceEsService {
 							}
 							if (type != null) {
 								bl.filter(qb -> qb.term(t -> t.field("type").value(type.name())));
+							}
+							if (themeId != null) {
+								String themeType = themeService.getThemeType(themeId);
+								if (themeType != null) {
+									bl.filter(qb -> qb.term(t -> t
+										.field("themes")
+										.value(themeType)));
+								}
 							}
 							return bl;
 						}))
