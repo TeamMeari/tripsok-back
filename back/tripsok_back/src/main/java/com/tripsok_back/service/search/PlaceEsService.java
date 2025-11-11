@@ -51,6 +51,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PlaceEsService {
 
 	private static final String INDEX = "places";
+	private static final Integer NULL_ID = -1;
 	private static final String MAPPING_PATH = "elasticsearch/mappings/places-mapping.json";
 	private static final double EPS = 1e-6;
 	private final ElasticsearchClient esClient;
@@ -422,9 +423,11 @@ public class PlaceEsService {
 		}
 	}
 
-	public List<PlaceBriefSlimResponseDto> searchByDistanceAndRemoveId(double lat, double lng, Integer placeId,
+	public List<PlaceBriefSlimResponseDto> searchByDistanceAndRemoveId(Double lat, Double lng, Integer placeId,
 		String distance, int size,
 		LocaleCode locale, Integer userId) {
+
+		Integer finalPlaceId = (placeId == null ? NULL_ID.intValue() : placeId);
 		try {
 
 			SearchRequest req = SearchRequest.of(s -> s
@@ -445,7 +448,7 @@ public class PlaceEsService {
 							.term(t -> t.field("locale").value(locale.name().toLowerCase()))
 						)
 						.mustNot(mn -> mn
-							.term(t -> t.field("placeId").value(placeId))
+							.term(t -> t.field("placeId").value(finalPlaceId))
 						)
 					)
 				)
@@ -486,12 +489,19 @@ public class PlaceEsService {
 						PlaceBriefSlimResponseDto.from(d, likedPlaceIds.contains(Integer.parseInt(d.getPlaceId()))));
 			}
 			if (placeId == null && !items.isEmpty()) {
-				var first = items.getFirst();
-				double firstLat = first.lat().doubleValue();
-				double firstLng = first.lng().doubleValue();
+				PlaceBriefSlimResponseDto first = items.getFirst();
+				Double firstLat = first.lat();
+				Double firstLng = first.lng();
+
+				log.info("[Nearby] 비교 시작: firstLat={}, firstLng={}, 요청 lat={}, lng={}, 차이 latDiff={}, lngDiff={}",
+					firstLat, firstLng, lat, lng,
+					Math.abs(firstLat - lat), Math.abs(firstLng - lng));
 
 				if (Math.abs(firstLat - lat) < EPS && Math.abs(firstLng - lng) < EPS) {
+					log.info("[Nearby] 동일 위치 감지 → 첫 번째 아이템 제거");
 					items.removeFirst();
+				} else {
+					log.info("[Nearby] 위치 불일치 → 유지");
 				}
 			}
 			return items;
