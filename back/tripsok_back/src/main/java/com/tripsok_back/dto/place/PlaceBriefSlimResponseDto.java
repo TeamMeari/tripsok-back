@@ -1,6 +1,7 @@
 package com.tripsok_back.dto.place;
 
-import java.math.BigDecimal;
+import static net.minidev.asm.DefaultConverter.*;
+
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Objects;
@@ -15,8 +16,8 @@ public record PlaceBriefSlimResponseDto(
 	String name,
 	String summary,
 	String type,
-	BigDecimal lat,
-	BigDecimal lng,
+	Double lat,
+	Double lng,
 	String thumbnailUrl,
 	Instant updatedAt
 ) {
@@ -43,8 +44,8 @@ public record PlaceBriefSlimResponseDto(
 			tr != null ? tr.getPlaceName() : null,
 			tr.getSummary(),
 			type,
-			p.getMapY(), // lat
-			p.getMapX(), // lng
+			p.getMapY() != null ? convertToDouble(p.getMapY()) : null,
+			p.getMapX() != null ? convertToDouble(p.getMapX()) : null,
 			thumbnailUrl,
 			p.getUpdatedAt() != null ? p.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant() : null
 		);
@@ -82,8 +83,8 @@ public record PlaceBriefSlimResponseDto(
 			tr.getPlaceName(),
 			tr.getSummary(),
 			type,
-			p.getMapY(),
-			p.getMapX(),
+			p.getMapY() != null ? p.getMapY().doubleValue() : null,
+			p.getMapX() != null ? p.getMapX().doubleValue() : null,
 			thumb,
 			p.getUpdatedAt().atZone(ZoneId.of("Asia/Seoul")).toInstant()
 		);
@@ -103,8 +104,8 @@ public record PlaceBriefSlimResponseDto(
 			d.getTitle(),
 			d.getSummary(),
 			d.getType(),
-			d.getLat() != null ? BigDecimal.valueOf(d.getLat()) : null,
-			d.getLng() != null ? BigDecimal.valueOf(d.getLng()) : null,
+			d.getLat(),
+			d.getLng(),
 			d.getThumbnailUrl(),
 			d.getUpdatedAt() != null ? Instant.ofEpochMilli(d.getUpdatedAt()) : null
 		);

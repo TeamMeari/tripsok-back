@@ -1,10 +1,10 @@
 package com.tripsok_back.dto.place;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceTr;
 import com.tripsok_back.model.place.accommodation.Accommodation;
@@ -13,19 +13,27 @@ import com.tripsok_back.model.place.tour.Tour;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 
 public record PlaceDetailResponseDto(
 	Integer id, String language, String placeName, String summary, String address, String contact, String email,
 	String information,
-	Integer view, Integer like, BigDecimal mapX, BigDecimal mapY, LocalDateTime createdAt, LocalDateTime updatedAt,
-	PlaceJoinType type, Boolean isLiked,
+	Integer view, Integer like,
+	@Schema(description = "위도", example = "37.5759")
+	Double lat,
+	@Schema(description = "경도", example = "126.9768") Double lng,
+	LocalDateTime createdAt,
+	LocalDateTime updatedAt,
+	PlaceJoinType type,
+	Boolean isLiked,
 	Set<PlaceTagResponseDto> tags,
 	ChildSummary child,
 	String openDate,
 	String restDate,
 	String useTime
 ) {
+
 	@Builder
 	public PlaceDetailResponseDto {
 	}
@@ -50,8 +58,8 @@ public record PlaceDetailResponseDto(
 			.information(tr != null ? tr.getInformation() : null)
 			.view(place.getView())
 			.like(place.getLike())
-			.mapX(place.getMapX())
-			.mapY(place.getMapY())
+            .lng(place.getMapX() != null ? place.getMapX().doubleValue() : null)
+            .lat(place.getMapY() != null ? place.getMapY().doubleValue() : null)
 			.isLiked(isLiked)
 			.createdAt(place.getCreatedAt())
 			.updatedAt(place.getUpdatedAt())
@@ -81,6 +89,20 @@ public record PlaceDetailResponseDto(
 			.restDate(place.getPlaceIntro() != null ? place.getPlaceIntro().getRestDate() : null)
 			.useTime(place.getPlaceIntro() != null ? place.getPlaceIntro().getUseTime() : null)
 			.build();
+	}
+
+	@Schema(deprecated = true, accessMode = Schema.AccessMode.READ_ONLY)
+	@JsonProperty("mapX")
+	@Deprecated(forRemoval = true)
+	public Double getMapX() {
+		return lng;
+	}
+
+	@Schema(deprecated = true, accessMode = Schema.AccessMode.READ_ONLY)
+	@JsonProperty("mapY")
+	@Deprecated(forRemoval = true)
+	public Double getMapY() {
+		return lat;
 	}
 
 	public sealed interface ChildSummary permits AccommodationSummary, RestaurantSummary, TourSummary {
