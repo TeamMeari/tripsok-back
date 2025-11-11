@@ -33,7 +33,7 @@ public class PlaceDocument {
 	private Double lat;
 	private Double lng;
 	private GeoPoint location;
-	private String type;
+	private TourismType type;
 	private Integer like;
 	private Integer view;
 	private Long updatedAt;
@@ -122,7 +122,7 @@ public class PlaceDocument {
 			.lat(lat)
 			.lng(lng)
 			.location(geoPoint)
-			.type(type != null ? type.name() : null)
+			.type(type)
 			.like(place.getLike())
 			.view(place.getView())
 			.updatedAt(place.getUpdatedAt() != null ? place.getUpdatedAt()

@@ -142,7 +142,7 @@ public record PlaceBriefResponseDto(
 			d.getAddress(),
 			d.getSummary(),
 			d.getInformation(),
-			d.getType(),
+			d.getType().name(),
 			d.getLat(),
 			d.getLng(),
 			d.getLike() != null ? d.getLike() : 0,

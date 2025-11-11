@@ -1,7 +1,10 @@
 package com.tripsok_back.type;
 
+import java.util.Locale;
+
 import com.tripsok_back.exception.CustomException;
 import com.tripsok_back.exception.ErrorCode;
+import com.tripsok_back.model.place.Place;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +37,7 @@ public enum TourismType {
 		if (category == null || category.isBlank()) {
 			throw new CustomException(ErrorCode.INVALID_TOUR_TYPE);
 		}
-		String key = category.trim().toLowerCase(java.util.Locale.ROOT);
+		String key = category.trim().toLowerCase(Locale.ROOT);
 
 		return switch (key) {
 			case "accommodation" -> ACCOMMODATION;
@@ -44,4 +47,24 @@ public enum TourismType {
 		};
 	}
 
+	public static TourismType fromOrThrow(Place place) {
+		if (place.getTour() != null) {
+			return TOURIST_SPOT;
+		}
+		if (place.getAccommodation() != null) {
+			return ACCOMMODATION;
+		}
+		if (place.getRestaurant() != null) {
+			return RESTAURANT;
+		}
+		throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+	}
+
+	public static TourismType fromPlaceJoinType(PlaceJoinType type) {
+		return switch (type) {
+			case ACCOMMODATION -> ACCOMMODATION;
+			case RESTAURANT -> RESTAURANT;
+			case TOUR -> TOURIST_SPOT;
+		};
+	}
 }

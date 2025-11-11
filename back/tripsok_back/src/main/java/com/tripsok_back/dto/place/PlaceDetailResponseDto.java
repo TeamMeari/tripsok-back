@@ -1,5 +1,6 @@
 package com.tripsok_back.dto.place;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -12,6 +13,8 @@ import com.tripsok_back.model.place.restaurant.Restaurant;
 import com.tripsok_back.model.place.tour.Tour;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
+import com.tripsok_back.type.TourismType;
+import com.tripsok_back.type.TourismType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -22,10 +25,11 @@ public record PlaceDetailResponseDto(
 	Integer view, Integer like,
 	@Schema(description = "위도", example = "37.5759")
 	Double lat,
-	@Schema(description = "경도", example = "126.9768") Double lng,
+	@Schema(description = "경도", example = "126.9768")
+	Double lng,
 	LocalDateTime createdAt,
 	LocalDateTime updatedAt,
-	PlaceJoinType type,
+	TourismType type,
 	Boolean isLiked,
 	Set<PlaceTagResponseDto> tags,
 	ChildSummary child,
@@ -63,7 +67,7 @@ public record PlaceDetailResponseDto(
 			.isLiked(isLiked)
 			.createdAt(place.getCreatedAt())
 			.updatedAt(place.getUpdatedAt())
-			.type(type)
+			.type(TourismType.fromPlaceJoinType(type))
 			.tags(tags)
 			.child(switch (type) {
 				case ACCOMMODATION -> {
