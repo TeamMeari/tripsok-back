@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
@@ -17,7 +20,9 @@ import org.springframework.stereotype.Component;
 import com.tripsok_back.dto.place.PlaceBriefSlimResponseDto;
 import com.tripsok_back.dto.place.PlaceDocument;
 import com.tripsok_back.model.place.Place;
+import com.tripsok_back.model.user.InterestPlace;
 import com.tripsok_back.repository.place.PlaceRepository;
+import com.tripsok_back.repository.user.InterestPlaceRepository;
 import com.tripsok_back.service.theme.ThemeService;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.TourismType;
@@ -46,10 +51,13 @@ import lombok.extern.slf4j.Slf4j;
 public class PlaceEsService {
 
 	private static final String INDEX = "places";
+	private static final Integer NULL_ID = -1;
 	private static final String MAPPING_PATH = "elasticsearch/mappings/places-mapping.json";
+	private static final double EPS = 1e-6;
 	private final ElasticsearchClient esClient;
 	private final EmbeddingUtil embeddingUtil;
 	private final PlaceRepository placeRepository;
+	private final InterestPlaceRepository interestPlaceRepository;
 	private final ThemeService themeService;
 
 	public String indexPlaceDocument(PlaceDocument doc) throws Exception {
@@ -65,7 +73,7 @@ public class PlaceEsService {
 		if (place == null)
 			return 0;
 		int count = 0;
-		TourismType type = inferType(place);
+		TourismType type = TourismType.fromOrThrow(place);
 		for (LocaleCode lc : List.of(LocaleCode.KO, LocaleCode.EN, LocaleCode.JA, LocaleCode.CN)) {
 			try {
 				if (place.getPlaceTr(lc) == null)
@@ -81,16 +89,8 @@ public class PlaceEsService {
 		return count;
 	}
 
-	private TourismType inferType(Place p) {
-		if (p.getTour() != null)
-			return TourismType.TOURIST_SPOT;
-		if (p.getRestaurant() != null)
-			return TourismType.RESTAURANT;
-		return TourismType.ACCOMMODATION;
-	}
-
 	public Page<PlaceBriefSlimResponseDto> unifiedSearch(
-		Pageable pageable, LocaleCode lc, String q, TourismType type, Sort sortArg, Integer themeId) {
+		Pageable pageable, LocaleCode lc, String q, TourismType type, Sort sortArg, Integer themeId, Integer userId) {
 
 		long start = System.currentTimeMillis();
 		try {
@@ -156,12 +156,24 @@ public class PlaceEsService {
 			});
 
 			SearchResponse<PlaceDocument> res = esClient.search(req, PlaceDocument.class);
-
+			Set<Integer> placeIds = res.hits().hits().stream()
+				.map(Hit::source)
+				.filter(Objects::nonNull)
+				.map(PlaceDocument::getPlaceId)
+				.filter(Objects::nonNull)
+				.map(Integer::parseInt)
+				.collect(Collectors.toSet());
+			List<InterestPlace> interestPlaces = interestPlaceRepository.findByUser_IdAndPlace_IdIn(userId, placeIds);
+			Set<Integer> likedPlaceIds = interestPlaces.stream()
+				.map(ip -> ip.getPlace().getId())
+				.collect(Collectors.toSet());
+			log.info(likedPlaceIds.toString());
 			List<PlaceBriefSlimResponseDto> items = new ArrayList<>(res.hits().hits().size());
 			for (Hit<PlaceDocument> h : res.hits().hits()) {
 				PlaceDocument d = h.source();
 				if (d != null)
-					items.add(PlaceBriefSlimResponseDto.from(d));
+					items.add(
+						PlaceBriefSlimResponseDto.from(d, likedPlaceIds.contains(Integer.parseInt(d.getPlaceId()))));
 			}
 			long total = res.hits().total() != null ? res.hits().total().value() : items.size();
 
@@ -177,7 +189,7 @@ public class PlaceEsService {
 	}
 
 	public Page<PlaceBriefSlimResponseDto> unifiedEmbeddingSearch(
-		Pageable pageable, LocaleCode lc, String q, TourismType type, Sort sortArg, Integer themeId) {
+		Pageable pageable, LocaleCode lc, String q, TourismType type, Sort sortArg, Integer themeId, Integer userId) {
 
 		long start = System.currentTimeMillis();
 		try {
@@ -247,13 +259,25 @@ public class PlaceEsService {
 			});
 
 			SearchResponse<PlaceDocument> res = esClient.search(req, PlaceDocument.class);
-
+			Set<Integer> placeIds = res.hits().hits().stream()
+				.map(Hit::source)
+				.filter(Objects::nonNull)
+				.map(PlaceDocument::getPlaceId)
+				.filter(Objects::nonNull)
+				.map(Integer::parseInt)
+				.collect(Collectors.toSet());
+			List<InterestPlace> interestPlaces = interestPlaceRepository.findByUser_IdAndPlace_IdIn(userId, placeIds);
+			Set<Integer> likedPlaceIds = interestPlaces.stream()
+				.map(ip -> ip.getPlace().getId())
+				.collect(Collectors.toSet());
 			List<PlaceBriefSlimResponseDto> items = new ArrayList<>();
 			for (Hit<PlaceDocument> h : res.hits().hits()) {
 				if (h.score() != null && h.score() >= 0.7) {
 					PlaceDocument d = h.source();
 					if (d != null)
-						items.add(PlaceBriefSlimResponseDto.from(d));
+						items.add(
+							PlaceBriefSlimResponseDto.from(d,
+								likedPlaceIds.contains(Integer.parseInt(d.getPlaceId()))));
 				}
 			}
 
@@ -269,6 +293,7 @@ public class PlaceEsService {
 		}
 	}
 
+	/*
 	public List<PlaceDocument> searchByText(String query) throws IOException {
 		long startMs = System.currentTimeMillis();
 		log.info("ES 장소 텍스트 검색 시작: q='{}'", query);
@@ -291,7 +316,8 @@ public class PlaceEsService {
 
 		return results;
 	}
-
+	*/
+	/*
 	public List<PlaceDocument> searchByEmbedding(String query) throws IOException {
 		try {
 			List<Float> queryVector = embeddingUtil.embed(query);
@@ -320,7 +346,7 @@ public class PlaceEsService {
 			return searchByText(query);
 		}
 	}
-
+*/
 	private String[] fieldsForLocale(LocaleCode locale) {
 		String nameAddressSuffix = locale.esNameAddrSuffix();
 		String summaryInfoSuffix = locale.esSummaryInfoSuffix();
@@ -397,8 +423,11 @@ public class PlaceEsService {
 		}
 	}
 
-	public List<PlaceBriefSlimResponseDto> searchByDistance(double lat, double lng, String distance, int size,
-		LocaleCode locale) {
+	public List<PlaceBriefSlimResponseDto> searchByDistanceAndRemoveId(Double lat, Double lng, Integer placeId,
+		String distance, int size,
+		LocaleCode locale, Integer userId) {
+
+		Integer finalPlaceId = (placeId == null ? NULL_ID.intValue() : placeId);
 		try {
 
 			SearchRequest req = SearchRequest.of(s -> s
@@ -417,6 +446,9 @@ public class PlaceEsService {
 						)
 						.filter(f -> f
 							.term(t -> t.field("locale").value(locale.name().toLowerCase()))
+						)
+						.mustNot(mn -> mn
+							.term(t -> t.field("placeId").value(finalPlaceId))
 						)
 					)
 				)
@@ -439,10 +471,38 @@ public class PlaceEsService {
 			log.info("거리 기반 검색 완료 lat={}, lng={}, distance={}, 결과={}", lat, lng, distance, res.hits().hits().size());
 
 			List<PlaceBriefSlimResponseDto> items = new ArrayList<>();
+			Set<Integer> placeIds = res.hits().hits().stream()
+				.map(Hit::source)
+				.filter(Objects::nonNull)
+				.map(PlaceDocument::getPlaceId)
+				.filter(Objects::nonNull)
+				.map(Integer::parseInt)
+				.collect(Collectors.toSet());
+			List<InterestPlace> interestPlaces = interestPlaceRepository.findByUser_IdAndPlace_IdIn(userId, placeIds);
+			Set<Integer> likedPlaceIds = interestPlaces.stream()
+				.map(ip -> ip.getPlace().getId())
+				.collect(Collectors.toSet());
 			for (Hit<PlaceDocument> h : res.hits().hits()) {
 				PlaceDocument d = h.source();
 				if (d != null)
-					items.add(PlaceBriefSlimResponseDto.from(d));
+					items.add(
+						PlaceBriefSlimResponseDto.from(d, likedPlaceIds.contains(Integer.parseInt(d.getPlaceId()))));
+			}
+			if (placeId == null && !items.isEmpty()) {
+				PlaceBriefSlimResponseDto first = items.getFirst();
+				Double firstLat = first.lat();
+				Double firstLng = first.lng();
+
+				log.info("[Nearby] 비교 시작: firstLat={}, firstLng={}, 요청 lat={}, lng={}, 차이 latDiff={}, lngDiff={}",
+					firstLat, firstLng, lat, lng,
+					Math.abs(firstLat - lat), Math.abs(firstLng - lng));
+
+				if (Math.abs(firstLat - lat) < EPS && Math.abs(firstLng - lng) < EPS) {
+					log.info("[Nearby] 동일 위치 감지 → 첫 번째 아이템 제거");
+					items.removeFirst();
+				} else {
+					log.info("[Nearby] 위치 불일치 → 유지");
+				}
 			}
 			return items;
 		} catch (IOException e) {

@@ -3,8 +3,11 @@ package com.tripsok_back.service.place;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.util.InternalException;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +28,7 @@ import com.tripsok_back.exception.InternalErrorCode;
 import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
+import com.tripsok_back.model.user.InterestPlace;
 import com.tripsok_back.repository.place.PlaceRepository;
 import com.tripsok_back.repository.place.RestaurantRepository;
 import com.tripsok_back.repository.user.InterestPlaceRepository;
@@ -118,31 +122,48 @@ public class RestaurantServiceImpl extends PlaceService {
 
 	@Override
 	public PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable,
-		LocaleCode locale) {
-		Page<Place> placeList = restaurantRepository.findByRestaurantIsNotNullAndPlaceTrs_Id_Locale(locale.getCode(),
+		LocaleCode locale, Integer userId) {
+		Page<Place> placePage = restaurantRepository.findByRestaurantIsNotNullAndPlaceTrs_Id_Locale(locale.getCode(),
 			pageable);
-		if (placeList.getTotalPages() == 0)
+		if (placePage.getTotalPages() == 0)
 			return PageResponse.empty();
-		Page<PlaceBriefSlimResponseDto> dtoList = placeList.map(
-			e -> PlaceBriefSlimResponseDto.from(e, getType().name(),
-				e.getRestaurant().getImageUrlList().getFirst(),
-				e.getRestaurant().getRestaurantImages().size(),
-				e.getRestaurant().getRestaurantReviews().size(),
-				locale));
-		return PageResponse.fromPage(placeList, dtoList);
+		List<InterestPlace> interestPlaces = getPlacesLikedByUserAndPlaces(userId, placePage);
+		Set<Integer> likedPlaceIds = interestPlaces.stream()
+			.map(ip -> ip.getPlace().getId())
+			.collect(Collectors.toSet());
+		return getPlaceBriefSlimResponseDtoPageResponse(locale, placePage, likedPlaceIds);
 	}
 
 	@Override
 	public PageResponse<PlaceBriefSlimResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
+		Integer userId,
 		LocaleCode locale) {
-		Page<Place> placeList = restaurantRepository.findByRestaurantIsNotNullAndThemes_Theme_Id(pageable, themeId);
-		Page<PlaceBriefSlimResponseDto> dtoList = placeList.map(
-			e -> PlaceBriefSlimResponseDto.from(e, getType().name(),
-				e.getRestaurant().getImageUrlList().getFirst(),
-				e.getRestaurant().getRestaurantImages().size(),
-				e.getRestaurant().getRestaurantReviews().size(),
-				locale));
-		return PageResponse.fromPage(placeList, dtoList);
+		Page<Place> placePage = restaurantRepository.findByRestaurantIsNotNullAndThemes_Theme_Id(pageable, themeId);
+		List<InterestPlace> interestPlaces = getPlacesLikedByUserAndPlaces(userId, placePage);
+		Set<Integer> likedPlaceIds = interestPlaces.stream()
+			.map(ip -> ip.getPlace().getId())
+			.collect(Collectors.toSet());
+		return getPlaceBriefSlimResponseDtoPageResponse(locale, placePage, likedPlaceIds);
+	}
+
+	@NotNull
+	protected PageResponse<PlaceBriefSlimResponseDto> getPlaceBriefSlimResponseDtoPageResponse(LocaleCode locale,
+		Page<Place> placePage, Set<Integer> likedPlaceIds) {
+		Page<PlaceBriefSlimResponseDto> dtoList = placePage.map(place -> {
+			boolean liked = likedPlaceIds.contains(place.getId()); // 관심 등록 여부 판단
+
+			return PlaceBriefSlimResponseDto.from(
+				place,
+				getType().name(),
+				place.getRestaurant().getImageUrlList().getFirst(),
+				liked,
+				place.getRestaurant().getRestaurantImages().size(),
+				place.getRestaurant().getRestaurantReviews().size(),
+				locale
+			);
+		});
+
+		return PageResponse.fromPage(placePage, dtoList);
 	}
 
 	@Override
@@ -183,6 +204,7 @@ public class RestaurantServiceImpl extends PlaceService {
 		return responseDto;
 	}
 
+	@Transactional
 	public Boolean checkAndUpdatePlace(TourApiPlaceResponseDto placeDto) {
 		LocalDateTime placeUpdatedAt = TimeUtil.stringToLocalDateTime(placeDto.getModifiedTime());
 		Optional<Place> place = restaurantRepository.findByContentId(placeDto.getContentId());

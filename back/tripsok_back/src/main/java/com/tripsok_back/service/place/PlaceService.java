@@ -2,6 +2,8 @@ package com.tripsok_back.service.place;
 
 import static com.tripsok_back.exception.ErrorCode.*;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -26,6 +28,7 @@ import com.tripsok_back.exception.PlaceException;
 import com.tripsok_back.exception.ServiceBlockException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceIntro;
+import com.tripsok_back.model.user.InterestPlace;
 import com.tripsok_back.repository.place.PlaceRepository;
 import com.tripsok_back.repository.user.InterestPlaceRepository;
 import com.tripsok_back.service.search.PlaceEsService;
@@ -84,9 +87,11 @@ public abstract class PlaceService {
 
 	public abstract Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale, Integer userId);
 
-	public abstract PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable, LocaleCode locale);
+	public abstract PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable, LocaleCode locale,
+		Integer userId);
 
 	public abstract PageResponse<PlaceBriefSlimResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
+		Integer userId,
 		LocaleCode locale);
 
 	public abstract void addReview(Integer userId, ReviewRequestDto reviewRequestdto);
@@ -94,6 +99,14 @@ public abstract class PlaceService {
 	public abstract Page<Place> findAll(PageRequest of);
 
 	public abstract int reindexFullEs();
+
+	protected List<InterestPlace> getPlacesLikedByUserAndPlaceIds(Integer userId, Collection<Integer> placeIds) {
+		return interestPlaceRepository.findByUser_IdAndPlace_IdIn(userId, placeIds);
+	}
+
+	protected List<InterestPlace> getPlacesLikedByUserAndPlaces(Integer userId, Page<Place> places) {
+		return interestPlaceRepository.findByUser_IdAndPlace_In(userId, places.getContent());
+	}
 
 	protected void ensurePlaceIntro(Place place) {
 		log.info("ensurePlaceIntro:{} , {}", place.getContentId(), place.getTourismType());

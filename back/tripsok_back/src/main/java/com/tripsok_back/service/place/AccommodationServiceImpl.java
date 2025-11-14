@@ -3,6 +3,8 @@ package com.tripsok_back.service.place;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +27,7 @@ import com.tripsok_back.exception.ServiceBlockException;
 import com.tripsok_back.exception.TourApiException;
 import com.tripsok_back.model.place.Place;
 import com.tripsok_back.model.place.PlaceLclsCategory;
+import com.tripsok_back.model.user.InterestPlace;
 import com.tripsok_back.repository.place.AccommodationRepository;
 import com.tripsok_back.repository.place.PlaceRepository;
 import com.tripsok_back.repository.user.InterestPlaceRepository;
@@ -121,38 +124,64 @@ public class AccommodationServiceImpl extends PlaceService {
 
 	@Override
 	public PageResponse<PlaceBriefSlimResponseDto> getPlaceList(Pageable pageable,
-		LocaleCode locale) throws TourApiException {
+		LocaleCode locale, Integer userId) throws TourApiException {
 
 		Page<Place> placePage = accommodationRepository.findByAccommodationIsNotNullAndPlaceTrs_Id_Locale(
 			locale.getCode(), pageable);
 		if (placePage.isEmpty())
 			return PageResponse.empty();
+		List<InterestPlace> interestPlaces = getPlacesLikedByUserAndPlaces(userId, placePage);
 
+		Set<Integer> likedPlaceIds = interestPlaces.stream()
+			.map(ip -> ip.getPlace().getId())
+			.collect(Collectors.toSet());
 		Place first = placePage.getContent().get(0);
 		int trSize = first.getPlaceTrs() != null ? first.getPlaceTrs().size() : 0;
 		log.info("getPlaceList: {}, {}, {}", placePage.getNumberOfElements(), trSize, first.getId());
 		if (placePage.getTotalPages() == 0)
 			return PageResponse.empty();
-		Page<PlaceBriefSlimResponseDto> dtoList = placePage.map(
-			e -> PlaceBriefSlimResponseDto.from(e, getType().name(),
-				e.getAccommodation().getImageUrlList().getFirst(),
-				e.getAccommodation().getAccommodationImages().size(),
-				e.getAccommodation().getAccommodationReviews().size(),
-				locale));
+		Page<PlaceBriefSlimResponseDto> dtoList = placePage.map(place -> {
+			boolean liked = likedPlaceIds.contains(place.getId()); // 관심 등록 여부 판단
+
+			return PlaceBriefSlimResponseDto.from(
+				place,
+				getType().name(),
+				place.getAccommodation().getImageUrlList().getFirst(),
+				liked,
+				place.getAccommodation().getAccommodationImages().size(),
+				place.getAccommodation().getAccommodationReviews().size(),
+				locale
+			);
+		});
 
 		return PageResponse.fromPage(placePage, dtoList);
+
 	}
 
 	public PageResponse<PlaceBriefSlimResponseDto> getPlaceListByTheme(Pageable pageable, Integer themeId,
+		Integer userId,
 		LocaleCode locale) {
 		Page<Place> placeList = accommodationRepository.findByAccommodationIsNotNullAndThemes_Theme_Id(pageable,
 			themeId);
-		Page<PlaceBriefSlimResponseDto> dtoList = placeList.map(
-			e -> PlaceBriefSlimResponseDto.from(e, getType().name(),
-				e.getAccommodation().getImageUrlList().getFirst(),
-				e.getAccommodation().getAccommodationImages().size(),
-				e.getAccommodation().getAccommodationReviews().size(),
-				locale));
+		List<InterestPlace> interestPlaces = getPlacesLikedByUserAndPlaces(userId, placeList);
+
+		Set<Integer> likedPlaceIds = interestPlaces.stream()
+			.map(ip -> ip.getPlace().getId())
+			.collect(Collectors.toSet());
+
+		Page<PlaceBriefSlimResponseDto> dtoList = placeList.map(place -> {
+			boolean liked = likedPlaceIds.contains(place.getId()); // 관심 등록 여부 판단
+
+			return PlaceBriefSlimResponseDto.from(
+				place,
+				getType().name(),
+				place.getAccommodation().getImageUrlList().getFirst(),
+				liked,
+				place.getAccommodation().getAccommodationImages().size(),
+				place.getAccommodation().getAccommodationReviews().size(),
+				locale
+			);
+		});
 		return PageResponse.fromPage(placeList, dtoList);
 	}
 
