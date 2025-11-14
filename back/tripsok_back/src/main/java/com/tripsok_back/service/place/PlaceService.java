@@ -97,8 +97,6 @@ public abstract class PlaceService {
 
 	protected void ensurePlaceIntro(Place place) {
 		log.info("ensurePlaceIntro:{} , {}", place.getContentId(), place.getTourismType());
-		if (place == null)
-			return;
 
 		boolean missing = place.getPlaceIntro() == null;
 		/*

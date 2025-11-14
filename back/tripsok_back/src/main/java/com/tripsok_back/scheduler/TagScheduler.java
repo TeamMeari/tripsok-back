@@ -40,7 +40,7 @@ public class TagScheduler {
 	private final PlaceThemeRepository placeThemeRepository;
 	private final PlaceTagRepository placeTagRepository;
 
-	@Scheduled(fixedRateString = "PT48H", initialDelayString = "PT1H")
+	@Scheduled(fixedRateString = "PT48H", initialDelayString = "PT2H")
 	void runBatchTagRequestApi() {
 		log.info("Place Tag 업데이트 시작");
 		int pageNum = 0;
