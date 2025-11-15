@@ -25,6 +25,40 @@ services:
       - "${KIBANA_PORT:-5601}:5601"
     depends_on:
       - elasticsearch
+  redis-service:
+    build:
+      context: ./infra/redis
+      dockerfile: Dockerfile
+    image: local/redis-service:${IMAGE_TAG:-local}
+    ports:
+      - "6379:6379"
+  oracle-free:
+    image: gvenzl/oracle-free:latest
+    container_name: oracle
+    ports:
+      - "1521:1521"
+    environment:
+      ORACLE_PASSWORD: ${DB_PASSWORD}
+      ORACLE_DATABASE: FREEPDB1
+      APP_USER: ${DB_USERNAME}
+      APP_USER_PASSWORD: ${DB_PASSWORD}
 
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+    volumes:
+      - foracle_data:/opt/oracle/oradata
+    restart: unless-stopped
+  backend-service:
+    build:
+      context: ./back/tripsok_back
+      dockerfile: Dockerfile
+    image: local/backend-service:${IMAGE_TAG:-local}
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    ports:
+      - "8080:8080"
 volumes:
   es_data:
+  foracle_data:
