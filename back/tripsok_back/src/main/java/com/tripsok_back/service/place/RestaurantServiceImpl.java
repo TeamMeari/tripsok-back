@@ -66,6 +66,7 @@ public class RestaurantServiceImpl extends PlaceService {
 	}
 
 	@Override
+	@Transactional
 	public void startPlaceUpdate(int numOfRow, int pageNo) {
 
 		List<TourApiPlaceResponseDto> responseDtoList = requestPlace(numOfRow, pageNo);
@@ -213,6 +214,7 @@ public class RestaurantServiceImpl extends PlaceService {
 			return true;
 		}
 		Place placeData = place.get();
+		ensurePlaceIntro(placeData);
 		if (placeData.getUpdatedAt().equals(placeUpdatedAt)) {
 			log.info("식당: ContentId:{} 변경사항 없음", placeDto.getContentId());
 			return false;
@@ -338,7 +340,8 @@ public class RestaurantServiceImpl extends PlaceService {
 			createInformationTranslation(restaurantPlace, localeCode);
 			createTransliterationForNameAndAddress(restaurantPlace, localeCode);
 		}
-		restaurantRepository.save(restaurantPlace);
+		Place place = restaurantRepository.save(restaurantPlace);
+		ensurePlaceIntro(place);
 	}
 
 	@Override

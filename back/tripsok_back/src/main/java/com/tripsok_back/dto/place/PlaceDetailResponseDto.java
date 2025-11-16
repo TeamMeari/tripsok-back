@@ -1,6 +1,5 @@
 package com.tripsok_back.dto.place;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -13,7 +12,6 @@ import com.tripsok_back.model.place.restaurant.Restaurant;
 import com.tripsok_back.model.place.tour.Tour;
 import com.tripsok_back.type.LocaleCode;
 import com.tripsok_back.type.PlaceJoinType;
-import com.tripsok_back.type.TourismType;
 import com.tripsok_back.type.TourismType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -62,8 +60,8 @@ public record PlaceDetailResponseDto(
 			.information(tr != null ? tr.getInformation() : null)
 			.view(place.getView())
 			.like(place.getLike())
-            .lng(place.getMapX() != null ? place.getMapX().doubleValue() : null)
-            .lat(place.getMapY() != null ? place.getMapY().doubleValue() : null)
+			.lng(place.getMapX() != null ? place.getMapX().doubleValue() : null)
+			.lat(place.getMapY() != null ? place.getMapY().doubleValue() : null)
 			.isLiked(isLiked)
 			.createdAt(place.getCreatedAt())
 			.updatedAt(place.getUpdatedAt())

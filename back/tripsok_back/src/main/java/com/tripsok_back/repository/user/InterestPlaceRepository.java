@@ -25,7 +25,7 @@ public interface InterestPlaceRepository extends JpaRepository<InterestPlace, In
 
 	boolean existsByPlaceAndUser_Id(Place place, Integer userId);
 
-List<InterestPlace> findByUser_IdAndPlace_IdIn(Integer userId, Collection<Integer> placeIds);
+	List<InterestPlace> findByUser_IdAndPlace_IdIn(Integer userId, Collection<Integer> placeIds);
 
 	List<InterestPlace> findByUser_IdAndPlace_In(Integer userId, List<Place> places);
 }

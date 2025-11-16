@@ -44,7 +44,9 @@ public class TagScheduler {
 	void runBatchTagRequestApi() {
 		log.info("Place Tag 업데이트 시작");
 		int pageNum = 0;
-		while (true) {
+		long count = placeRepository.count();
+		long totalPages = (count / 10) + ((count % 10 == 0) ? 0 : 1);
+		while (pageNum < totalPages) {
 			Pageable pageable = PageRequest.of(pageNum, 10);
 			Set<Place> placeList = getTargetPlaces(pageable);
 			if (placeList.isEmpty()) {

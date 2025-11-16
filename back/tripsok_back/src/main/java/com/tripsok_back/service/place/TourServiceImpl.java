@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -64,6 +65,7 @@ public class TourServiceImpl extends PlaceService {
 	}
 
 	@Override
+	@Transactional
 	public void startPlaceUpdate(int numOfRow, int pageNo) {
 		List<TourApiPlaceResponseDto> responseDtoList = requestPlace(numOfRow, pageNo);
 
@@ -74,6 +76,7 @@ public class TourServiceImpl extends PlaceService {
 		}
 	}
 
+	@Transactional
 	@Override
 	public Optional<PlaceDetailResponseDto> getPlaceDetail(int placeId, LocaleCode locale,
 		Integer userId) {
@@ -208,6 +211,7 @@ public class TourServiceImpl extends PlaceService {
 			return true;
 		}
 		Place placeData = place.get();
+		ensurePlaceIntro(placeData);
 		if (placeData.getUpdatedAt().equals(placeUpdatedAt)) {
 			log.info("숙소: ContentId:{} 변경사항 없음", placeDto.getContentId());
 			return false;
@@ -342,7 +346,8 @@ public class TourServiceImpl extends PlaceService {
 			createInformationTranslation(tourPlace, localeCode);
 			createTransliterationForNameAndAddress(tourPlace, localeCode);
 		}
-		tourRepository.save(tourPlace);
+		Place place =tourRepository.save(tourPlace);
+		ensurePlaceIntro(place);
 	}
 
 	@Override
