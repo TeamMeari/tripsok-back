@@ -118,6 +118,7 @@ public class AuthController {
 			.maxAge(authService.getRefreshTokenExpirationTime() * 60) // 쿠키의 만료 시간 설정
 			.secure(true) // cookie 가 https 에서만 전송되도록
 			.path("/api/v1/auth") // 쿠키가 유효한 경로 설정
+			.sameSite("None")
 			.build();
 	}
 
