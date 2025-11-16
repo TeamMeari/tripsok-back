@@ -1,5 +1,6 @@
 package com.tripsok_back.security.handler;
 
+import static com.tripsok_back.common.constants.CorsConstants.*;
 import static com.tripsok_back.exception.ErrorCode.*;
 
 import java.io.IOException;
@@ -27,6 +28,12 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 		AccessDeniedException accessDeniedException) throws IOException {
 		response.setStatus(HttpServletResponse.SC_FORBIDDEN);
 		response.setContentType("application/json");
+		String requestOrigin = request.getHeader("Origin");
+		if(isAllowedOrigin(requestOrigin)) {
+			response.setHeader("Access-Control-Allow-Origin", requestOrigin);
+			response.setHeader("Access-Control-Allow-Credentials", "true");
+			response.setHeader("Access-Control-Allow-Headers", ALLOWED_HEADERS_CSV);
+		}
 		ErrorResponse errorResponse = new ErrorResponse(FORBIDDEN_ACCESS.getCode(),
 			FORBIDDEN_ACCESS.getErrorMessage());
 		objectMapper.writeValue(response.getOutputStream(), errorResponse);
