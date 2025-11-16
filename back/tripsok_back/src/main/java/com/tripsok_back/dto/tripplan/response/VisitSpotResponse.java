@@ -30,8 +30,8 @@ public record VisitSpotResponse(
 			visitSpot.getMemo(),
 			visitSpot.getPlace().getPlaceTr(locale) != null ? visitSpot.getPlace().getPlaceTr(locale).getAddress() :
 				null,
-visitSpot.getPlace().getMapX() != null ? visitSpot.getPlace().getMapX().doubleValue() : null,
-visitSpot.getPlace().getMapY() != null ? visitSpot.getPlace().getMapY().doubleValue() : null,
+			visitSpot.getPlace().getMapX() != null ? visitSpot.getPlace().getMapX().doubleValue() : null,
+			visitSpot.getPlace().getMapY() != null ? visitSpot.getPlace().getMapY().doubleValue() : null,
 			visitSpot.getOrderIndex()
 		);
 	}

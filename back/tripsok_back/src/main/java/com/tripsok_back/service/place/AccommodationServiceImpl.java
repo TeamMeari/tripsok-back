@@ -66,6 +66,7 @@ public class AccommodationServiceImpl extends PlaceService {
 	}
 
 	@Override
+	@Transactional
 	public void startPlaceUpdate(int numOfRow, int pageNo) throws ServiceBlockException {
 		List<TourApiPlaceResponseDto> responseDtoList = requestPlace(numOfRow, pageNo);
 
@@ -233,6 +234,7 @@ public class AccommodationServiceImpl extends PlaceService {
 			return true;
 		}
 		Place placeData = place.get();
+		ensurePlaceIntro(placeData);
 		if (placeData.getUpdatedAt().equals(placeUpdatedAt)) {
 			log.info("숙소: ContentId:{} 변경사항 없음", placeDto.getContentId());
 			return false;
@@ -359,7 +361,8 @@ public class AccommodationServiceImpl extends PlaceService {
 			createInformationTranslation(accommodationPlace, localeCode);
 			createTransliterationForNameAndAddress(accommodationPlace, localeCode);
 		}
-		accommodationRepository.save(accommodationPlace);
+		Place place = accommodationRepository.save(accommodationPlace);
+		ensurePlaceIntro(place);
 	}
 
 	@Override
