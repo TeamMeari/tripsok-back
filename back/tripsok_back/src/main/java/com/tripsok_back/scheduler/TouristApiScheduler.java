@@ -32,7 +32,7 @@ public class TouristApiScheduler {
 			.orElseThrow(() -> new IllegalArgumentException("No processor found for type: " + type));
 	}
 
-	@Scheduled(fixedRateString = "PT24H", initialDelayString = "PT1H") // 24시간마다 실행, 애플리케이션 시작 후 1시간 후에 첫 실행
+	@Scheduled(cron = "0 0 3 * * *") // 매일 오전 3시에 실행
 	public void initTourPlaceRequest() throws ServiceBlockException {
 
 		try {

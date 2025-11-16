@@ -1,5 +1,7 @@
 package com.tripsok_back.security.filter;
 
+import static com.tripsok_back.common.constants.CorsConstants.*;
+
 import java.io.IOException;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -56,9 +58,15 @@ public class JwtCheckFilter extends OncePerRequestFilter {
 			response.reset();
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			response.setContentType("application/json;charset=UTF-8");
-			ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode().getCode(),
-				e.getMessage());
-			objectMapper.writeValue(response.getOutputStream(), errorResponse);
+			String requestOrigin = request.getHeader("Origin");
+			if (isAllowedOrigin(requestOrigin)) {
+				response.setHeader("Access-Control-Allow-Origin", requestOrigin);
+				response.setHeader("Access-Control-Allow-Credentials", "true");
+				response.setHeader("Access-Control-Allow-Headers", ALLOWED_HEADERS_CSV);
+				}
+				ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode().getCode(),
+					e.getMessage());
+				objectMapper.writeValue(response.getOutputStream(), errorResponse);
 		}
 	}
 }
