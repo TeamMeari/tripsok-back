@@ -1,5 +1,7 @@
 package com.tripsok_back.config;
 
+import static com.tripsok_back.common.constants.CorsConstants.*;
+
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
@@ -62,12 +64,9 @@ public class SecurityConfig {
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration corsConfig = new CorsConfiguration();
-		corsConfig.setAllowedOriginPatterns(
-			List.of("http://localhost:8080", "http://localhost:5173", "http://localhost:3000",
-				"http://localhost:4173", "https://trip-sok.jayden-bin.cc", "https://www.tourang.site",
-				"https://tripsok-front.vercel.app"));
+		corsConfig.setAllowedOrigins(ALLOWED_ORIGINS);
 		corsConfig.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "PUT", "OPTIONS"));
-		corsConfig.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+		corsConfig.setAllowedHeaders(ALLOWED_HEADERS);
 		corsConfig.setAllowCredentials(true);
 		corsConfig.setMaxAge(3600L);
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
