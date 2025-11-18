@@ -16,6 +16,18 @@ public record GetBookingSpotSetResponse(
 	Integer orderIndex,
 	String memo
 ) {
+    @Schema(description = "기존 latitude 필드입니다. `lat` 필드를 사용해주세요. (deprecated)", deprecated = true, example = "37.5665")
+	@JsonProperty("latitude")
+	@Deprecated
+	public Double getLatitudeDeprecated() {
+		return lat;
+	}
+
+	@Schema(description = "기존 longitude 필드입니다. `lng` 필드를 사용해주세요. (deprecated)", deprecated = true, example = "126.9780")
+	@JsonProperty("longitude")
+	public Double getMapX() {
+		return lng;
+	}
 	public GetBookingSpotSetResponse(BookingSpot bookingSpotSet) {
 		this(
 			bookingSpotSet.getPlaceId(),
@@ -26,19 +38,5 @@ public record GetBookingSpotSetResponse(
 			bookingSpotSet.getOrderIndex(),
 			bookingSpotSet.getMemo()
 		);
-	}
-
-	@Schema(description = "기존 latitude 필드입니다. `lat` 필드를 사용해주세요. (deprecated)", deprecated = true, example = "37.5665")
-	@JsonProperty("latitude")
-	@Deprecated
-	public Double getLatitudeDeprecated() { // Changed method name and added @Deprecated annotation
-		//return lat.doubleValue();
-		throw new UnsupportedOperationException("This field is deprecated. Use 'lat' instead.");
-	}
-
-	@Schema(description = "기존 longitude 필드입니다. `lng` 필드를 사용해주세요. (deprecated)", deprecated = true, example = "126.9780")
-	@JsonProperty("longitude")
-	public Double getMapX() {
-		return lng;
 	}
 }
