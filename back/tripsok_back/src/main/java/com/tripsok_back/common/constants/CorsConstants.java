@@ -21,9 +21,10 @@ public final class CorsConstants {
 	private CorsConstants() {
 	}
 
-	public static boolean isAllowedOrigin(String origin){
+	public static boolean isAllowedOrigin(String origin) {
 		for (String allowedOrigin : ALLOWED_ORIGINS) {
-			if(origin.equals(allowedOrigin)) return true;
+			if (origin.equals(allowedOrigin))
+				return true;
 		}
 		return false;
 	}

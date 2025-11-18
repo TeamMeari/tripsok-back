@@ -346,7 +346,7 @@ public class TourServiceImpl extends PlaceService {
 			createInformationTranslation(tourPlace, localeCode);
 			createTransliterationForNameAndAddress(tourPlace, localeCode);
 		}
-		Place place =tourRepository.save(tourPlace);
+		Place place = tourRepository.save(tourPlace);
 		ensurePlaceIntro(place);
 	}
 

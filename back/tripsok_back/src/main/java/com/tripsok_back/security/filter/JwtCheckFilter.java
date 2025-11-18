@@ -63,10 +63,10 @@ public class JwtCheckFilter extends OncePerRequestFilter {
 				response.setHeader("Access-Control-Allow-Origin", requestOrigin);
 				response.setHeader("Access-Control-Allow-Credentials", "true");
 				response.setHeader("Access-Control-Allow-Headers", ALLOWED_HEADERS_CSV);
-				}
-				ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode().getCode(),
-					e.getMessage());
-				objectMapper.writeValue(response.getOutputStream(), errorResponse);
+			}
+			ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode().getCode(),
+				e.getMessage());
+			objectMapper.writeValue(response.getOutputStream(), errorResponse);
 		}
 	}
 }

@@ -32,7 +32,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 		response.setContentType("application/json");
 		String requestOrigin = request.getHeader("Origin");
-		if(isAllowedOrigin(requestOrigin)) {
+		if (isAllowedOrigin(requestOrigin)) {
 			response.setHeader("Access-Control-Allow-Origin", requestOrigin);
 			response.setHeader("Access-Control-Allow-Credentials", "true");
 			response.setHeader("Access-Control-Allow-Headers", ALLOWED_HEADERS_CSV);

@@ -56,7 +56,7 @@ public class BookingServiceImpl implements BookingService {
 		Set<BookingSpot> bookingSpotSet = tripPlan.getVisitSpotSet().stream().map(visitSpot ->
 			new BookingSpot(booking, visitSpot, locale)
 		).collect(Collectors.toSet());
-		booking.setBookingSpotSet(bookingSpotSet); 
+		booking.setBookingSpotSet(bookingSpotSet);
 		emailService.sendBookingConfirmationEmail(request, request.getUserName(), tripPlan);
 		return new CompleteBookingResponse(request.getContactEmail());
 	}
